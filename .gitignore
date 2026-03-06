@@ -1,0 +1,29 @@
+# --- NEXT.JS / NODE (Frontend) ---
+node_modules/
+.next/
+out/
+build/
+.env*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.vercel
+.turbo
+
+# --- .NET / VISUAL STUDIO (Backend) ---
+bin/
+obj/
+.vs/
+.vscode/
+*.user
+*.userosscache
+*.sln.docstates
+TestResults/
+AppPackages/
+BundleArtifacts/
+[Dd]ebug/
+[Rr]elease/
+
+# --- OS / SYSTEM ---
+.DS_Store
+Thumbs.db

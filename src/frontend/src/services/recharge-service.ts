@@ -1,0 +1,1 @@
+// đóng vai trò là các HttpClient đơn thuần, chỉ gọi API và trả về dữ liệu. Logic xử lý dữ liệu phức tạp nên đẩy về Custom Hooks.
