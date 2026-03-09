@@ -1,0 +1,718 @@
+/* ========================= */
+/* GLOBAL */
+/* ========================= */
+
+body{
+  margin:0;
+  font-family:Arial, Helvetica, sans-serif;
+  background:#f6f7fb;
+}
+
+.homepage{
+  width:100%;
+}
+
+
+/* ========================= */
+/* NAVBAR */
+/* ========================= */
+
+.navbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:16px 40px;
+  background:white;
+  border-bottom:1px solid #eee;
+}
+
+.logo{
+  font-size:22px;
+  font-weight:bold;
+  color:#e60023;
+}
+
+.menu{
+  display:flex;
+  gap:25px;
+  list-style:none;
+  padding:0;
+  margin:0;
+}
+
+.menu li{
+  cursor:pointer;
+  font-size:15px;
+}
+
+.login-btn{
+  background:#e60023;
+  color:white;
+  border:none;
+  padding:8px 16px;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+
+/* ========================= */
+/* BANNER */
+/* ========================= */
+
+.banner{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:60px 40px;
+  background:#f3f3f3;
+}
+
+.banner-left{
+  width:50%;
+}
+
+.banner-left h1{
+  font-size:42px;
+  margin-bottom:10px;
+}
+
+.banner-left p{
+  color:#555;
+}
+
+.recharge-btn{
+  margin-top:20px;
+  padding:12px 20px;
+  background:#e60023;
+  color:white;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.banner-right{
+  width:40%;
+}
+
+.banner-box{
+  width:100%;
+  height:220px;
+  background:#ddd;
+  border-radius:10px;
+}
+
+
+/* ========================= */
+/* SERVICES */
+/* ========================= */
+
+.services{
+  max-width:1100px;
+  margin:50px auto 60px auto;
+  padding:0 20px;   /* thêm khoảng cách 2 bên màn hình */
+
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:25px;
+}
+
+.service-card{
+  background:white;
+  text-align:center;
+  padding:25px 15px;
+
+  border-radius:6px; /* giảm độ tròn */
+
+  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+
+  font-size:26px;
+  transition:0.2s;
+}
+
+.service-card p{
+  font-size:15px;
+  margin-top:10px;
+}
+
+.service-card span{
+  display:inline-block;
+  font-size:26px;
+  transition:transform 0.3s ease;
+}
+
+.service-card:hover span{
+  transform:scale(1.3);
+}
+
+
+/* ========================= */
+/* PROMOTIONS */
+/* ========================= */
+
+.promotions{
+  padding:60px 20px;
+  text-align:center;
+}
+
+.promo-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:25px;
+  max-width:1000px;
+  margin:30px auto;
+}
+
+.promo-card{
+  padding:20px;
+  background:white;
+  border-radius:10px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+}
+
+
+/* ========================= */
+/* CATEGORY */
+/* ========================= */
+
+.categories{
+  padding:60px 20px;
+  text-align:center;
+}
+
+.category-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:25px;
+  max-width:1000px;
+  margin:30px auto;
+}
+
+.category-card{
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+}
+
+.img-box{
+  height:120px;
+  background:#ddd;
+  border-radius:10px;
+  margin-bottom:10px;
+}
+
+.category-card:hover .img-box{
+  transform:scale(1.05);
+}
+
+
+/* ========================= */
+/* SIM SECTION */
+/* ========================= */
+
+.sim-section{
+  padding:60px 20px;
+  text-align:center;
+}
+
+.sim-grid{
+  display:flex;
+  justify-content:center;
+  gap:20px;
+  margin-top:30px;
+}
+
+.sim-big{
+  width:350px;
+  height:200px;
+  background:#ddd;
+  border-radius:10px;
+}
+
+.sim-small-group{
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+}
+
+.sim-small{
+  width:250px;
+  height:90px;
+  background:#ddd;
+  border-radius:10px;
+}
+
+.sim-big,
+.sim-small{
+  transition:0.3s;
+  background-size:cover;
+  background-position:center;
+}
+
+.sim-big:hover,
+.sim-small:hover{
+  transform:scale(1.05);
+}
+
+/* ========================= */
+/* PACKAGES */
+/* ========================= */
+
+.packages{
+  padding:60px 20px;
+  text-align:center;
+}
+
+.package-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:25px;
+  max-width:1000px;
+  margin:30px auto;
+}
+
+.package-card{
+  background:white;
+  padding:20px;
+  border-radius:8px; /* giảm bo góc cho gọn */
+  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+}
+
+.package-card span{
+  display:block;          /* giá xuống dòng riêng */
+  margin-top:10px;
+  font-size:18px;
+  font-weight:500;
+}
+
+.package-card button{
+  display:block;          /* nút xuống dòng */
+  margin:15px auto 0;     /* căn giữa */
+  padding:8px 16px;
+  background:#e60023;
+  color:white;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.package-card button:hover{
+  background:#c4001d;
+}
+
+
+/* ========================= */
+/* DEVICES */
+/* ========================= */
+
+.devices{
+  padding:60px 20px;
+  text-align:center;
+}
+
+.device-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:25px;
+  max-width:900px;
+  margin:30px auto;
+}
+
+.device-img{
+  height:120px;
+  background:#ddd;
+  border-radius:10px;
+}
+
+.device-img{
+  background-size:cover;
+  background-position:center;
+  transition:0.3s;
+}
+
+.device-card:hover .device-img{
+  transform:scale(1.05);
+}
+
+
+/* ========================= */
+/* CUSTOMER CARE */
+/* ========================= */
+
+.customer-care{
+  padding:60px 20px;
+  text-align:center;
+}
+
+.care-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:25px;
+  max-width:900px;
+  margin:30px auto;
+}
+
+.care-card{
+  padding:20px;
+  background:white;
+  border-radius:10px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+}
+
+
+/* ========================= */
+/* FOOTER */
+/* ========================= */
+
+.footer{
+  background:#222;
+  color:white;
+  text-align:center;
+  padding:20px;
+  margin-top:40px;
+}
+
+
+/* ========================= */
+/* RESPONSIVE */
+/* ========================= */
+
+@media (max-width:1024px){
+
+.banner{
+  flex-direction:column;
+  text-align:center;
+}
+
+.banner-left,
+.banner-right{
+  width:100%;
+}
+
+.sim-grid{
+  flex-direction:column;
+  align-items:center;
+}
+
+.sim-small-group{
+  flex-direction:row;
+}
+
+}
+
+
+@media (max-width:768px){
+
+.navbar{
+  flex-direction:column;
+  gap:10px;
+}
+
+.menu{
+  flex-wrap:wrap;
+  justify-content:center;
+}
+
+.services{
+  grid-template-columns:repeat(2,1fr);
+}
+
+}
+
+
+@media (max-width:480px){
+
+.banner-left h1{
+  font-size:28px;
+}
+
+.services{
+  grid-template-columns:1fr;
+}
+
+}
+
+.more-packages{
+  padding:60px 20px;
+  text-align:center;
+}
+
+.more-package-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:25px;
+  max-width:1000px;
+  margin:30px auto;
+}
+
+.more-package-card{
+  background:white;
+  padding:25px;
+  border-radius:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+  transition:0.2s;
+}
+
+.more-package-card h3{
+  margin-bottom:10px;
+}
+
+.more-package-card p{
+  color:#555;
+}
+
+.more-package-card button{
+  margin-top:15px;
+  padding:8px 16px;
+  background:#e60023;
+  color:white;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.more-package-card:hover{
+  transform:translateY(-5px);
+}
+
+.smart-devices{
+  padding:60px 20px;
+  text-align:center;
+}
+
+.smart-device-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:25px;
+  max-width:900px;
+  margin:30px auto;
+}
+
+.smart-device-card{
+  background:white;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+  transition:0.2s;
+}
+
+.smart-img{
+  height:120px;
+  background:#ddd;
+  border-radius:10px;
+  margin-bottom:10px;
+}
+
+.smart-device-card span{
+  color:#e60023;
+  font-weight:bold;
+}
+
+.smart-device-card:hover{
+  transform:translateY(-5px);
+}
+
+.customer-program{
+  padding:60px 20px;
+  text-align:center;
+}
+
+.program-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:25px;
+  max-width:900px;
+  margin:30px auto;
+}
+
+.program-card{
+  background:white;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+  transition:0.2s;
+}
+
+.program-img{
+  height:100px;
+  background:#eee;
+  border-radius:10px;
+  margin-bottom:10px;
+}
+
+.program-card:hover{
+  transform:translateY(-5px);
+}
+
+/* ========================= */
+/* DIGITAL SERVICES */
+/* ========================= */
+
+.digital-services{
+  padding:60px 20px;
+  background:#f3f4f6;
+  text-align:center;
+}
+
+.digital-services h2{
+  font-size:34px;
+  margin-bottom:40px;
+}
+
+.digital-services h2 span{
+  color:#e60023;
+}
+
+.digital-grid{
+  max-width:1000px;
+  margin:0 auto;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:30px;
+}
+
+.digital-card{
+  background:white;
+  padding:30px;
+  border-radius:14px;
+  text-align:left;
+  box-shadow:0 5px 15px rgba(0,0,0,0.08);
+  transition:0.25s;
+}
+
+.digital-card:hover{
+  transform:translateY(-6px);
+}
+
+.digital-icon{
+  width:60px;
+  height:60px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+  font-weight:bold;
+  font-size:22px;
+  margin-bottom:15px;
+}
+
+.viettel{
+  background:#e60023;
+}
+
+.tv360{
+  background:#ff2b2b;
+}
+
+.imuzik{
+  background:#f5c400;
+  color:black;
+}
+
+.digital-card h3{
+  margin-bottom:10px;
+}
+
+.digital-card p{
+  color:#555;
+  line-height:1.5;
+  margin-bottom:15px;
+}
+
+.digital-card a{
+  color:#e60023;
+  font-weight:500;
+  text-decoration:none;
+}
+
+.img-box{
+  width:100%;
+  height:160px;
+  border-radius:10px;
+  margin-bottom:15px;
+
+  background-size:cover;
+  background-position:center;
+}
+
+/* ========================= */
+/* IMAGE SOURCES */
+/* ========================= */
+
+/* category images */
+
+.category-card:nth-child(1) .img-box{
+  background-image:url("https://m.media-amazon.com/images/I/61C2vA5ELUL._AC_SL1000__.jpg");
+}
+
+.category-card:nth-child(2) .img-box{
+  background-image:url("https://m.media-amazon.com/images/I/61C2vA5ELUL._AC_SL1000__.jpg");
+}
+
+.category-card:nth-child(3) .img-box{
+  background-image:url("https://cdn.mobilecity.vn/mobilecity-vn/images/2025/11/banner-xiaomi-17-series-mobilecity-1720x650px-2.jpg");
+}
+
+.category-card:nth-child(4) .img-box{
+  background-image:url("https://m.media-amazon.com/images/I/61C2vA5ELUL._AC_SL1000__.jpg");
+}
+
+/* sim images */
+
+.sim-big{
+  background-image:url("https://play-lh.googleusercontent.com/nBiXjFsxZmksZk3xIilapGP6OGCTHOKYf_PzvscFu-1Ru5d0PykHEs1XHCuPs6HYlFE");
+  background-size:cover;
+  background-position:center;
+}
+
+.sim-small:nth-child(1){
+  background-image:url("https://m.media-amazon.com/images/I/61C2vA5ELUL._AC_SL1000__.jpg");
+}
+
+.sim-small:nth-child(2){
+  background-image:url("https://m.media-amazon.com/images/I/61C2vA5ELUL._AC_SL1000__.jpg");
+}
+
+/* DEVICE IMAGES */
+
+.device-card:nth-child(1) .device-img{
+  background-image: url("https://m.media-amazon.com/images/I/61C2vA5ELUL._AC_SL1000__.jpg");
+}
+
+.device-card:nth-child(2) .device-img{
+  background-image: url("https://m.media-amazon.com/images/I/61C2vA5ELUL._AC_SL1000__.jpg");
+}
+
+.device-card:nth-child(3) .device-img{
+  background-image: url("https://m.media-amazon.com/images/I/61C2vA5ELUL._AC_SL1000__.jpg");
+}
+
+.device-card:nth-child(4) .device-img{
+  background-image: url("https://m.media-amazon.com/images/I/61C2vA5ELUL._AC_SL1000__.jpg");
+}
+
+.device-card:nth-child(5) .device-img{
+  background-image: url("https://m.media-amazon.com/images/I/61C2vA5ELUL._AC_SL1000__.jpg");
+}
+
+.device-card:nth-child(6) .device-img{
+  background-image: url("https://m.media-amazon.com/images/I/61C2vA5ELUL._AC_SL1000__.jpg");
+}
+
+.device-card:nth-child(7) .device-img{
+  background-image: url("https://m.media-amazon.com/images/I/61C2vA5ELUL._AC_SL1000__.jpg");
+}
+
+.device-card:nth-child(8) .device-img{
+  background-image: url("https://m.media-amazon.com/images/I/61C2vA5ELUL._AC_SL1000__.jpg");
+}
+
+.device-card:nth-child(9) .device-img{
+  background-image: url("https://m.media-amazon.com/images/I/61C2vA5ELUL._AC_SL1000__.jpg");
+}
+
+.device-card:nth-child(10) .device-img{
+  background-image: url("https://m.media-amazon.com/images/I/61C2vA5ELUL._AC_SL1000__.jpg");
+}
