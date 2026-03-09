@@ -1,0 +1,6 @@
+@fabu_HostAddress = http://localhost:5055
+
+GET {{fabu_HostAddress}}/fabu/
+Accept: application/json
+
+###
