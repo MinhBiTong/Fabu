@@ -1,7 +1,8 @@
 import Image from "next/image";
-import logo from "../../styles/images/FAMUlogo.png";
+import logo from "../../styles/images/FABUlogo.png";
 import Icon from "../../styles/images/search.png";
 import Menu from "../../styles/images/menu.png";
+import User from "../../styles/images/user.png";
 
 function Header() {
   return (
@@ -28,6 +29,9 @@ function Header() {
       </button >
      
         <button className="SigninButton">Sign in</button>
+         <button className="ProfileButton">
+           <Image src={User} alt="Search"/>
+         </button>
 
       </div>
 

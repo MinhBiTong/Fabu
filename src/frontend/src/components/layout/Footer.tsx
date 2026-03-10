@@ -1,5 +1,5 @@
 import Image from "next/image";
-import logo from "../../styles/images/FAMUlogo.png";
+import logo from "../../styles/images/FABUlogo.png";
 import FAQ from "../../styles/images/faq.png";
 import Intro from "../../styles/images/idea.png";
 import Location from "../../styles/images/location.png";
