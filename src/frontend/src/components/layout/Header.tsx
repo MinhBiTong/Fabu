@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
 
@@ -11,7 +12,7 @@ import Menu from "../../styles/images/menu.png";
 import User from "../../styles/images/user.png";
 
 function Header() {
-
+    const router = useRouter()
     const [showLogin, setShowLogin] = useState(false);
     
   return (
@@ -23,14 +24,14 @@ function Header() {
       </div>
       
        <div className="logo">
-        <Image src={logo} alt="Logo"  />
+        <Image src={logo} alt="Logo" onClick={() => router.push("/")} />
       </div>
 
       <div className="navlinks">
-        <button>Homasdasde</button>
-        <button>Aboasdasdut</button>
-        <button>Serasdasdvices</button>
-        <button>Contasdasdact</button>
+         <button onClick={() => router.push("/")}>Home</button>
+         <button onClick={() => router.push("/about")}>About</button>
+         <button onClick={() => router.push("/services")}>Services</button>
+         <button onClick={() => router.push("/contact")}>Contact</button>
       </div>
       <div className="signin">
       <button className="SearchButton">
