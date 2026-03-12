@@ -372,6 +372,84 @@ gap : 10px ;
 }
 
 
-
-
 /* Login Form */
+
+/* Contact  */
+.ContactContainer{
+  display : flex ;
+  flex-direction: column ;
+  align-items: center ;
+  width :100% ;
+}
+.ContactContainer .ContactContent{
+  background-color: white ;
+  display : flex ;
+  flex-direction: column ;
+  align-items: center ;
+  width :60% ;
+  gap : 5px ;
+  border-radius: 20px ;
+  margin-bottom : 40px ;
+  padding : 20px 30px ;
+}
+.ContactContainer  .ContactContent .ContactForm{
+  display : flex ;
+  flex-direction: column ;
+  width : 90% ;
+  gap : 5px ;
+  padding : 10px 20px ;
+}
+.ContactContainer .ContactContent h3{
+  white-space: normal;
+word-wrap: break-word;
+}
+.ContactContainer  .ContactContent .ContactForm button{
+  margin-top: 30px ;
+  width : 100px  ;
+  height : 50px ;
+  background-color: rgb(0, 145, 255);
+  border : none ;
+  color : white ;
+  font-size: 18px;
+  border-radius: 40px ;
+  align-self: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}
+.ContactContainer  .ContactContent .ContactForm button:hover{
+ background-color: rgb(0, 129, 228);
+}
+
+.ContactContainer  .ContactContent .ContactForm button:active{
+ cursor : grabbing ;
+ background-color: rgb(0, 111, 197);
+}
+
+.ContactContainer  .ContactContent .ContactForm input{
+  height : 40px ;
+  padding : 0 10px ;
+
+}
+.ContactContainer  .ContactContent .ContactForm textarea{
+  height : 100px ;
+  padding : 10px ;
+}
+
+@media (max-width: 900px) {
+  .ContactContainer  .ContactContent .ContactForm button{
+  margin-top: 25px ;
+  width : 80px  ;
+  height : 40px ;
+  font-size: 16px;
+}
+ .ContactContainer h1{
+  font-size: 24px ;
+ }
+.ContactContainer .ContactContent h3{
+  font-size: 16px ;
+  white-space: normal;
+word-wrap: break-word;
+}
+}
+
+/* Contact  */
