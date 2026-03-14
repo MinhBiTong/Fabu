@@ -4,7 +4,9 @@ margin-top: 100px;
 font-family:Arial, Helvetica, sans-serif;
 background:#f6f7fb;
 }
-
+body::-webkit-scrollbar {
+  display: none;              /* Chrome, Safari, Edge */
+}
 /* Header */
 .navibar{
     position: fixed;
@@ -453,3 +455,241 @@ word-wrap: break-word;
 }
 
 /* Contact  */
+
+/* Phone Service Page */
+
+.PhoneServiceContainer{
+  display : flex ;
+  flex-direction: column ;
+  align-items: center ;
+  width :100% ;
+}
+.PhoneServiceContainer .PhoneServiceBanner{
+  background-color: white;
+  width : 90% ;
+  height : 200px ;
+  flex-direction: column;
+  display : flex ;
+box-sizing: border-box;
+  padding : 10px 30px ;
+  border-radius: 30px ;
+}
+/* Phone Service Page */
+
+/* 5G Data Plan Page */
+
+.p5GContainer{
+  display : flex ;
+  flex-direction: column ;
+  align-items: center ;
+  width :100% ;
+}
+.p5GContainer .ChoosePackage{
+  width : 90% ;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row ;
+  display : flex ;
+}
+.p5GContainer .ChoosePackage .MobilePackageType{
+  font-size: 22px ;
+  padding :10px 20px ;
+  border-bottom: 2px solid rgb(176, 176, 176) ;
+}
+.p5GContainer .ChoosePackage .MobilePackageType:hover{
+  border-bottom: 2px solid rgb(0, 104, 240) ;
+  cursor: pointer;
+}
+.p5GContainer .ChoosePackage .MobilePackageType:active{
+  cursor: grabbing;
+}
+.p5GContainer .ValueOptions{
+  width : 90% ;
+  display : flex ;
+  flex-direction: row ;
+  align-items: center ;
+  justify-content: center ;
+  margin-top : 20px ;
+  gap : 10px ;
+}
+
+.p5GContainer .ValueOptions .Opted{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+   justify-content: center ;
+   gap : 8px ;
+  background-color : white ;
+  font-size: 16px ;
+  padding :10px 15px ;
+  height : 15px ;
+  border-radius: 12px;
+  font-weight: bold;
+  border : 1px transparent solid ;
+  box-shadow : 0 1px 2px rgb(0, 0, 0 , 0.1) ;
+}
+.p5GContainer .ValueOptions .Opted:hover{
+
+  border : 1px solid rgb(0, 136, 255 , 0.5) ;
+  color : rgb(0, 119, 255) ;
+  cursor : pointer ;
+}
+.p5GContainer .ValueOptions .Opted:active{
+
+  border : 1px solid rgba(1, 89, 165, 0.799) ;
+  color : rgb(0, 94, 201) ;
+  cursor : grabbing ;
+}
+.p5GContainer .ValueOptions .Opted img{
+  width : auto ;
+  height : 18px ;
+}
+.p5GContainer .PackageContain{
+  width : 100% ;
+  padding : 20px 0px ;
+   box-sizing: border-box;
+   display : flex ;
+    flex-direction: column ;
+   align-items: center;
+
+}
+.p5GContainer .PackageContain .PackageandViewAll{
+  width : 100% ;
+ box-sizing: border-box;
+ padding : 5px clamp(30px , 10vw , 150px) ;
+ display: flex;
+ flex-direction: row ;
+ justify-content: space-between;
+ align-items: center;
+}
+.p5GContainer .PackageContain .PackageandViewAll h3{
+ 
+
+}
+.p5GContainer .PackageContain .PackageandViewAll h3:hover{
+ color : rgb(0, 119, 255) ;
+ cursor: pointer;
+}
+.p5GContainer .PackageContain .PackageandViewAll h3:active{
+ color : rgb(0, 94, 201) ;
+ cursor: grabbing ;
+}
+.p5GContainer .PackageContain .PackageSet{
+  display : grid ;
+   grid-template-columns: repeat(3, 1fr); 
+   gap : 50px  ;
+ width : 88% ;
+  padding : 20px 20px ;
+   box-sizing: border-box;
+
+}
+.p5GContainer .PackageContain .PackageSet .Package{
+ display : flex ;
+ flex-direction: column ;
+  background-color: rgb(255, 255, 255) ;
+  min-width : 370px ;
+  height : 300px ;
+  border-radius: 30px ;
+  margin : auto ;
+  box-shadow : 0 2px 2px rgb(0, 0, 0 , 0.2) 
+}
+.p5GContainer .PackageContain .PackageSet .Package:hover{
+
+  box-shadow : 0 3px 4px rgb(0, 0, 0 , 0.3) 
+}
+.p5GContainer .PackageContain .PackageSet .Package .PackageTitle{
+  height : 23% ;
+width : 100% ;
+background-color : rgb(0, 98, 255);
+border-radius : 30px 30px 0px 0px ;
+align-items: center;
+padding : 0px 30px ;
+color : white ;
+box-sizing: border-box;
+display : flex ;
+}
+.p5GContainer .PackageContain .PackageSet .Package .PackageOffer{
+  padding : 0 20px ;
+box-shadow: 0px 2px 2px rgb(0, 0, 0 , 0.2);
+ box-sizing: border-box;
+ margin : auto ;
+  height : 30% ;
+font-size : 18px ;
+  align-self: center;
+width : 95% ;
+padding : 10px 30px ;
+display: flex ;
+justify-content: center;
+ word-break: break-word;
+ flex-direction: column;
+ gap : 5px ;
+}
+.p5GContainer .PackageContain .PackageSet .Package .PackageOffer p{
+ margin : 0 ;
+}
+.p5GContainer .PackageContain .PackageSet .Package .PackagePrice{
+  height : 10% ;
+  width : 100% ;
+  font-size: 24px;
+  padding : 0 40px ;
+box-sizing: border-box;
+display : flex ;
+align-items: center;
+}
+.p5GContainer .PackageContain .PackageSet .Package .PackageChoices{
+height : 30%;
+width : 100% ;
+display : flex ;
+flex-direction: row ;
+padding : 15px 30px  ;
+ box-sizing: border-box;
+ justify-content: space-between;
+ align-items: center;
+}
+.p5GContainer .PackageContain .PackageSet .Package .PackageChoices button{
+ font-size: 18px;
+ height : 100% ;
+  border-radius: 30px ;
+  width : 40% ;
+  border : 1px solid black ;
+  background-color : white ;
+   cursor : pointer ;
+}
+.p5GContainer .PackageContain .PackageSet .Package .PackageChoices button:hover{
+background-color: rgb(0, 94, 255);
+}
+.p5GContainer .PackageContain .PackageSet .Package .PackageChoices h3{
+   font-size: 20px;
+   cursor : pointer ;
+}
+.p5GContainer .PackageContain .PackageSet .Package .PackageChoices h3:hover{
+   color : rgb(0, 94, 255) ;
+}
+.p5GContainer .PackageContain .PackageSet .Package .PackageChoices h3:active{
+   color : rgb(0, 71, 194) ;
+}
+@media (max-width: 1300px) {
+.p5GContainer .PackageContain .PackageSet{
+   grid-template-columns: repeat(2, 1fr); 
+
+}
+}
+@media (max-width: 900px){
+.p5GContainer .PackageContain .PackageSet{
+   grid-template-columns: repeat(1, 1fr); 
+
+}
+  .p5GContainer h1{
+    font-size: 24px ;
+  }
+.p5GContainer .ChoosePackage .MobilePackageType{
+  font-size : 14px ;
+}
+.p5GContainer .PackageContain .PackageandViewAll h2{
+font-size: 18px ;
+}
+.p5GContainer .PackageContain .PackageandViewAll h3{
+ font-size: 14px;
+}
+}
+/* 5G Data Plan Page */
