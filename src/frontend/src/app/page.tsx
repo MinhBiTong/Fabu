@@ -1,15 +1,16 @@
 import "../styles/homepage.css";
-//import LoginForm from "../components/features/auth/LoginForm"; nhớ thêm <LoginForm /> dưới div homepage
+import Link from "next/link";
 
 export default function HomePage() {
   return (
     <div className="homepage">
       <section className="home">
         <div className="services">
-          <div className="service-card">
+
+          <Link href="/recharge" className="service-card">
             <span>📱</span>
             <p>Nạp tiền điện thoại</p>
-          </div>
+          </Link>
 
           <div className="service-card">
             <span>💳</span>
@@ -30,6 +31,7 @@ export default function HomePage() {
             <span>👤</span>
             <p>Tài khoản</p>
           </div>
+
         </div>
 
       </section>
