@@ -94,7 +94,7 @@ export default function NapTien() {
 
             <p className="payment-note">
               Nhấn vào "Nạp tiền" đồng nghĩa với việc bạn đồng ý
-              với điều khoản mua hàng.
+              với điều khoản.
             </p>
 
           </div>
