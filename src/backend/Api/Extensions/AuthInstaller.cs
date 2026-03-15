@@ -1,12 +1,12 @@
 ﻿using Application.Interfaces;
 using Domain.Entities;
+using Domain.Exceptions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Persistence.Data.Contexts;
-using Persistence.Identity;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
@@ -25,16 +25,16 @@ namespace Api.Extensions
             if (!authConfig.GetValue<bool>("Enabled")) return;
 
             //identity
-            services.AddIdentity<ApplicationUser, IdentityRole<long>>(options =>
-            {
-                options.Password.RequireDigit = false;
-                options.Password.RequireLowercase = false;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequiredLength = 6;
-            })
-              .AddEntityFrameworkStores<AppDbContext>()
-              .AddDefaultTokenProviders();
+            //services.AddIdentity<User, IdentityRole<long>>(options =>
+            //{
+            //    options.Password.RequireDigit = false;
+            //    options.Password.RequireLowercase = false;
+            //    options.Password.RequireNonAlphanumeric = false;
+            //    options.Password.RequireUppercase = false;
+            //    options.Password.RequiredLength = 6;
+            //})
+            //  .AddEntityFrameworkStores<AppDbContext>()
+            //  .AddDefaultTokenProviders();
             
             //JWT
 
@@ -66,7 +66,7 @@ namespace Api.Extensions
                         IssuerSigningKey = new SymmetricSecurityKey(key),
                         ClockSkew = TimeSpan.Zero
                     };
-                    //event de populate claims tu db sau validate - userId, role
+                    //chi check ban neu config bat - tranh db call
                     if (authConfig.GetValue<bool>("CheckBanEnabled"))
                     {
                         options.Events = new JwtBearerEvents
@@ -76,24 +76,14 @@ namespace Api.Extensions
                                 var userId = context.Principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                                 if (userId == null)
                                 {
-                                    context.Fail("Token invalid");
-                                    return;
+                                    throw new AppException(ErrorCode.UNAUTHENTICATED);
                                 }
 
-                                var userManager = context.HttpContext.RequestServices
-                                    .GetRequiredService<UserManager<ApplicationUser>>();
-
+                                var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<User>>();
                                 var user = await userManager.FindByIdAsync(userId);
-
-                                if (user == null)
+                                if (user == null) // Giả sử User có prop IsBanned
                                 {
-                                    context.Fail("User not found");
-                                    return;
-                                }
-
-                                if (user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.UtcNow)
-                                {
-                                    context.Fail("User banned");
+                                    throw new AppException(ErrorCode.UNAUTHENTICATED);
                                 }
                             }
                         };

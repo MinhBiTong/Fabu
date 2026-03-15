@@ -31,14 +31,18 @@ namespace Persistence.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<decimal>("Balance")
+                        .ValueGeneratedOnAdd()
                         .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,2)")
+                        .HasDefaultValue(0m);
 
                     b.Property<decimal>("CreditLimit")
+                        .ValueGeneratedOnAdd()
                         .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,2)")
+                        .HasDefaultValue(0m);
 
-                    b.Property<long>("CustomerId")
+                    b.Property<long?>("CustomerId")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime?>("LastRechargeDate")
@@ -52,7 +56,9 @@ namespace Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("IX_Accounts_CustomerId")
+                        .HasFilter("[CustomerId] IS NOT NULL");
 
                     b.ToTable("Accounts", (string)null);
                 });
@@ -119,18 +125,18 @@ namespace Persistence.Migrations
 
             modelBuilder.Entity("Domain.Entities.Coupon", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<long>("CreatedByUserId")
+                    b.Property<long?>("CreatedByUserId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("DiscountType")
@@ -159,13 +165,14 @@ namespace Persistence.Migrations
                         .HasColumnType("nvarchar(200)");
 
                     b.Property<int>("UsageLimitPerUser")
-                        .HasColumnType("int");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
 
                     b.Property<int>("UsageLimitTotal")
-                        .HasColumnType("int");
-
-                    b.Property<long?>("UserId")
-                        .HasColumnType("bigint");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1000);
 
                     b.Property<DateTime>("ValidFrom")
                         .HasColumnType("datetime2");
@@ -180,24 +187,19 @@ namespace Persistence.Migrations
 
                     b.HasIndex("CreatedByUserId");
 
-                    b.HasIndex("UserId");
-
                     b.ToTable("Coupons", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.CouponUsage", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<int>("CouponId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("CouponId1")
-                        .HasColumnType("int");
+                    b.Property<long?>("CouponId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("CreatedBy")
                         .IsRequired()
@@ -205,12 +207,6 @@ namespace Persistence.Migrations
 
                     b.Property<DateTimeOffset>("CreatedDate")
                         .HasColumnType("datetimeoffset");
-
-                    b.Property<long>("CustomerId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("CustomerId1")
-                        .HasColumnType("bigint");
 
                     b.Property<decimal>("DiscountApplied")
                         .HasPrecision(18, 2)
@@ -228,10 +224,7 @@ namespace Persistence.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<long>("TransactionId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("TransactionId1")
+                    b.Property<long?>("TransactionId")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("UsedAt")
@@ -241,16 +234,7 @@ namespace Persistence.Migrations
 
                     b.HasIndex("CouponId");
 
-                    b.HasIndex("CouponId1");
-
-                    b.HasIndex("CustomerId");
-
-                    b.HasIndex("CustomerId1");
-
-                    b.HasIndex("TransactionId")
-                        .IsUnique();
-
-                    b.HasIndex("TransactionId1");
+                    b.HasIndex("TransactionId");
 
                     b.ToTable("CouponUsages", (string)null);
                 });
@@ -262,9 +246,6 @@ namespace Persistence.Migrations
                         .HasColumnType("bigint");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long?>("AccountId")
-                        .HasColumnType("bigint");
 
                     b.Property<string>("Address")
                         .IsRequired()
@@ -309,28 +290,24 @@ namespace Persistence.Migrations
                     b.Property<long?>("UserId")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("UserId1")
-                        .HasColumnType("bigint");
-
                     b.HasKey("Id");
 
                     b.HasIndex("MobileNumber")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("IX_Customers_MobileNumber");
 
                     b.HasIndex("UserId");
-
-                    b.HasIndex("UserId1");
 
                     b.ToTable("Customers", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.CustomerService", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("ActivatedAt")
                         .HasColumnType("datetime2");
@@ -342,7 +319,7 @@ namespace Persistence.Migrations
                     b.Property<DateTimeOffset>("CreatedDate")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<long>("CustomerId")
+                    b.Property<long?>("CustomerId")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("ExpiresAt")
@@ -360,14 +337,18 @@ namespace Persistence.Migrations
                     b.Property<DateTimeOffset>("ModifiedDate")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<long>("ServiceId")
+                    b.Property<long?>("ServiceId")
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CustomerId");
+                    b.HasIndex("ExpiresAt")
+                        .HasDatabaseName("IX_CustomerServices_ExpiresAt");
 
                     b.HasIndex("ServiceId");
+
+                    b.HasIndex("CustomerId", "IsAutoRenewed")
+                        .HasDatabaseName("IX_CustomerServices_CustomerId_IsAutoRenewed");
 
                     b.ToTable("CustomerServices", (string)null);
                 });
@@ -381,9 +362,6 @@ namespace Persistence.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<long?>("CustomerId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("CustomerId1")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Message")
@@ -402,21 +380,9 @@ namespace Persistence.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<long?>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("UserId1")
-                        .HasColumnType("bigint");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
-
-                    b.HasIndex("CustomerId1");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("UserId1");
 
                     b.ToTable("Feedbacks", (string)null);
                 });
@@ -463,8 +429,8 @@ namespace Persistence.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int?>("BillId")
-                        .HasColumnType("int");
+                    b.Property<long?>("BillId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("CreatedBy")
                         .IsRequired()
@@ -472,6 +438,12 @@ namespace Persistence.Migrations
 
                     b.Property<DateTimeOffset>("CreatedDate")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("ModifiedBy")
                         .IsRequired()
@@ -491,27 +463,12 @@ namespace Persistence.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<int?>("PostpaidBillId")
-                        .HasColumnType("int");
-
                     b.Property<int>("Status")
                         .HasColumnType("int");
-
-                    b.Property<long?>("TransactionId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("TransactionId1")
-                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
                     b.HasIndex("BillId");
-
-                    b.HasIndex("PostpaidBillId");
-
-                    b.HasIndex("TransactionId");
-
-                    b.HasIndex("TransactionId1");
 
                     b.ToTable("Payments", (string)null);
                 });
@@ -541,20 +498,40 @@ namespace Persistence.Migrations
 
             modelBuilder.Entity("Domain.Entities.PostpaidBill", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("BillMonth")
                         .HasColumnType("datetime2");
 
-                    b.Property<long>("CustomerId")
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("CreatedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<long?>("CustomerId")
                         .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<DateTime>("DueDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ModifiedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("ModifiedDate")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<decimal>("PaidAmount")
                         .ValueGeneratedOnAdd()
@@ -569,18 +546,21 @@ namespace Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CustomerId");
+                    b.HasIndex("CustomerId", "BillMonth")
+                        .IsUnique()
+                        .HasDatabaseName("IX_PostpaidBills_CustomerId_BillMonth")
+                        .HasFilter("[CustomerId] IS NOT NULL");
 
                     b.ToTable("PostpaidBills", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.RechargePlan", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
@@ -634,6 +614,21 @@ namespace Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Roles");
+                });
+
+            modelBuilder.Entity("Domain.Entities.RolePermission", b =>
+                {
+                    b.Property<long?>("RoleId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int?>("PermissionId")
+                        .HasColumnType("int");
+
+                    b.HasKey("RoleId", "PermissionId");
+
+                    b.HasIndex("PermissionId");
+
+                    b.ToTable("RolePermissions", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Service", b =>
@@ -715,8 +710,14 @@ namespace Persistence.Migrations
                     b.Property<DateTimeOffset>("CreatedDate")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<long>("CustomerId")
+                    b.Property<long?>("CustomerId")
                         .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("ModifiedBy")
                         .IsRequired()
@@ -724,6 +725,9 @@ namespace Persistence.Migrations
 
                     b.Property<DateTimeOffset>("ModifiedDate")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<long?>("PaymentId")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("PaymentMethod")
                         .HasColumnType("int");
@@ -743,7 +747,14 @@ namespace Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CustomerId");
+                    b.HasIndex("PaymentId");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("IX_Transactions_Status");
+
+                    b.HasIndex("CustomerId", "CreatedDate")
+                        .IsDescending(false, true)
+                        .HasDatabaseName("IX_Transactions_CustomerId_CreatedDate");
 
                     b.ToTable("Transactions", (string)null);
                 });
@@ -821,209 +832,19 @@ namespace Persistence.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<long>", b =>
+            modelBuilder.Entity("Domain.Entities.UserRole", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<long?>("UserId")
                         .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedName")
-                        .IsUnique()
-                        .HasDatabaseName("RoleNameIndex")
-                        .HasFilter("[NormalizedName] IS NOT NULL");
-
-                    b.ToTable("AspNetRoles", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<long>", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("RoleId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("AspNetRoleClaims", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<long>", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("AspNetUserClaims", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<long>", b =>
-                {
-                    b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ProviderKey")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ProviderDisplayName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("LoginProvider", "ProviderKey");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("AspNetUserLogins", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<long>", b =>
-                {
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("RoleId")
+                    b.Property<long?>("RoleId")
                         .HasColumnType("bigint");
 
                     b.HasKey("UserId", "RoleId");
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("AspNetUserRoles", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<long>", b =>
-                {
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Value")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("UserId", "LoginProvider", "Name");
-
-                    b.ToTable("AspNetUserTokens", (string)null);
-                });
-
-            modelBuilder.Entity("Persistence.Identity.ApplicationUser", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("NormalizedEmail")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("UserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedEmail")
-                        .HasDatabaseName("EmailIndex");
-
-                    b.HasIndex("NormalizedUserName")
-                        .IsUnique()
-                        .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.ToTable("AspNetUsers", (string)null);
+                    b.ToTable("UserRoles", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Account", b =>
@@ -1031,8 +852,7 @@ namespace Persistence.Migrations
                     b.HasOne("Domain.Entities.Customer", "Customer")
                         .WithOne("Account")
                         .HasForeignKey("Domain.Entities.Account", "CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Customer");
                 });
@@ -1040,14 +860,9 @@ namespace Persistence.Migrations
             modelBuilder.Entity("Domain.Entities.Coupon", b =>
                 {
                     b.HasOne("Domain.Entities.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.User", null)
                         .WithMany("Coupons")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("CreatedByUser");
                 });
@@ -1055,38 +870,16 @@ namespace Persistence.Migrations
             modelBuilder.Entity("Domain.Entities.CouponUsage", b =>
                 {
                     b.HasOne("Domain.Entities.Coupon", "Coupon")
-                        .WithMany()
+                        .WithMany("CouponUsages")
                         .HasForeignKey("CouponId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Coupon", null)
-                        .WithMany("CouponUsages")
-                        .HasForeignKey("CouponId1");
-
-                    b.HasOne("Domain.Entities.Customer", "Customer")
-                        .WithMany()
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Customer", null)
-                        .WithMany("CouponUsages")
-                        .HasForeignKey("CustomerId1");
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Domain.Entities.Transaction", "Transaction")
-                        .WithOne()
-                        .HasForeignKey("Domain.Entities.CouponUsage", "TransactionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Transaction", null)
-                        .WithMany("Coupons")
-                        .HasForeignKey("TransactionId1");
+                        .WithMany("CouponUsages")
+                        .HasForeignKey("TransactionId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Coupon");
-
-                    b.Navigation("Customer");
 
                     b.Navigation("Transaction");
                 });
@@ -1094,13 +887,9 @@ namespace Persistence.Migrations
             modelBuilder.Entity("Domain.Entities.Customer", b =>
                 {
                     b.HasOne("Domain.Entities.User", "User")
-                        .WithMany()
+                        .WithMany("Customers")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("Domain.Entities.User", null)
-                        .WithMany("Customers")
-                        .HasForeignKey("UserId1");
 
                     b.Navigation("User");
                 });
@@ -1110,14 +899,12 @@ namespace Persistence.Migrations
                     b.HasOne("Domain.Entities.Customer", "Customer")
                         .WithMany("CustomerServices")
                         .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("Domain.Entities.Service", "Service")
                         .WithMany("CustomerServices")
                         .HasForeignKey("ServiceId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Customer");
 
@@ -1127,51 +914,21 @@ namespace Persistence.Migrations
             modelBuilder.Entity("Domain.Entities.Feedback", b =>
                 {
                     b.HasOne("Domain.Entities.Customer", "Customer")
-                        .WithMany()
+                        .WithMany("Feedbacks")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("Domain.Entities.Customer", null)
-                        .WithMany("Feedbacks")
-                        .HasForeignKey("CustomerId1");
-
-                    b.HasOne("Domain.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("Domain.Entities.User", null)
-                        .WithMany("Feedbacks")
-                        .HasForeignKey("UserId1");
-
                     b.Navigation("Customer");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Domain.Entities.Payment", b =>
                 {
                     b.HasOne("Domain.Entities.PostpaidBill", "PostpaidBill")
-                        .WithMany()
+                        .WithMany("Payments")
                         .HasForeignKey("BillId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("Domain.Entities.PostpaidBill", null)
-                        .WithMany("Payments")
-                        .HasForeignKey("PostpaidBillId");
-
-                    b.HasOne("Domain.Entities.Transaction", "Transaction")
-                        .WithMany()
-                        .HasForeignKey("TransactionId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("Domain.Entities.Transaction", null)
-                        .WithMany("Payments")
-                        .HasForeignKey("TransactionId1");
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("PostpaidBill");
-
-                    b.Navigation("Transaction");
                 });
 
             modelBuilder.Entity("Domain.Entities.PostpaidBill", b =>
@@ -1179,10 +936,28 @@ namespace Persistence.Migrations
                     b.HasOne("Domain.Entities.Customer", "Customer")
                         .WithMany("PostpaidBills")
                         .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("Domain.Entities.RolePermission", b =>
+                {
+                    b.HasOne("Domain.Entities.Permission", "Permission")
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("PermissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Customer");
+                    b.HasOne("Domain.Entities.Role", "Role")
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("Domain.Entities.Transaction", b =>
@@ -1190,61 +965,34 @@ namespace Persistence.Migrations
                     b.HasOne("Domain.Entities.Customer", "Customer")
                         .WithMany("Transactions")
                         .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Domain.Entities.Payment", "Payment")
+                        .WithMany("Transactions")
+                        .HasForeignKey("PaymentId")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Customer");
+
+                    b.Navigation("Payment");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<long>", b =>
+            modelBuilder.Entity("Domain.Entities.UserRole", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<long>", null)
-                        .WithMany()
+                    b.HasOne("Domain.Entities.Role", "Role")
+                        .WithMany("UserRoles")
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+                        .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<long>", b =>
-                {
-                    b.HasOne("Persistence.Identity.ApplicationUser", null)
-                        .WithMany()
+                    b.HasOne("Domain.Entities.User", "User")
+                        .WithMany("UserRoles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<long>", b =>
-                {
-                    b.HasOne("Persistence.Identity.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+                    b.Navigation("Role");
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<long>", b =>
-                {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<long>", null)
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Persistence.Identity.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<long>", b =>
-                {
-                    b.HasOne("Persistence.Identity.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Domain.Entities.Coupon", b =>
@@ -1254,10 +1002,7 @@ namespace Persistence.Migrations
 
             modelBuilder.Entity("Domain.Entities.Customer", b =>
                 {
-                    b.Navigation("Account")
-                        .IsRequired();
-
-                    b.Navigation("CouponUsages");
+                    b.Navigation("Account");
 
                     b.Navigation("CustomerServices");
 
@@ -1268,9 +1013,26 @@ namespace Persistence.Migrations
                     b.Navigation("Transactions");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Payment", b =>
+                {
+                    b.Navigation("Transactions");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Permission", b =>
+                {
+                    b.Navigation("RolePermissions");
+                });
+
             modelBuilder.Entity("Domain.Entities.PostpaidBill", b =>
                 {
                     b.Navigation("Payments");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Role", b =>
+                {
+                    b.Navigation("RolePermissions");
+
+                    b.Navigation("UserRoles");
                 });
 
             modelBuilder.Entity("Domain.Entities.Service", b =>
@@ -1280,9 +1042,7 @@ namespace Persistence.Migrations
 
             modelBuilder.Entity("Domain.Entities.Transaction", b =>
                 {
-                    b.Navigation("Coupons");
-
-                    b.Navigation("Payments");
+                    b.Navigation("CouponUsages");
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>
@@ -1291,7 +1051,7 @@ namespace Persistence.Migrations
 
                     b.Navigation("Customers");
 
-                    b.Navigation("Feedbacks");
+                    b.Navigation("UserRoles");
                 });
 #pragma warning restore 612, 618
         }

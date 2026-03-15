@@ -10,10 +10,12 @@ using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
-    public class Transaction: EntityAuditBase<long>
+    public class Transaction: EntityAuditSoftDeleteBase<long>
     {
-        public long CustomerId { get; set; }
-        public virtual Customer Customer { get; set; }
+        public long? CustomerId { get; set; }
+        public virtual Customer? Customer { get; set; }
+        public long? PaymentId { get; set; }
+        public virtual Payment? Payment { get; set; }
         public string TransactionType { get; set; } // Recharge, BillPayment...
 
         public decimal Amount { get; set; }
@@ -25,8 +27,6 @@ namespace Domain.Entities
         public string TransactionRef { get; set; }
 
         public DateTime? CompletedAt { get; set; }
-
-        public virtual ICollection<Payment> Payments { get; set; }
-        public virtual ICollection<CouponUsage> Coupons { get; set; }
+        public virtual ICollection<CouponUsage> CouponUsages { get; set; }
     }
 }

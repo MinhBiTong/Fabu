@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace Api.Middleware
+namespace Domain.Exceptions
 {
     public enum ErrorCode
     {
@@ -13,7 +13,7 @@ namespace Api.Middleware
         USER_NOT_EXISTED = 1005,
         UNAUTHENTICATED = 1006,
         UNAUTHORIZED = 1007,
-        INVALID_DOB = 1008
+        INVALID_DOB = 1008,
     }
 
     public class ErrorDetails

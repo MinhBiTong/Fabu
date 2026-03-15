@@ -32,16 +32,25 @@ namespace Persistence.Data.Configurations
                 .HasMaxLength(500);
 
             builder.HasIndex(x => x.MobileNumber)
-                .IsUnique();
+                .IsUnique()
+                .HasDatabaseName("IX_Customers_MobileNumber");
 
+            builder.Property(c => c.UserId)
+                .IsRequired(false); // Cho phép UserId có giá trị null
+
+            //user nullable - 1 user nhieu customer
             builder.HasOne(x => x.User)
-                .WithMany()
+                .WithMany(x => x.Customers)
                 .HasForeignKey(x => x.UserId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.SetNull);
-            //builder.HasOne(c => c.Account)
-            //        .WithOne(a => a.Customer)
-            //        .HasForeignKey<Account>(a => a.CustomerId)
-            //        .OnDelete(DeleteBehavior.Cascade);
+
+            //1:1 VOI ACCOUNT
+            builder.HasOne(c => c.Account)
+                 .WithOne(a => a.Customer)
+                 .HasForeignKey<Account>(a => a.CustomerId)
+                 .OnDelete(DeleteBehavior.Cascade);
+
             builder.HasQueryFilter(c => !c.IsDeleted);
         }
     }

@@ -30,12 +30,18 @@ namespace Persistence.Data.Configurations
             builder.HasOne(x => x.Customer)
                 .WithMany(x => x.CustomerServices)
                 .HasForeignKey(x => x.CustomerId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
 
             builder.HasOne(x => x.Service)
                 .WithMany(x => x.CustomerServices)
                 .HasForeignKey(x => x.ServiceId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasIndex(cs => new { cs.CustomerId, cs.IsAutoRenewed })
+                .HasDatabaseName("IX_CustomerServices_CustomerId_IsAutoRenewed");
+
+            builder.HasIndex(cs => cs.ExpiresAt)
+                .HasDatabaseName("IX_CustomerServices_ExpiresAt");
         }
     }
 }

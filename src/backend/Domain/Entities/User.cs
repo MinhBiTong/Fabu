@@ -27,8 +27,7 @@ namespace Domain.Entities
         public bool IsActive { get; set; } = true;
 
         public virtual ICollection<Customer> Customers { get; set; }
-        public virtual ICollection<Feedback> Feedbacks { get; set; }
         public virtual ICollection<Coupon> Coupons { get; set; }
-
+        public virtual ICollection<UserRole> UserRoles { get; set; }
     }
 }

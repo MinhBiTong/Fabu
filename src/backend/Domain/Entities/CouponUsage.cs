@@ -8,16 +8,13 @@ using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
-    public class CouponUsage : EntityAuditBase<int>
+    public class CouponUsage : EntityAuditBase<long>
     {
-        public long CustomerId { get; set; }
-        public virtual Customer Customer { get; set; }
+        public long? CouponId { get; set; }
+        public virtual Coupon? Coupon { get; set; }
 
-        public int CouponId { get; set; }
-        public virtual Coupon Coupon { get; set; }
-
-        public long TransactionId { get; set; }
-        public virtual Transaction Transaction { get; set; }
+        public long? TransactionId { get; set; }
+        public virtual Transaction? Transaction { get; set; }
 
         public DateTime UsedAt { get; set; } = DateTime.UtcNow;
 

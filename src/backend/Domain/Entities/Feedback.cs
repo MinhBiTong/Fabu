@@ -12,11 +12,8 @@ namespace Domain.Entities
 {
     public class Feedback : EntityBase<int>
     {
-        public long? UserId { get; set; }
-        public virtual User User { get; set; }
-
         public long? CustomerId { get; set; }
-        public virtual Customer Customer { get; set; }
+        public virtual Customer? Customer { get; set; }
 
         public string Subject { get; set; }
 

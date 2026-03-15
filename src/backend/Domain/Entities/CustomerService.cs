@@ -9,13 +9,13 @@ using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
-    public class CustomerService : EntityAuditBase<int>
+    public class CustomerService : EntityAuditBase<long>
     {
-        public long CustomerId { get; set; }
-        public virtual Customer Customer { get; set; }
+        public long? CustomerId { get; set; }
+        public virtual Customer? Customer { get; set; }
 
-        public long ServiceId { get; set; }
-        public virtual Service Service { get; set; }
+        public long? ServiceId { get; set; }
+        public virtual Service? Service { get; set; }
 
         public DateTime ActivatedAt { get; set; } = DateTime.UtcNow;
 

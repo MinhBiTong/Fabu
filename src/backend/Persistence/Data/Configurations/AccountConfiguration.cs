@@ -19,9 +19,11 @@ namespace Persistence.Data.Configurations
 
             builder.Property(x => x.Balance)
                 .HasPrecision(18, 2)
+                .HasDefaultValue(0)
                 .IsRequired();
 
             builder.Property(x => x.CreditLimit)
+                .HasDefaultValue(0)
                 .HasPrecision(18, 2);
 
             builder.Property(x => x.Status)
@@ -31,11 +33,13 @@ namespace Persistence.Data.Configurations
             builder.Property(x => x.LastRechargeDate);
 
             builder.HasIndex(x => x.CustomerId)
+                .HasDatabaseName("IX_Accounts_CustomerId")
                 .IsUnique();
 
             builder.HasOne(x => x.Customer)
                 .WithOne(c => c.Account)
                 .HasForeignKey<Account>(x => x.CustomerId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

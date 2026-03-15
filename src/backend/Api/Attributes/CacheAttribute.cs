@@ -50,7 +50,7 @@ namespace Api.Attributes
             var excutedContext = await next();
             if (excutedContext.Result is OkObjectResult objectResult)
             {
-                await cacheService.SetCacheResponseAsync(cacheKey, response: objectResult.Value, timeOut: TimeSpan.FromSeconds(_timeToLiveSeconds));
+                await cacheService.SetCacheResponseByGroupAsync(cacheKey, response: objectResult.Value, absoluteExpiry: TimeSpan.FromSeconds(_timeToLiveSeconds), slidingExpiry: TimeSpan.FromSeconds(_timeToLiveSeconds));
             }
         }
 

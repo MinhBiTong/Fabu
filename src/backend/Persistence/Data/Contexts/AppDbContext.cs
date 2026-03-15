@@ -5,11 +5,10 @@ using System.Linq.Expressions;
 using Domain.Abstractions;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
-using Persistence.Identity;
 
 namespace Persistence.Data.Contexts
 {
-    public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<long>, long>
+    public class AppDbContext : DbContext
     {
         private readonly IUserContext _userContext;
         public AppDbContext(DbContextOptions<AppDbContext> options, IUserContext userContext) : base(options)
@@ -33,6 +32,8 @@ namespace Persistence.Data.Contexts
         public DbSet<CustomerService> CustomerServices { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<Feedback> Feedbacks { get; set; }
+        public DbSet<RolePermission> RolePermissions { get; set; }
+        public DbSet<UserRole> UserRoles { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);            

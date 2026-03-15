@@ -1,4 +1,5 @@
-﻿using Application.Interfaces;
+﻿//using Application.Interfaces;
+using Application.Interfaces;
 using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -17,7 +18,7 @@ namespace Infrastructure.Services
 
         public readonly IConnectionMultiplexer _connectionMultiplexer;
 
-        public ResponseCacheService(IDistributedCache distributedCache, IConnectionMultiplexer connectionMultiplexer)
+        public ResponseCacheService(IDistributedCache distributedCache, IConnectionMultiplexer? connectionMultiplexer = null)
         {
             _distributedCache = distributedCache;
             _connectionMultiplexer = connectionMultiplexer;
@@ -32,19 +33,21 @@ namespace Infrastructure.Services
             return JsonConvert.DeserializeObject<T>(cachedResponse);
         }
 
-        public async Task RemoveCacheResponseAsync(string pattern)
+        //xoa 1 key cu the
+        public async Task RemoveCacheResponseAsync(string cacheKey)
         {
-            if (string.IsNullOrWhiteSpace(pattern))
+            if (string.IsNullOrWhiteSpace(cacheKey))
             {
                 throw new ArgumentException("Value cannot be null or whitespace");
             }
 
-            await foreach (var key in GetKeyAsync(pattern + "*")) //xoa tat ca cac duoi dang sau, chi giu lai prefix o controller
-            {
-                await _distributedCache.RemoveAsync(key.ToString()); 
-            }
+            await _distributedCache.RemoveAsync(cacheKey);
+            var groupName = cacheKey.Split(':')[0];
+            var db = _connectionMultiplexer.GetDatabase();
+            await db.SetRemoveAsync($"group:{groupName}", cacheKey);
         }
 
+        //xoa toan bo key trong 1 group - ko scan
         public async Task RemoveCacheResponseByGroupAsync(string groupName)
         {
             var db = _connectionMultiplexer.GetDatabase();
@@ -52,6 +55,7 @@ namespace Infrastructure.Services
 
             // Lấy toàn bộ danh sách key trong nhóm ra
             var keys = await db.SetMembersAsync(groupKey);
+            if(keys.Length == 0) return; // Nếu nhóm không có key nào thì không cần xóa gì cả
 
             foreach (var key in keys)
             {
@@ -83,7 +87,7 @@ namespace Infrastructure.Services
             }
         }
 
-        public async Task SetCacheResponseAsync(string cacheKey, object response, TimeSpan timeOut)
+        public async Task SetCacheResponseByGroupAsync(string cacheKey, object response, TimeSpan? absoluteExpiry = null, TimeSpan? slidingExpiry = null)
         {
             //check response co du lieu chua
             if (response == null)
@@ -91,20 +95,30 @@ namespace Infrastructure.Services
                 return;
             }
 
-            var serializerResponse = JsonConvert.SerializeObject(response, new JsonSerializerSettings()
+            //viet lai de co the truyen vao thoi gian het han tu ngoai, neu khong truyen thi mac dinh la 5 phut
+            var settings = new JsonSerializerSettings
             {
-                ContractResolver = new CamelCasePropertyNamesContractResolver()
-            });
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                Formatting = Formatting.Indented
+            };
 
-            //luu data vao cache 
-            await _distributedCache.SetStringAsync(cacheKey, serializerResponse, new DistributedCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = timeOut
-            });
+            var json = JsonConvert.SerializeObject(response, settings);
+
+            var options = new DistributedCacheEntryOptions();
+            if (absoluteExpiry.HasValue) options.AbsoluteExpirationRelativeToNow = absoluteExpiry; // Cache sẽ hết hạn sau khoảng thời gian tuyệt đối kể từ thời điểm lưu vào cache.
+            if (slidingExpiry.HasValue) options.SlidingExpiration = slidingExpiry; // Cache sẽ hết hạn nếu không có truy cập nào đến cache này trong khoảng thời gian trượt kể từ lần truy cập cuối cùng.
+            await _distributedCache.SetStringAsync(cacheKey, json, options);
+            
             // 2. Lưu key này vào một nhóm để quản lý (Ví dụ lấy tiền tố làm tên nhóm)
-            var groupName = cacheKey.Split('_')[0]; // Giả sử cacheKey là Product_123
+            var groupName = cacheKey.Split(':')[0]; // Giả sử cacheKey là Product_123
             var db = _connectionMultiplexer.GetDatabase();
             await db.SetAddAsync($"Group:{groupName}", cacheKey);
+        }
+
+        public async Task AddToGroupAsync(string groupKey, string value)
+        {
+            var db = _connectionMultiplexer.GetDatabase();
+            await db.SetAddAsync(groupKey, value);
         }
     }
 }

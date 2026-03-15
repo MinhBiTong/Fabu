@@ -33,9 +33,9 @@ builder.Services.Configure<MailConfiguration>(builder.Configuration.GetSection("
 builder.Services.Configure<RateLimiterConfiguration>(builder.Configuration.GetSection("RateLimiting"));
 builder.Services.Configure<JwtConfiguration>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddScoped<IUserContext, UserContext>();
-builder.Services.AddScoped<IResponseCacheService, ResponseCacheService>();
 
 var app = builder.Build();
+app.UseMiddleware<GlobalException>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -51,13 +51,12 @@ else
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowReactApp");
 app.UseRateLimiter();
 app.MapReverseProxy();
-
 app.UseAuthentication();
 app.UseMiddleware<TokenBlacklistMiddleware>();
 app.UseAuthorization();
-app.UseCors("AllowReactApp");
 app.MapControllers();
 
 app.Run();

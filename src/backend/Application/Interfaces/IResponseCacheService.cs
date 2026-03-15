@@ -8,11 +8,13 @@ namespace Application.Interfaces
 {
     public interface IResponseCacheService
     {
-        Task SetCacheResponseAsync(string cacheKey, object response, TimeSpan timeOut);
+        Task SetCacheResponseByGroupAsync(string cacheKey, object response, TimeSpan? absoluteExpiry = null, TimeSpan? slidingExpiry = null);
 
         //cache luu theo document, phai dung serialize
         Task<T?> GetCachedResponseAsync<T>(string cacheKey);
 
         Task RemoveCacheResponseAsync(string pattern);
+        Task RemoveCacheResponseByGroupAsync(string pattern);
+        Task AddToGroupAsync(string groupKey, string value);
     }
 }

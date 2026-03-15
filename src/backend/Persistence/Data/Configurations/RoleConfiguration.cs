@@ -16,6 +16,10 @@ namespace Persistence.Data.Configurations
             builder.HasKey(r => r.Id);
             builder.Property(r => r.Name).HasMaxLength(100).IsRequired();
             builder.Property(r => r.Description).HasMaxLength(100).IsRequired();
+            builder.HasMany(r => r.RolePermissions)
+                .WithOne(rp => rp.Role)
+                .HasForeignKey(rp => rp.RoleId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

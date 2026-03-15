@@ -1,4 +1,5 @@
 ﻿using Application.DTOs.Requests;
+using Domain.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Serilog;
 using System.Net;

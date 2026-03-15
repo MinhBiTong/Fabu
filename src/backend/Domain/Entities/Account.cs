@@ -12,8 +12,8 @@ namespace Domain.Entities
 {
     public class Account : EntityBase<long>
     {
-        public long CustomerId { get; set; }
-        public virtual Customer Customer { get; set; }
+        public long? CustomerId { get; set; }
+        public virtual Customer? Customer { get; set; }
 
         public decimal Balance { get; set; } = 0;
 

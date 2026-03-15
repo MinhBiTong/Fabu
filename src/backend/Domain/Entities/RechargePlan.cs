@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
-    public class RechargePlan : EntityBase<int>
+    public class RechargePlan : EntityBase<long>
     {
         public string PlanName { get; set; }
 

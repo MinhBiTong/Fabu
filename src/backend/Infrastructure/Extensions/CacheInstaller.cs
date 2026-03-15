@@ -3,6 +3,7 @@ using Domain.Data.Configurations;
 using Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Win32;
 using StackExchange.Redis;
 
 namespace Infrastructure.Extensions
@@ -11,27 +12,32 @@ namespace Infrastructure.Extensions
     {
         public void InstallServices(IServiceCollection services, IConfiguration configuration)
         {
-            var redisConfiguration = new RedisConfiguration();
-            configuration.GetSection("RedisConfiguration").Bind(redisConfiguration);  // Bind config tu appseting OK 
-            services.AddSingleton(redisConfiguration);
+            var redisConfig = configuration.GetSection("RedisConfiguration").Get<RedisConfiguration>()
+                ?? new RedisConfiguration { Enabled = false };
 
-            if (!redisConfiguration.Enabled) return;  //Nếu disabled thì skip, ngược lại add service
+            services.AddSingleton(redisConfig);
 
-            var connectionString = redisConfiguration.ConnectionStrings;
-            if (string.IsNullOrEmpty(connectionString))
-                throw new InvalidOperationException("Redis connection string is empty.");
+            if (redisConfig.Enabled && !string.IsNullOrEmpty(redisConfig.ConnectionStrings))
+            {
+                services.AddSingleton<IConnectionMultiplexer>(sp =>
+                    ConnectionMultiplexer.Connect(redisConfig.ConnectionStrings));
 
-            services.AddSingleton<IConnectionMultiplexer>(provider =>
-                ConnectionMultiplexer.Connect(connectionString));  // inject add IConnectionMultiplexer singleton neu enable
+                services.AddStackExchangeRedisCache(options =>
+                {
+                    options.Configuration = redisConfig.ConnectionStrings;
+                    options.InstanceName = "Fabu:";
+                });
+            }
+            else
+            {
+                // Fallback: In-memory cache khi Redis disabled (cho dev/test)
+                services.AddDistributedMemoryCache();
+            }
 
-            services.AddStackExchangeRedisCache(option => {
-                option.Configuration = redisConfiguration.ConnectionStrings;
-                option.InstanceName = "Fabu";
-            });
-
-
+            //Register service(luôn có, dù Redis hay không)
             //quan ly viec cache 1 cai la interface, 1 cai la implement
             services.AddSingleton<IResponseCacheService, ResponseCacheService>();
+            services.AddScoped<IResponseCacheService, ResponseCacheService>(); // Đăng ký cả Singleton và Scoped để đảm bảo có instance khi Redis disabled
         }
     }
 }

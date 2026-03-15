@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 using Domain.Abstractions;
 using Serilog.Core;
+using Persistence.Data.Configurations;
 namespace Application.Services
 {
     public class UserService : IUserService
@@ -18,9 +19,11 @@ namespace Application.Services
         private readonly IResponseCacheService _responseCacheService;
         private readonly IUserContext _userContext;
         private readonly Logger _logger;
+        private readonly UserConfiguration _userConfiguration;
 
-        public UserService(IUnitOfWork unitOfWork, IMapper mapper, IResponseCacheService responseCacheService, IUserContext userContext, Logger logger)
+        public UserService(IUnitOfWork unitOfWork, IMapper mapper, IResponseCacheService? responseCacheService, IUserContext userContext, Logger logger, UserConfiguration _userConfiguration)
         {
+            
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _responseCacheService = responseCacheService;
@@ -66,7 +69,7 @@ namespace Application.Services
             if (user == null) return null;
 
             var response = _mapper.Map<UserResponse>(user);
-            await _responseCacheService.SetCacheResponseAsync(cacheKey, response, TimeSpan.FromMinutes(10));
+            await _responseCacheService.SetCacheResponseByGroupAsync(cacheKey, response, TimeSpan.FromMinutes(10));
             return response;
         }
 
@@ -85,7 +88,7 @@ namespace Application.Services
             if (user != null) return null;
 
             var response = _mapper.Map<UserResponse>(user);
-            await _responseCacheService.SetCacheResponseAsync(cacheKey, response, TimeSpan.FromMinutes(10));
+            await _responseCacheService.SetCacheResponseByGroupAsync(cacheKey, response, TimeSpan.FromMinutes(10));
             return response;
         }
 

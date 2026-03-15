@@ -1,15 +1,20 @@
 ﻿using Application.DTOs.Requests.LoginRequest;
 using Application.DTOs.Responses.LoginResponse;
 using Application.Interfaces;
+using Domain.Abstractions;
 using Domain.Configurations;
 using Domain.Entities;
+using Domain.Exceptions;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Persistence.Repositories;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IdentityModel.Tokens.Jwt; //de hash RT
 using System.Linq;
 using System.Security.Claims;
@@ -21,20 +26,20 @@ namespace Application.Services
 {
     public class AuthService : IAuthService
     {
-        private readonly UserManager<User> _userManager;
         private readonly IConfiguration _configuration; // de lay jwt setting
         private readonly IValidator<LoginRequest> _validator; //fluentValid
         private readonly IResponseCacheService _responseCache;
         private readonly TimeSpan _refreshTokenExpiry = TimeSpan.FromDays(7); //7 days
         private readonly JwtConfiguration _jwtConfiguration;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public AuthService(UserManager<User> userManager, IConfiguration configuration, IValidator<LoginRequest> validator,IResponseCacheService responseCache, IOptions<JwtConfiguration> jwtOptions)
+        public AuthService(IConfiguration configuration, IValidator<LoginRequest> validator,IResponseCacheService responseCache, IOptions<JwtConfiguration> jwtOptions, IResponseCacheService responseCacheService, IUnitOfWork unitOfWork)
         {
-            _userManager = userManager;
             _configuration = configuration;
             _validator = validator;
             _responseCache = responseCache;
             _jwtConfiguration = jwtOptions.Value;
+            _unitOfWork = unitOfWork;
         }
 
         //chain sub-method
@@ -44,8 +49,8 @@ namespace Application.Services
             await ValidateLoginRequestAsync(request);
 
             //validate user credentials
-            var user = await ValidateUserCredentialsAsync(request.Email, request.Password);
-            if (user == null) throw new UnauthorizedAccessException("Invalid email or password");
+            var user = await _unitOfWork.Users.GetByEmailAsync(request.Email);
+            if (user == null || !VerifyPassword(request.Password, user.PasswordHash)) throw new UnauthorizedAccessException("Invalid email or password");
 
             //generate claims + scope
             var claims = await GenerateClaimsAsync(user);
@@ -65,28 +70,33 @@ namespace Application.Services
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken, // tra cho client luu secure storage
-                ExpiresAt = DateTime.Now.AddMinutes(30), //access expiry
+                ExpiresAt = DateTime.Now.AddMinutes(_jwtConfiguration.ExpiryMinutes), //access expiry
                 Claims = claims.Select(c => new LoginResponse.ClaimDto { Type = c.Type, Value = c.Value }).ToList()
             };
+        }
+
+        private bool VerifyPassword(string password, string passwordHash)
+        {
+            return BCrypt.Net.BCrypt.Verify(password, passwordHash); // This is just a placeholder. In a real implementation, you would compare the provided password with the stored hash.
         }
 
         //validate request fluent + basic
         private async Task ValidateLoginRequestAsync(LoginRequest request)
         {
             var validationResult = await _validator.ValidateAsync(request);
-            if (!validationResult.IsValid) throw new ValidationException(validationResult.Errors); //400 request
+            if (!validationResult.IsValid) throw new AppException(ErrorCode.UNAUTHENTICATED); //400 request
         }
 
         //validate user/password identity
-        private async Task<User?> ValidateUserCredentialsAsync(string email, string password)
-        {
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null || !await _userManager.CheckPasswordAsync(user, password))
-            {
-                return null;
-            }
-            return user;
-        }
+        //private async Task<User?> ValidateUserCredentialsAsync(string email, string password)
+        //{
+        //    var roles = user.UserRoles?.Select(ur => ur.Role?.Name).Where(role => role != null).ToList() ?? new List<string>();
+        //    if (user == null || !await _userManager.CheckPasswordAsync(user, password))
+        //    {
+        //        return null;
+        //    }
+        //    return user;
+        //}
 
         //genrate claims - base + role
         private async Task<List<Claim>> GenerateClaimsAsync(User user)
@@ -99,12 +109,12 @@ namespace Application.Services
             };
 
             //add roles
-            var rolesTask = await _userManager.GetRolesAsync(user);
+            var roles = user.UserRoles?.Select(ur => ur.Role?.Name).Where(role => role != null).ToList() ?? new List<string>();
             //var roles = rolesTask.Result;
             //claims.AddRange(rolesTask.Select(role => new Claim(ClaimTypes.Role, role)));
-            foreach (var role in rolesTask)
+            foreach (var role in roles)
             {
-                claims.Add(new Claim(ClaimTypes.Role, role));
+                claims.Add(new Claim(ClaimTypes.Role, role.Trim()));
                 //permission khop voi policy trong authInstaller
                 if (role == "Admin")
                 {
@@ -118,7 +128,7 @@ namespace Application.Services
         //buildScope- define scope cho token, dua vao role - vd read:user write:order
         private async Task<string> BuildScope(User user)
         {
-            var roles = await _userManager.GetRolesAsync(user); // Removed `.Result` to fix the issue
+            var roles = user.UserRoles?.Select(ur => ur.Role?.Name).Where(role => role != null).ToList() ?? new List<string>();// Removed `.Result` to fix the issue
             var scopes = new List<string>();
 
             if (roles.Contains("Admin"))
@@ -183,8 +193,14 @@ namespace Application.Services
         private async Task StoreRefreshTokenAsync(long userId, string refreshHash, TimeSpan expiry)
         {
             var key = $"refresh:{userId}:{refreshHash}";
-            var expiryTime = DateTime.UtcNow.Add(expiry).Ticks;// store as long- ticks
-            await _responseCache.SetCacheResponseAsync(key, expiryTime, expiry);
+            var expiryTicks = DateTime.UtcNow.Add(expiry).Ticks;
+            
+            //luu token
+            await _responseCache.SetCacheResponseByGroupAsync(key, expiryTicks, absoluteExpiry: expiry);
+
+            // Thêm key vào group của user qua service response cache
+            var groupKey = $"group:refresh:{userId}";
+            await _responseCache.AddToGroupAsync(groupKey, key);
         }
 
         //refresh token: validate tu redis, generate at moi
@@ -197,10 +213,10 @@ namespace Application.Services
             //hash token
             var refreshHash = HashToken(request.RefreshToken);
             var key = $"refresh:{request.UserId}:{refreshHash}";//format refresh:{userId}:{hash}
-            var storedExpiryTicks = await _responseCache.GetCachedResponseAsync<long>(key);
-            if (storedExpiryTicks == 0 || new DateTime(storedExpiryTicks) < DateTime.UtcNow)
+            var storedExpiryTicks = await _responseCache.GetCachedResponseAsync<long?>(key);
+            if (storedExpiryTicks == null || new DateTime(storedExpiryTicks.Value) < DateTime.UtcNow)
             {
-                throw new UnauthorizedAccessException("Invalid or expired refresh token");
+                throw new AppException(ErrorCode.UNAUTHENTICATED, "Invalid or expired refresh token");
             }
 
             //xoa refresh token da su dung - one-time use
@@ -214,8 +230,8 @@ namespace Application.Services
             //}
 
             //lay user tu db
-            var user = await _userManager.FindByIdAsync(request.UserId.ToString());
-            if (user == null) throw new UnauthorizedAccessException("User not found.");
+            var user = await _unitOfWork.Users.GetByIdAsync(request.UserId);
+            if (user == null) throw new AppException(ErrorCode.USER_NOT_EXISTED, "User not found");
 
             //generate identity moi : claims + scope
             var claims = await GenerateClaimsAsync(user);
@@ -233,7 +249,7 @@ namespace Application.Services
             {
                 AccessToken = newAccessToken,
                 RefreshToken = newRefreshToken, // tra cho client luu secure storage
-                ExpiresAt = DateTime.Now.AddMinutes(30), //access expiry
+                ExpiresAt = DateTime.Now.AddMinutes(_jwtConfiguration.ExpiryMinutes), //access expiry
                 Claims = claims.Select(c => new LoginResponse.ClaimDto {
                     Type = c.Type, 
                     Value = c.Value 
@@ -244,22 +260,26 @@ namespace Application.Services
         public async Task LogoutAsync(LogoutRequest request)
         {
             // Delete all refresh for user (pattern keys – assume _responseCache supports GetKeysAsync)
-            var refreshKeys = await _responseCache.GetCachedResponseAsync<List<string>>($"refresh:{request.UserId}:*");  // List<string> keys
-            foreach (var key in refreshKeys ?? new List<string>())
-            {
-                await _responseCache.RemoveCacheResponseAsync(key);
-            }
+            // Xóa group refresh của user
+            var groupKey = $"group:refresh:{request.UserId}";
 
-            // Blacklist access token (optional, for immediate invalidate)
+            await _responseCache.RemoveCacheResponseByGroupAsync(groupKey);
+
+            // Blacklist access token
             if (!string.IsNullOrEmpty(request.AccessToken))
             {
-                // Parse remaining expiry from token (decode JWT without verify)
                 var handler = new JwtSecurityTokenHandler();
-                var jsonToken = handler.ReadJwtToken(request.AccessToken);
-                var remainingExpiry = jsonToken.ValidTo - DateTime.UtcNow;
-                if (remainingExpiry > TimeSpan.Zero)
+                if (handler.CanReadToken(request.AccessToken))
                 {
-                    await _responseCache.SetCacheResponseAsync($"blacklist:{request.AccessToken}", true, remainingExpiry);
+                    var jwt = handler.ReadJwtToken(request.AccessToken);
+                    var remaining = jwt.ValidTo - DateTime.UtcNow;
+                    if (remaining > TimeSpan.Zero)
+                    {
+                        await _responseCache.SetCacheResponseByGroupAsync(
+                            $"blacklist:{request.AccessToken}",
+                            true,
+                            absoluteExpiry: remaining);
+                    }
                 }
             }
         }
