@@ -1,4 +1,4 @@
-import NapTien from "../../../components/NapTien";
+import NapTien from "../../../components/recharge";
 
 export default function NapTienPage() {
   return <NapTien />;
