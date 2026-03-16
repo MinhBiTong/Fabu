@@ -173,6 +173,39 @@ display : flex ;
 }
 /* Header */
 
+/* Header Sidebar */
+.MenuList{
+    background-color: rgba(0, 0, 0, 0.3) ;
+  position: fixed;
+  top: 80px;
+  left: 0;
+
+  width: 100vw;
+  height: 100vh;
+  z-index: 1 ;
+  display: none ;
+  flex-direction: column;
+}
+.MenuList button{
+  background-color: rgb(246, 248, 249);
+  font-size: 18px ;
+  padding : 5px 0 ;
+  border : 0.1px solid black;
+}
+@media (max-width :1200px){
+  .MenuList{
+    display: flex;
+  }
+}
+@media (max-width: 700px) {
+  .MenuList{
+  top : 60px ;
+  }
+
+}
+/* Header Sidebar */
+
+
 /* Footer */
 .footer{
   background-color: rgb(237, 237, 237);
@@ -311,7 +344,7 @@ width : 80%
 .FullScreen{
   background-color: rgba(0, 0, 0, 0.3) ;
   position: fixed;
-  top: 0;
+  top: 0px;
   left: 0;
 
   width: 100vw;
@@ -693,3 +726,21 @@ font-size: 18px ;
 }
 }
 /* 5G Data Plan Page */
+
+/* About us */
+.Introduction{
+  width : 100% ;
+
+  display:  flex ;
+  flex-direction: row;
+  padding : 30px ;
+}
+.Introduction img{
+width : auto ;
+height : 300px ;
+
+}
+
+
+
+/* About us */

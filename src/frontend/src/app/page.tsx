@@ -12,15 +12,15 @@ export default function HomePage() {
             <p>Nạp tiền điện thoại</p>
           </Link>
 
-          <div className="service-card">
+         <div className="service-card">
             <span>💳</span>
             <p>Thanh toán hóa đơn</p>
-          </div>
+         </div>
 
-          <div className="service-card">
+           <Link href="/P5GDataPlan" className="service-card">
             <span>📊</span>
             <p>Mua gói data</p>
-          </div>
+           </Link>
 
           <div className="service-card">
             <span>🧾</span>

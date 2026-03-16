@@ -6,10 +6,10 @@ type Props = {
 
 function LoginForm({ onClose }: Props) {
   return (
-    <div className= "FullScreen">
-    <div className="loginOverlay">
+    <div className= "FullScreen" >
+    <div className="loginOverlay"onClick={onClose} >
 
-      <div className="loginform">
+      <div className="loginform"    onClick={(e) => e.stopPropagation()}>
 
         <button className="closeBtn"onClick={onClose}>✕</button>
 
