@@ -163,3 +163,44 @@
   margin-top:-15px;
   margin-bottom:15px;
 }
+
+@media (max-width:1024px){
+
+  .nap-wrapper{
+    padding:30px;
+  }
+
+  .nap-layout{
+    gap:20px;
+  }
+
+  .nap-input{
+    width:100%;
+  }
+
+  .money-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+}
+
+@media (max-width:600px){
+
+  .nap-wrapper{
+    padding:20px 15px;
+  }
+
+  .nap-title{
+    font-size:24px;
+  }
+
+  .money-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .money-btn{
+    font-size:14px;
+    padding:12px;
+  }
+
+}
