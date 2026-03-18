@@ -164,14 +164,21 @@
   margin-bottom:15px;
 }
 
-@media (max-width:1024px){
-
-  .nap-wrapper{
-    padding:30px;
-  }
+@media (max-width:768px){
 
   .nap-layout{
-    gap:20px;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  .nap-left,
+  .nap-right{
+    width:100%;
+    max-width:500px; 
+  }
+
+  .nap-left{
+    margin-bottom:20px;
   }
 
   .nap-input{
@@ -180,27 +187,6 @@
 
   .money-grid{
     grid-template-columns:repeat(2,1fr);
-  }
-
-}
-
-@media (max-width:600px){
-
-  .nap-wrapper{
-    padding:20px 15px;
-  }
-
-  .nap-title{
-    font-size:24px;
-  }
-
-  .money-grid{
-    grid-template-columns:repeat(2,1fr);
-  }
-
-  .money-btn{
-    font-size:14px;
-    padding:12px;
   }
 
 }
