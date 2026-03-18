@@ -20,30 +20,47 @@ export default function NapTien() {
 
   const handleNapTien = () => {
 
+    const phoneRegex = /^[0-9]+$/;
+
     if (!phone) {
-      setError("Vui lòng nhập số điện thoại");
+      setError("Please enter your phone number");
+      return;
+    }
+
+    if (!phoneRegex.test(phone)) {
+      setError("Phone number must contain only digits");
+      return;
+    }
+
+    if (phone.length > 10) {
+      setError("Phone number must not exceed 10 digits");
+      return;
+    }
+
+    if (phone.length < 10) {
+      setError("Phone number must be exactly 10 digits");
       return;
     }
 
     setError("");
-    alert("Nạp tiền thành công!");
+    alert("Recharge successful!");
   };
 
   return (
     <div className="nap-wrapper">
 
-      <h1 className="nap-title">Nạp tiền điện thoại</h1>
+      <h1 className="nap-title">Mobile Recharge</h1>
 
       <div className="nap-layout">
 
         {/* LEFT */}
         <div className="nap-left">
 
-          <label>Số điện thoại:</label>
+          <label>Phone Number:</label>
 
           <input
             type="text"
-            placeholder="Nhập số điện thoại"
+            placeholder="Enter phone number"
             className="nap-input"
             value={phone}
             onChange={(e) => {
@@ -54,7 +71,7 @@ export default function NapTien() {
 
           {error && <p className="input-error">{error}</p>}
 
-          <label>Chọn mệnh giá:</label>
+          <label>Select Amount:</label>
 
           <div className="money-grid">
 
@@ -78,7 +95,7 @@ export default function NapTien() {
           <div className="payment-box">
 
             <div className="payment-row total">
-              <span>Tổng tiền:</span>
+              <span>Total:</span>
               <span>
                 {amount ? amount.toLocaleString() + "đ" : "0đ"}
               </span>
@@ -89,12 +106,11 @@ export default function NapTien() {
               onClick={handleNapTien}
               disabled={!amount}
             >
-              Nạp tiền
+              Recharge
             </button>
 
             <p className="payment-note">
-              Nhấn vào "Nạp tiền" đồng nghĩa với việc bạn đồng ý
-              với điều khoản.
+              By clicking "Recharge", you agree to the terms and conditions.
             </p>
 
           </div>
