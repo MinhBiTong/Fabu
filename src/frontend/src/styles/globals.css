@@ -4,8 +4,18 @@ margin-top: 100px;
 font-family:Arial, Helvetica, sans-serif;
 background:#f6f7fb;
 }
+
+@media (max-width: 700px) {
+body{
+margin : 0  ;
+margin-top: 80px;
+font-family:Arial, Helvetica, sans-serif;
+background:#f6f7fb;
+}
+
+}
 body::-webkit-scrollbar {
-  display: none;              /* Chrome, Safari, Edge */
+  display: none;         
 }
 /* Header */
 .navibar{
@@ -727,6 +737,127 @@ font-size: 18px ;
 }
 /* 5G Data Plan Page */
 
+/* 5G Data Plan Details */
+.Totality {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.Totality .DpDetailsContainer{
+  width: 100% ;
+  padding : 0px clamp(10px ,11vw,200px) ;
+
+display : flex ;
+flex-direction: row;
+box-sizing: border-box;
+justify-content: space-between;
+}
+.Totality .DpDetailsContainer .MainInfos{
+width : 25% ;
+align-items: center;
+justify-content: center;
+display: flex;
+flex-direction: column;
+padding : 20px 0px ;
+gap : 30px ;
+ box-sizing: border-box;
+}
+.Totality .DpDetailsContainer .MainInfos .Infobox{
+background-color: rgb(255, 255, 255);
+   width : 95% ;
+   padding : 10px 20px ;
+   box-sizing: border-box;
+   border-radius: 10px ;
+   border : 2px solid rgb(188, 188, 188,0.5);
+  gap : 3px ;
+  align-items: center;
+display: flex;
+flex-direction: row;
+}
+.Totality .DpDetailsContainer .MainInfos .Infobox img{
+  width : auto ;
+  height : 35px ;
+  margin-right: 10px ;
+}
+.Totality .DpDetailsContainer .MainInfos .Infobox .Infotexts{
+display: flex;
+flex-direction: column;
+}
+.Totality .DpDetailsContainer .MainInfos .Infobox .Infotexts p{
+ margin : 0 ;
+
+}
+.Totality .DpDetailsContainer .MainInfos .Infobox .Infotexts p:first-child{
+  font-size: 14px ;
+}
+.Totality .DpDetailsContainer .MainInfos .Infobox .Infotexts p:last-child{
+  font-size : 18px ;
+  font-weight: bold ;
+}
+.Totality .DpDetailsContainer .Descriptions{
+  width : 70% ;
+   box-sizing: border-box;
+   padding : 20px ;
+}
+.Totality .DpDetailsContainer .Descriptions .Descriptioncontent{
+ background-color: rgb(255, 255, 255);
+   width : 100% ;
+   height : 100% ;
+   box-sizing: border-box;
+   border-radius: 10px ;
+   border : 2px solid rgb(188, 188, 188,0.5);
+   padding : 10px 30px  ;
+   font-size: 18px ;
+}
+.Totality .ChoiceButtons{
+  padding : 30px 10px ;
+  margin-bottom: 30px ;
+}
+.Totality .ChoiceButtons button{
+ width : 180px ;
+ height : 50px ;
+ background-color: rgb(192, 215, 255);
+ border-radius: 10px 10px 10px 0px ;
+ border : 2px solid rgb(117, 117, 117,0.5);
+ font-size: large;
+ font-weight: bold;
+}
+.Totality .ChoiceButtons button:hover{
+background-color: rgb(166, 190, 232);
+cursor : pointer;
+}
+.Totality .ChoiceButtons button:aCtive{
+background-color: rgb(138, 167, 215);
+cursor : grabbing ;
+}
+@media(max-width : 1000px ) {
+  .Totality .DpDetailsContainer{
+    gap: 40px ;
+  width: 100% ;
+  padding : 0px clamp(2px ,8vw,100px) ;
+display : flex ;
+flex-direction: column;
+box-sizing: border-box;
+}
+.Totality .DpDetailsContainer .MainInfos{
+width : 100% ;
+display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); 
+ box-sizing: border-box;
+ padding : 0px;
+}
+.Totality .DpDetailsContainer .Descriptions{
+  width : 100% ;
+   box-sizing: border-box;
+   padding : 0px;
+}
+.Totality .DpDetailsContainer .Descriptions .Descriptioncontent{
+   font-size: 15px;
+   min-height: 300px ;
+}
+/* 5G Data Plan Details */
+}
 /* About us */
 .Introduction{
   width : 100% ;
