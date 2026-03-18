@@ -25,8 +25,9 @@ namespace Api.Extensions
             if (!authConfig.GetValue<bool>("Enabled")) return;
 
             //identity
-            services.AddIdentity<ApplicationUser, IdentityRole<long>>(options =>
+            services.AddIdentity<User, IdentityRole<long>>(options =>
             {
+
                 options.Password.RequireDigit = false;
                 options.Password.RequireLowercase = false;
                 options.Password.RequireNonAlphanumeric = false;
@@ -51,6 +52,7 @@ namespace Api.Extensions
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
+                .AddCookie("Cookies")
                 .AddJwtBearer(options =>
                 {
                     options.SaveToken = true;
@@ -81,7 +83,7 @@ namespace Api.Extensions
                                 }
 
                                 var userManager = context.HttpContext.RequestServices
-                                    .GetRequiredService<UserManager<ApplicationUser>>();
+                                    .GetRequiredService<UserManager<User>>();
 
                                 var user = await userManager.FindByIdAsync(userId);
 
@@ -91,13 +93,21 @@ namespace Api.Extensions
                                     return;
                                 }
 
-                                if (user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.UtcNow)
-                                {
-                                    context.Fail("User banned");
-                                }
+                                //if (user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.UtcNow)
+                                //{
+                                //    context.Fail("User banned");
+                                //}
                             }
                         };
                     }
+                })
+                .AddGoogle(options =>
+                {
+                    options.SignInScheme = "Cookies";
+
+                    options.ClientId = configuration["Authentication:Google:ClientId"];
+                    options.ClientSecret = configuration["Authentication:Google:ClientSecret"];
+                    options.SaveTokens = true;
                 });
               //ROLE_ADMIN
               //├─ user.create

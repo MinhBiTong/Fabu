@@ -9,7 +9,7 @@ using Persistence.Identity;
 
 namespace Persistence.Data.Contexts
 {
-    public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<long>, long>
+    public class AppDbContext : IdentityDbContext<User, IdentityRole<long>, long>
     {
         private readonly IUserContext _userContext;
         public AppDbContext(DbContextOptions<AppDbContext> options, IUserContext userContext) : base(options)
@@ -17,8 +17,8 @@ namespace Persistence.Data.Contexts
             _userContext = userContext;
         }
 
-        public DbSet<User> Users { get; set; }
-        public DbSet<Role> Roles { get; set; }
+        //public DbSet<User> Users { get; set; }
+        //public DbSet<Role> Roles { get; set; }
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Account> Accounts { get; set; }
