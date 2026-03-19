@@ -27,10 +27,10 @@ export default function HomePage() {
             <p>Lịch sử giao dịch</p>
           </div>
 
-          <div className="service-card">
+          <Link  href="/Profile" className="service-card">
             <span>👤</span>
             <p>Tài khoản</p>
-          </div>
+          </Link>
 
         </div>
 

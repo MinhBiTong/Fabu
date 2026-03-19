@@ -201,6 +201,15 @@ display : flex ;
   font-size: 18px ;
   padding : 5px 0 ;
   border : 0.1px solid black;
+  cursor: pointer;
+}
+.MenuList button:hover{
+  background-color: rgb(220, 225, 227);
+
+}
+.MenuList button:active{
+  background-color: rgb(193, 199, 202);
+
 }
 @media (max-width :1200px){
   .MenuList{
@@ -436,6 +445,7 @@ gap : 10px ;
   border-radius: 20px ;
   margin-bottom : 40px ;
   padding : 20px 30px ;
+  border: 1px solid rgb(201, 201, 201);
 }
 .ContactContainer  .ContactContent .ContactForm{
   display : flex ;
@@ -643,7 +653,9 @@ box-sizing: border-box;
 .p5GContainer .PackageContain .PackageSet .Package .PackageTitle{
   height : 23% ;
 width : 100% ;
-background-color : rgb(0, 98, 255);
+  background-image: url("../styles/images/blueytitlebackground.png");
+  background-repeat: no-repeat;
+   background-position: top ;
 border-radius : 30px 30px 0px 0px ;
 align-items: center;
 padding : 0px 30px ;
@@ -859,19 +871,227 @@ display: grid;
 /* 5G Data Plan Details */
 }
 /* About us */
-.Introduction{
+.AboutContainer{
   width : 100% ;
-
-  display:  flex ;
-  flex-direction: row;
-  padding : 30px ;
-}
-.Introduction img{
-width : auto ;
-height : 300px ;
+  display : flex ;
+  flex-direction: column;
+  align-items: center;
+  gap : 20px ;
 
 }
+.AboutContainer .WhatisFabu{
+width : 100% ;
+display : flex ;
+flex-direction: row ;
+ align-items: stretch;
+justify-content: center;
+height : 350px ;
+gap : 60px ;
+box-sizing: border-box;
+}
+.AboutContainer .WhatisFabu img{
+   width : auto ;
+   height : 100% ;
+   box-sizing: border-box;
+}
+
+.AboutContainer .WhatisFabu .Lineofsomething{
+   width : 30% ;
+   height : 100% ;
+   padding : 10px ;
+   box-sizing: border-box;
+   justify-content: center;
+   align-items: center;
+}
+.AboutContainer .WhatisFabu .Lineofsomething p{
+  font-size: 20px ;
+
+}
+
+.AboutContainer .GridInvestor{
+ width :70% ;
+ display: grid ;
+ grid-template-columns: repeat(3 , 1fr);
+ align-items: center;
+ box-sizing: border-box;
+ margin-bottom: 50px ;
+}
+.AboutContainer .GridInvestor .Investorbox{
+  background-color: rgb(241, 248, 251);
+width : 100% ;
+height : 150px ;
+ box-sizing: border-box;
+border: 1px solid rgb(160, 160, 160 ,0.5) ;
+justify-self: center;
+display: flex ;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+padding : 30px ;
+}
+.AboutContainer .GridInvestor .Investorbox img{
+    max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+@media (max-width : 1100px){
+
+.AboutContainer .WhatisFabu{
+width : 100% ;
+display : flex ;
+flex-direction: column ;
+ align-items: center;
+justify-content: center;
+gap : 30px ;
+box-sizing: border-box;
+padding : 20px ;
+margin-bottom: 100px ;
+}
+.AboutContainer .WhatisFabu img{
+   width : auto ;
+   height : 80% ;
+   box-sizing: border-box;
+   margin-top: 100px ;
+}
+.AboutContainer .WhatisFabu .Lineofsomething{
+   width : 100% ;
+   height : 100% ;
+   padding : 10px ;
+   box-sizing: border-box;
+   justify-content: center;
+   align-items: center;
+}
+.AboutContainer .WhatisFabu .Lineofsomething p{
+  font-size: 16px ;
+}
+
+.AboutContainer .GridInvestor{
+ width :70% ;
+ display: grid ;
+ grid-template-columns: repeat(2 , 1fr);
+ align-items: center;
+ box-sizing: border-box;
+ margin-bottom: 50px ;
+}
 
 
 
+}
 /* About us */
+
+/* Profile */
+.ProfileContainer{
+ width: 100%;
+ display: flex ;
+ flex-direction: column;
+padding : 30px ;
+ box-sizing: border-box;
+justify-content: center;
+}
+.ProfileContainer .MainInformation{
+ width : 100% ;
+ height : 320px ;
+ background-color: rgb(66, 66, 66) ;
+ display: flex;
+ flex-direction: row ;
+ justify-content: space-between ;
+box-sizing: border-box;
+border-radius: 300px;
+gap : 20px ;
+}
+.ProfileContainer .MainInformation img{
+width: auto ;
+height : 100%;
+object-fit: contain;
+border-radius: 300px;
+border: 5px solid rgb(36, 36, 36);
+box-sizing: border-box;
+}
+
+.ProfileContainer .MainInformation .BasicInfos{
+background-color: rgb(236, 236, 236);
+width : 75% ;
+border-radius: 30px 200px 200px 30px;
+box-sizing: border-box;
+padding: 20px 40px;
+border: 5px solid rgb(36, 36, 36);
+}
+.ProfileContainer .MainInformation .BasicInfos .Lineeach{
+ display: flex;
+ flex-direction: row;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+ line-height: 5px ;
+ font-size: 18px;
+}
+
+.ProfileContainer .MainInformation .BasicInfos .Lineeach:first-child{
+    font-weight: bold ;
+    font-size: 20px;
+  margin-bottom : 5px ;
+}
+.ProfileContainer .AccountsInfo{
+  margin-top: 60px ;
+  display: flex ;
+  flex-direction: column;
+  width : 100%;
+  border : 2px solid black ;
+  align-items: center;
+  box-sizing: border-box;
+  justify-content: center;
+padding : 20px ;
+border-radius: 20px ;
+}
+
+.ProfileContainer .AccountsInfo .Balances{
+  width: 100% ;
+ display: flex ;
+  flex-direction: row;
+   gap : 30px ;
+justify-content: center;
+}
+.ProfileContainer .AccountsInfo .Balances p{
+  font-size: 26px ;
+  font-weight: bold;
+  margin : 0;
+}
+.ProfileContainer .AccountsInfo .Balance{
+ width: 100% ;
+ display: flex ;
+  flex-direction: row;
+   gap : 20px ;
+justify-content: center;
+}
+.ProfileContainer .AccountsInfo .Balance p{
+  font-size: 20px ;
+  margin : 0;
+}
+.ProfileContainer .AccountsInfo .HistoryList{
+ width: 100%;
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+}
+.ProfileContainer .AccountsInfo .HistoryList .HistoryBox{
+ width : 90% ;
+ display: flex ;
+ flex-direction: row;
+ justify-content: space-between;
+ align-items: center;
+background-color: rgb(185, 124, 124);
+box-sizing: border-box;
+padding :0 100px ;
+}
+.ProfileContainer .AccountsInfo .HistoryList .HistoryBox:first-child{
+ background-color: rgb(86, 243, 146);
+  
+
+}
+
+.ProfileContainer .AccountsInfo .Bot{
+font-size: 16px;
+margin: 0;
+margin-bottom: 5px;
+}
+/* Profile */
