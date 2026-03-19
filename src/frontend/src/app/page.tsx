@@ -9,7 +9,6 @@ export default function HomePage() {
 
           <Link href="/recharge" className="service-card">
             <span>📱</span>
-            <p>Nạp tiền điện thoại</p>
             <p>Mobile Recharge</p>
           </Link>
 
