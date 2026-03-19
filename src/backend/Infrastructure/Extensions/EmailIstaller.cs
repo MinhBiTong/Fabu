@@ -13,7 +13,7 @@ namespace Infrastructure.Extensions
     {
         public void InstallServices(IServiceCollection services, IConfiguration configuration)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
     }
 }

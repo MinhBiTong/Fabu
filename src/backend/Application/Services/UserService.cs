@@ -1,14 +1,15 @@
-﻿using Application.DTOs.Requests.UserRequest;
+﻿using System.Security.Claims;
+using Application.DTOs.Requests.UserRequest;
 using Application.DTOs.Responses.UserResponse;
 using Application.Interfaces;
 using AutoMapper;
 using Domain.Abstractions;
 using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
-using System.Security.Claims;
-using Domain.Abstractions;
-using Serilog.Core;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Persistence.Data.Configurations;
+using Serilog.Core;
 namespace Application.Services
 {
     public class UserService : IUserService
@@ -18,10 +19,13 @@ namespace Application.Services
         private readonly IMapper _mapper;
         private readonly IResponseCacheService _responseCacheService;
         private readonly IUserContext _userContext;
-        private readonly Logger _logger;
         private readonly UserConfiguration _userConfiguration;
+        //hien comment
+        //private readonly Logger _logger;
+        private readonly ILogger<UserService> _logger;
+        //private readonly IOptions<UserConfiguration> _userConfiguration;
 
-        public UserService(IUnitOfWork unitOfWork, IMapper mapper, IResponseCacheService? responseCacheService, IUserContext userContext, Logger logger, UserConfiguration _userConfiguration)
+        public UserService(IUnitOfWork unitOfWork, IMapper mapper, IResponseCacheService responseCacheService, IUserContext userContext, ILogger<UserService> logger, IOptions<UserConfiguration> userConfiguration)
         {
             
             _unitOfWork = unitOfWork;
@@ -29,6 +33,7 @@ namespace Application.Services
             _responseCacheService = responseCacheService;
             _userContext = userContext;
             _logger = logger;
+            _userConfiguration = userConfiguration.Value;
         }
 
         public async Task<UserResponse> CreateUserAsync(CreateUserRequest request)
@@ -66,6 +71,7 @@ namespace Application.Services
             if (cacheUser != null) return cacheUser;
 
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
+            //hien thay != thanh ==
             if (user == null) return null;
 
             var response = _mapper.Map<UserResponse>(user);
@@ -85,10 +91,13 @@ namespace Application.Services
             if (cached != null) return cached;
 
             var user = await _unitOfWork.Users.GetByIdAsync(id);
-            if (user != null) return null;
+            //hien comment
+            //if (user != null) return null;
+            if (user == null) return null;
+
 
             var response = _mapper.Map<UserResponse>(user);
-            await _responseCacheService.SetCacheResponseByGroupAsync(cacheKey, response, TimeSpan.FromMinutes(10));
+            await _responseCacheService.SetCacheResponseByGroupAsync(cacheKey, response, null, TimeSpan.FromMinutes(10));
             return response;
         }
 
@@ -104,7 +113,10 @@ namespace Application.Services
                 return _mapper.Map<List<UserResponse>>(users);
             } catch (Exception ex)
             {
-                _logger.Error("Error in GetAllUsersPagedAsync: {Message}", ex.Message);
+                //hien comment
+                //_logger.Error("Error in GetAllUsersPagedAsync: {Message}", ex.Message);
+                _logger.LogError(ex, "Error in GetAllUsersPagedAsync");
+                throw;
             }
             return new List<UserResponse>();
         }

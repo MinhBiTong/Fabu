@@ -1,19 +1,21 @@
 ﻿using Application.Interfaces;
+using Infrastructure.Services;
 
 namespace Api.Middleware
 {
     public class TokenBlacklistMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly IResponseCacheService _responseCacheService;
+        //private readonly IResponseCacheService _responseCacheService;
 
-        public TokenBlacklistMiddleware(RequestDelegate next, IResponseCacheService responseCacheService)
+        public TokenBlacklistMiddleware(RequestDelegate next)
         {
             _next = next;
-            _responseCacheService = responseCacheService;
+            //_responseCacheService = responseCacheService;
         }
 
-        public async Task InvokeAsync(HttpContext context)
+        //hien sửa, chuyển IResponseCacheService responseCacheService từ contructor xuống InvokeAsync
+        public async Task InvokeAsync(HttpContext context, IResponseCacheService responseCacheService)
         {
             // Check for endpoints that require authentication
             if (context.Request.Path.StartsWithSegments("/api") &&
@@ -22,7 +24,10 @@ namespace Api.Middleware
                 var token = context.Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Trim();
                 if (!string.IsNullOrEmpty(token))
                 {
-                    var isBlacklisted = await _responseCacheService.GetCachedResponseAsync<bool?>($"blacklist:{token}");
+                    //hien comment
+                    //var isBlacklisted = await _responseCacheService.GetCachedResponseAsync<bool?>($"blacklist:{token}");
+                    var isBlacklisted = await responseCacheService.GetCachedResponseAsync<bool?>($"blacklist:{token}");
+
                     if (isBlacklisted == true)
                     {
                         context.Response.StatusCode = StatusCodes.Status401Unauthorized;

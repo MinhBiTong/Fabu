@@ -17,6 +17,7 @@ namespace Api.Controllers
         private readonly IAuthService _authService;
         public AuthController(IAuthService authService) => _authService = authService;
         //ham ho tro tao cookie luu refresh token
+        [ApiExplorerSettings(IgnoreApi = true)] //hien thêm
         public void SetRefreshTokenCookie(string refreshToken)
         {
             var cookieOptions = new CookieOptions

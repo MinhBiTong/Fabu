@@ -51,9 +51,19 @@ namespace Api.Extensions
         //tao instance + goi InstallService cho tung cai
         public static void InstallerServicesInAssembly(this IServiceCollection services, IConfiguration configuration)
         {
-            //lay het tat ca class trong Installer va bo di interface va abstract class 
-            var currentAssesmbly = Assembly.GetExecutingAssembly();
-            var installers = currentAssesmbly.ExportedTypes
+            //lay het tat ca class trong Installer va bo di interface va abstract class
+            //hien commint đi
+            //var currentAssesmbly = Assembly.GetExecutingAssembly();
+            //var installers = currentAssesmbly.ExportedTypes
+            //    .Where(x => typeof(IInstaller).IsAssignableFrom(x) && !x.IsInterface && !x.IsAbstract)
+            //    .Select(Activator.CreateInstance)
+            //    .Cast<IInstaller>()
+            //    .ToList();
+
+            //hien them
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+            var installers = assemblies.SelectMany(a => a.ExportedTypes)
                 .Where(x => typeof(IInstaller).IsAssignableFrom(x) && !x.IsInterface && !x.IsAbstract)
                 .Select(Activator.CreateInstance)
                 .Cast<IInstaller>()

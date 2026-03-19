@@ -17,6 +17,7 @@ using Domain.Configurations;
 using Api.Extensions.ContextExtensions;
 using Application.Interfaces;
 using Infrastructure.Services;
+using Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +34,8 @@ builder.Services.Configure<MailConfiguration>(builder.Configuration.GetSection("
 builder.Services.Configure<RateLimiterConfiguration>(builder.Configuration.GetSection("RateLimiting"));
 builder.Services.Configure<JwtConfiguration>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddScoped<IUserContext, UserContext>();
+
+builder.Services.AddScoped<IResponseCacheService, MemoryResponseCacheService>();
 
 var app = builder.Build();
 app.UseMiddleware<GlobalException>();
