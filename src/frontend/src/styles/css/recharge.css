@@ -310,7 +310,4 @@
   padding: 4px 8px;
   border-radius: 999px;
   font-weight: 500;
-
-  /* FIX SHADOW */
-  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4);
 }
