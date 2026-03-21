@@ -405,7 +405,7 @@ gap : 10px ;
  display : flex ;
  flex-direction: column ;
   align-items: center ;
-  gap : 40px ;
+  gap : 10px ;
   width : 100% ;
 }
 
@@ -424,9 +424,143 @@ gap : 10px ;
    height : 40px ;
   width : 40% ;
 }
+.FullScreen .loginOverlay .loginform .Mainform p{
+  margin: 0;
+  cursor: pointer ;
+}
+.FullScreen .loginOverlay .loginform .Mainform p:hover{
+  color : rgb(108, 13, 175) ;
+}
+.FullScreen .loginOverlay .loginform .Mainform p:active{
+  color : rgb(147, 43, 220) ;
+  cursor: grabbing;
+}
 
 
+.FullScreen .loginOverlay .loginform .Mainform .Signuplink{
+  display: flex;
+  flex-direction: row;
+  gap : 10px ;
+}
+.FullScreen .loginOverlay .loginform .Mainform .Signuplink p:last-child{
+color : rgb(13, 13, 117);
+cursor : pointer ;
+}
+.FullScreen .loginOverlay .loginform .Mainform .Signuplink p:last-child:hover{
+color : rgb(36, 36, 140);
+}
+.FullScreen .loginOverlay .loginform .Mainform .Signuplink p:last-child:active{
+color : rgb(64, 64, 232);
+cursor : grabbing ;
+}
 /* Login Form */
+
+/* Sign up Form */
+
+.FullScreenup{
+  background-color: rgba(0, 0, 0, 0.5) ;
+  position: fixed;
+  top: 0px;
+  left: 0;
+
+  width: 100vw;
+  height: 100vh;
+  z-index: 2 ;
+}
+.FullScreenup .SignupOverlay{
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.FullScreenup .SignupOverlay .SignupContain {
+  background-color: whitesmoke;
+ width : 70%;
+ height : 85%;
+display: flex;
+flex-direction: row;
+position : relative ;
+border-radius: 30px;
+}
+.FullScreenup .SignupOverlay .SignupContain .image{
+height: 100% ;
+width : 35% ;
+background-color: rgb(0, 115, 255);
+border-radius : 30px 0 0 30px ;
+box-sizing: border-box;
+}
+.FullScreenup .SignupOverlay .SignupContain .Signupform{
+display: flex;
+flex-direction: column;
+width : 65% ;
+padding : 5px 10px ;
+align-items: center;
+box-sizing: border-box;
+gap : 10px ;
+}
+.FullScreenup .SignupOverlay .SignupContain .Signupform .CorrectLine{
+display: flex;
+flex-direction: column ;
+padding : 3px 15px ;
+width : 80% ;
+gap : 5px ;
+}
+.FullScreenup .SignupOverlay .SignupContain .Signupform .CorrectLine p{
+ margin : 0 ;
+font-size: 16px ;
+}
+.FullScreenup .SignupOverlay .SignupContain .Signupform .CorrectLine input{
+  height : 35px ;
+  border : none ;
+  font-size: 18px ;
+ padding : 0px 10px ;
+  border-radius: 10px ;
+  box-sizing: border-box;
+  border : 1px solid black ;
+}
+.FullScreenup .SignupOverlay .SignupContain .Signupform .JoinLine .CorrectLine{
+display: flex;
+flex-direction: column ;
+padding : 3px 15px ;
+width : 80% ;
+gap : 5px ;
+}
+.FullScreenup .SignupOverlay .SignupContain .Signupform .JoinLine{
+ display: flex;
+ flex-direction: row ;
+ width : 85% ;
+box-sizing: border-box;
+padding: 0 ;
+}
+.FullScreenup .SignupOverlay .SignupContain .Signupform .JoinLine .CorrectLine input{
+  height : 35px ;
+  border : none ;
+  font-size: 18px ;
+ padding : 0px 10px ;
+  border-radius: 10px ;
+  box-sizing: border-box;
+  border : 1px solid black ;
+}
+
+.FullScreenup .SignupOverlay .SignupContain .Signupform .JoinLine .CorrectLine p{
+ margin : 0 ;
+font-size: 16px ;
+}
+.FullScreenup .SignupOverlay .SignupContain .Signupform .ToS{
+display: flex; 
+flex-direction: row;
+gap : 5px ;
+}
+.FullScreenup .SignupOverlay .SignupContain .Signupform button{
+  width : 100px ;
+  height : 50px ;
+  border-radius: 20px ;
+}
+
+/* Sign up Form */
+
 
 /* Contact  */
 .ContactContainer{
