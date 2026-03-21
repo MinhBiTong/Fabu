@@ -1,0 +1,114 @@
+/* CONTAINER */
+.payment-container {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+}
+
+/* METHODS */
+.methods {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.method {
+  flex: 1;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1.5px solid #e5e7eb;
+  text-align: center;
+  cursor: pointer;
+  font-weight: 500;
+  background: #f9fafb;
+  transition: all 0.25s ease;
+}
+
+.method:hover {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+
+.method.active {
+  border-color: #2563eb;
+  background: #2563eb;
+  color: #fff;
+  box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+}
+
+/* SUMMARY */
+.summary {
+  background: #f9fafb;
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.summary p {
+  display: flex;
+  justify-content: space-between;
+  margin: 8px 0;
+  color: #555;
+  font-size: 14px;
+}
+
+/* Tổng thanh toán nổi bật */
+.summary h3 {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #111827;
+}
+
+/* Highlight số tiền */
+.summary h3 span {
+  color: #2563eb;
+}
+
+/* BUTTON */
+.nap-submit {
+  width: 100%;
+  margin-top: 20px;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  background: #d1d5db;
+  color: #fff;
+  cursor: not-allowed;
+  transition: all 0.3s ease;
+}
+
+.nap-submit.active {
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  cursor: pointer;
+}
+
+.nap-submit.active:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+}
+
+/* TOTAL BOX (bên ngoài) */
+.payment-box {
+  margin-top: 20px;
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 14px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+}
+
+.payment-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+  margin-bottom: 10px;
+}
+
+.payment-row.total {
+  font-weight: bold;
+  font-size: 18px;
+}
