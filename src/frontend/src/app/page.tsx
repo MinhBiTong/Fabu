@@ -12,25 +12,25 @@ export default function HomePage() {
             <p>Mobile Recharge</p>
           </Link>
 
-          <div className="service-card">
+         <div className="service-card">
             <span>💳</span>
-            <p>Bill Payment</p>
-          </div>
+            <p>Thanh toán hóa đơn</p>
+         </div>
 
-          <div className="service-card">
+           <Link href="/P5GDataPlan" className="service-card">
             <span>📊</span>
-            <p>Buy Data Package</p>
-          </div>
+            <p>Mua gói data</p>
+           </Link>
 
           <div className="service-card">
             <span>🧾</span>
             <p>Transaction History</p>
           </div>
 
-          <div className="service-card">
+          <Link  href="/Profile" className="service-card">
             <span>👤</span>
-            <p>Account</p>
-          </div>
+            <p>Tài khoản</p>
+          </Link>
 
         </div>
       </section>
