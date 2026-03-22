@@ -19,7 +19,7 @@ namespace Application.DTOs.Requests.ServiceRequest
 
         public int DataAmountMB { get; set; }
 
-        public short IsAutoRenew { get; set; } = 0; // 0: No, 1: Yes
+        public bool IsAutoRenew { get; set; } // 0: No, 1: Yes
 
         public int MaxActivationsPerMonth { get; set; } = 1;
         public decimal Price { get; set; }

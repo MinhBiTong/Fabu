@@ -27,16 +27,19 @@ namespace Application.Services
     public class AuthService : IAuthService
     {
         private readonly IConfiguration _configuration; // de lay jwt setting
-        private readonly IValidator<LoginRequest> _validator; //fluentValid
-        private readonly IResponseCacheService _responseCache;
+        private readonly IResponseCacheService? _responseCache;
         private readonly TimeSpan _refreshTokenExpiry = TimeSpan.FromDays(7); //7 days
         private readonly JwtConfiguration _jwtConfiguration;
         private readonly IUnitOfWork _unitOfWork;
 
-        public AuthService(IConfiguration configuration, IValidator<LoginRequest> validator,IResponseCacheService responseCache, IOptions<JwtConfiguration> jwtOptions, IResponseCacheService responseCacheService, IUnitOfWork unitOfWork)
+        public AuthService(
+            IConfiguration configuration,
+            IValidator<LoginRequest> validator,
+            IOptions<JwtConfiguration> jwtOptions,
+            IUnitOfWork unitOfWork,
+            IResponseCacheService? responseCache = null) 
         {
             _configuration = configuration;
-            _validator = validator;
             _responseCache = responseCache;
             _jwtConfiguration = jwtOptions.Value;
             _unitOfWork = unitOfWork;
@@ -83,8 +86,8 @@ namespace Application.Services
         //validate request fluent + basic
         private async Task ValidateLoginRequestAsync(LoginRequest request)
         {
-            var validationResult = await _validator.ValidateAsync(request);
-            if (!validationResult.IsValid) throw new AppException(ErrorCode.UNAUTHENTICATED); //400 request
+            //var validationResult = await _validator.ValidateAsync(request);
+            //if (!validationResult.IsValid) throw new AppException(ErrorCode.UNAUTHENTICATED); //400 request
         }
 
         //validate user/password identity

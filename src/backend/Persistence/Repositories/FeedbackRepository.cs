@@ -14,5 +14,20 @@ namespace Persistence.Repositories
         public FeedbackRepository(AppDbContext context) : base(context)
         {
         }
+
+        public Task<IEnumerable<Feedback>> GetAllPendingAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task MarkAsReadAsync(long feedbackId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task MarkAsRepliedAsync(long feedbackId, string replyNote)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
