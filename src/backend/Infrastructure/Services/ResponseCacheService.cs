@@ -16,12 +16,17 @@ namespace Infrastructure.Services
     {
         public readonly IDistributedCache _distributedCache;
 
-        public readonly IConnectionMultiplexer _connectionMultiplexer;
+        public readonly IConnectionMultiplexer? _connectionMultiplexer;
 
         public ResponseCacheService(IDistributedCache distributedCache, IConnectionMultiplexer? connectionMultiplexer = null)
         {
-            _distributedCache = distributedCache;
+            _distributedCache = distributedCache ?? throw new ArgumentException(nameof(distributedCache));
             _connectionMultiplexer = connectionMultiplexer;
+        }
+
+        public IDatabase? GetRedisDb()
+        {
+            return _connectionMultiplexer?.GetDatabase();
         }
 
         public async Task<T?> GetCachedResponseAsync<T>(string cacheKey)
@@ -42,15 +47,20 @@ namespace Infrastructure.Services
             }
 
             await _distributedCache.RemoveAsync(cacheKey);
+            
+            var db = GetRedisDb();
+            if (db == null) return; //skip group vi redis ko co
+
             var groupName = cacheKey.Split(':')[0];
-            var db = _connectionMultiplexer.GetDatabase();
             await db.SetRemoveAsync($"group:{groupName}", cacheKey);
         }
 
         //xoa toan bo key trong 1 group - ko scan
         public async Task RemoveCacheResponseByGroupAsync(string groupName)
         {
-            var db = _connectionMultiplexer.GetDatabase();
+            var db = GetRedisDb(); 
+            if (db == null) return;
+
             var groupKey = $"Group:{groupName}";
 
             // Lấy toàn bộ danh sách key trong nhóm ra
@@ -108,17 +118,23 @@ namespace Infrastructure.Services
             if (absoluteExpiry.HasValue) options.AbsoluteExpirationRelativeToNow = absoluteExpiry; // Cache sẽ hết hạn sau khoảng thời gian tuyệt đối kể từ thời điểm lưu vào cache.
             if (slidingExpiry.HasValue) options.SlidingExpiration = slidingExpiry; // Cache sẽ hết hạn nếu không có truy cập nào đến cache này trong khoảng thời gian trượt kể từ lần truy cập cuối cùng.
             await _distributedCache.SetStringAsync(cacheKey, json, options);
-            
+
             // 2. Lưu key này vào một nhóm để quản lý (Ví dụ lấy tiền tố làm tên nhóm)
-            var groupName = cacheKey.Split(':')[0]; // Giả sử cacheKey là Product_123
-            var db = _connectionMultiplexer.GetDatabase();
-            await db.SetAddAsync($"Group:{groupName}", cacheKey);
+            var db = GetRedisDb();
+            if (db != null)
+            {
+                var groupName = cacheKey.Split(':')[0];   //Giả sử cacheKey là Product_123
+                await db.SetAddAsync($"Group:{groupName}", cacheKey);
+            }            
         }
 
         public async Task AddToGroupAsync(string groupKey, string value)
         {
-            var db = _connectionMultiplexer.GetDatabase();
-            await db.SetAddAsync(groupKey, value);
+            var db = GetRedisDb();
+            if (db != null)
+            {
+                await db.SetAddAsync(groupKey, value);
+            }
         }
     }
 }

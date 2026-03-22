@@ -52,17 +52,25 @@ namespace Api.Extensions
         public static void InstallerServicesInAssembly(this IServiceCollection services, IConfiguration configuration)
         {
             //lay het tat ca class trong Installer va bo di interface va abstract class 
-            var currentAssesmbly = Assembly.GetExecutingAssembly();
-            var installers = currentAssesmbly.ExportedTypes
-                .Where(x => typeof(IInstaller).IsAssignableFrom(x) && !x.IsInterface && !x.IsAbstract)
-                .Select(Activator.CreateInstance)
-                .Cast<IInstaller>()
-                .ToList();
+            var assemblies = new[]
+            {
+                Assembly.GetExecutingAssembly(), // Tầng Api
+                Assembly.Load("Infrastructure"), // Tầng Infrastructure (thay tên đúng của dự án em)
+                // Assembly.Load("Application")  // Tầng Application (nếu có installer ở đây)
+            };
 
-            //check
-            if (installers == null || !installers.Any()) return;
+            foreach (var assembly in assemblies)
+            {
+                var installers = assembly.ExportedTypes
+                    .Where(x => typeof(IInstaller).IsAssignableFrom(x) && !x.IsInterface && !x.IsAbstract)
+                    .Select(Activator.CreateInstance)
+                    .Cast<IInstaller>()
+                    .ToList();
 
-            installers.ForEach(i => i.InstallServices(services, configuration));
+                //check
+                if (installers == null || !installers.Any()) return;
+                installers.ForEach(i => i.InstallServices(services, configuration));
+            }
         }
     }
 }

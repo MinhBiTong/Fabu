@@ -16,10 +16,44 @@ namespace Persistence.Repositories
         {
         }
 
-        public string Username => throw new NotImplementedException();
+        public Task CreditAsync(long customerId, decimal amount)
+        {
+            throw new NotImplementedException();
+        }
 
-        public string Environment => throw new NotImplementedException();
+        public Task DebitAsync(long customerId, decimal amount)
+        {
+            throw new NotImplementedException();
+        }
 
-        public AccountId HomeAccountId => throw new NotImplementedException();
+        public Task<Account?> GetByCustomerIdAsync(long customerId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<decimal> GetCurrentBalanceAsync(long customerId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> HasEnoughBalanceAsync(long customerId, decimal amount)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task LockAccountAsync(long customerId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UnlockAccountAsync(long customerId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateBalanceAsync(long accountId, decimal amount, bool isAdd = true)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

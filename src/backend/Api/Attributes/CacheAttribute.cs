@@ -9,7 +9,7 @@ namespace Api.Attributes
     //class dong vai tro la 1 constructor va truyen tham so vao controller [Cache(1000)]
     public class CacheAttribute : Attribute, IAsyncActionFilter
     {
-        private readonly int _timeToLiveSeconds = 1000;
+        private readonly int _timeToLiveSeconds;
 
         public CacheAttribute(int timeToLiveSeconds = 1000)
         {
@@ -20,51 +20,69 @@ namespace Api.Attributes
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             //add singleton tu redisconfiguration
-            var cacheConfiguration = context.HttpContext.RequestServices.GetRequiredService<RedisConfiguration>();
+            var cacheConfig = context.HttpContext.RequestServices.GetRequiredService<RedisConfiguration>();
 
             //xem cache co chua, loi dung middleware k can phai qua nhieu middleware
             //neu k su dung cache thi cho chay ra ngoai k cache nua
-            if (!cacheConfiguration.Enabled)
+            if (!cacheConfig.Enabled)
             {
-                await next(); //no chay vao trong controller kiem tra xem co dung cache hay k
+                await next();  //no chay vao trong controller kiem tra xem co dung cache hay k
                 return;
             }
 
             var cacheService = context.HttpContext.RequestServices.GetRequiredService<IResponseCacheService>();
-            var cacheKey = GenerateCacheKeyFromRequest(context.HttpContext.Request);
-            var cacheResponse = await cacheService.GetCachedResponseAsync<string>(cacheKey);
+            var cacheKey = GenerateCacheKeyFromRequest(context.HttpContext.Request, context.ActionArguments);
+
+            var cachedResponse = await cacheService.GetCachedResponseAsync<string>(cacheKey);
 
             //neu co cache thi response tra ve luon  
-            if (!string.IsNullOrEmpty(cacheResponse))
+            if (!string.IsNullOrEmpty(cachedResponse))
             {
-                var contentResult = new ContentResult
+                context.Result = new ContentResult
                 {
-                    Content = cacheResponse,
+                    Content = cachedResponse,
                     ContentType = "application/json",
-                    StatusCode = 200,
+                    StatusCode = 200
                 };
-                context.Result = contentResult;
                 return;
             }
+
+            var executedContext = await next();
+
             //neu no k co cache - goi vao action method controller
-            var excutedContext = await next();
-            if (excutedContext.Result is OkObjectResult objectResult)
+            if (executedContext.Result is OkObjectResult okResult && okResult.Value != null)
             {
-                await cacheService.SetCacheResponseByGroupAsync(cacheKey, response: objectResult.Value, absoluteExpiry: TimeSpan.FromSeconds(_timeToLiveSeconds), slidingExpiry: TimeSpan.FromSeconds(_timeToLiveSeconds));
+                await cacheService.SetCacheResponseByGroupAsync(
+                    cacheKey,
+                    okResult.Value,
+                    absoluteExpiry: TimeSpan.FromSeconds(_timeToLiveSeconds),
+                    slidingExpiry: TimeSpan.FromSeconds(_timeToLiveSeconds));
             }
         }
 
-        private static string GenerateCacheKeyFromRequest(HttpRequest request)
+        private static string GenerateCacheKeyFromRequest(HttpRequest request, IDictionary<string, object?> actionArguments)
         {
-            var keyBuider = new StringBuilder();
-            keyBuider.Append($"{request.Path}"); //lay path sau do lay key
-            
-            //lay ten cac tham so truyen vao tu controller
-            foreach (var (key, value) in request.Query.OrderBy(x => x.Key)) //lay tham so truyen vao trong cac ham o controller
+            var keyBuilder = new StringBuilder();
+            keyBuilder.Append($"{request.Method}-{request.Path}");
+
+            // Query string
+            foreach (var (key, value) in request.Query.OrderBy(x => x.Key))
             {
-                keyBuider.Append($"|{key}-{value}"); //dua vao chuoi
+                keyBuilder.Append($"|{key}={value}");
             }
-            return keyBuider.ToString();
+
+            // Body/Arguments (nếu POST/PUT, lấy từ actionArguments nếu có)
+            if (request.Method == HttpMethods.Post || request.Method == HttpMethods.Put)
+            {
+                //lay ten cac tham so truyen vao tu controller
+                foreach (var (key, value) in actionArguments.OrderBy(x => x.Key))  //lay tham so truyen vao trong cac ham o controller
+                {
+                    if (value != null)
+                        keyBuilder.Append($"|{key}={value}");
+                }
+            }
+
+            return keyBuilder.ToString();
         }
     }
 }

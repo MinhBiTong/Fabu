@@ -3,41 +3,44 @@ using Domain.Data.Configurations;
 using Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Win32;
 using StackExchange.Redis;
 
-namespace Infrastructure.Extensions
+public class CacheInstaller : IInstaller
 {
-    public class CacheInstaller : IInstaller
+    public void InstallServices(IServiceCollection services, IConfiguration configuration)
     {
-        public void InstallServices(IServiceCollection services, IConfiguration configuration)
+        var redisConfig = configuration.GetSection("RedisConfiguration").Get<RedisConfiguration>()
+            ?? new RedisConfiguration { Enabled = false };
+        services.AddSingleton(redisConfig);
+        // Luôn register IDistributedCache
+        if (redisConfig.Enabled && !string.IsNullOrEmpty(redisConfig.ConnectionStrings))
         {
-            var redisConfig = configuration.GetSection("RedisConfiguration").Get<RedisConfiguration>()
-                ?? new RedisConfiguration { Enabled = false };
-
-            services.AddSingleton(redisConfig);
-
-            if (redisConfig.Enabled && !string.IsNullOrEmpty(redisConfig.ConnectionStrings))
+            // Redis thật
+            services.AddSingleton<IConnectionMultiplexer>(sp =>
             {
-                services.AddSingleton<IConnectionMultiplexer>(sp =>
-                    ConnectionMultiplexer.Connect(redisConfig.ConnectionStrings));
-
-                services.AddStackExchangeRedisCache(options =>
+                try
                 {
-                    options.Configuration = redisConfig.ConnectionStrings;
-                    options.InstanceName = "Fabu:";
-                });
-            }
-            else
+                    return ConnectionMultiplexer.Connect(redisConfig.ConnectionStrings);
+                }
+                catch (Exception ex)
+                {
+                    // Log lỗi nhưng vẫn fallback
+                    Console.WriteLine($"Redis connection failed: {ex.Message}. Using in-memory cache.");
+                    return null; // hoặc throw nếu muốn bắt buộc Redis
+                }
+            });
+            services.AddStackExchangeRedisCache(options =>
             {
-                // Fallback: In-memory cache khi Redis disabled (cho dev/test)
-                services.AddDistributedMemoryCache();
-            }
-
-            //Register service(luôn có, dù Redis hay không)
-            //quan ly viec cache 1 cai la interface, 1 cai la implement
-            services.AddSingleton<IResponseCacheService, ResponseCacheService>();
-            services.AddScoped<IResponseCacheService, ResponseCacheService>(); // Đăng ký cả Singleton và Scoped để đảm bảo có instance khi Redis disabled
+                options.Configuration = redisConfig.ConnectionStrings;
+                options.InstanceName = "Fabu:";
+            });
         }
+        else
+        {
+            // Fallback in-memory (rất quan trọng!)
+            services.AddDistributedMemoryCache();
+        }
+        // Register service scoped
+        services.AddScoped<IResponseCacheService, ResponseCacheService>();
     }
 }

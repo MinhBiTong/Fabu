@@ -11,9 +11,10 @@ using AutoMapper;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Application.Services;
+using Infrastructure.Services;
 
 
-namespace Application.Extensions
+namespace Infrastructure.Extensions
 {
     public static class DependencyInjection
     {
@@ -23,6 +24,7 @@ namespace Application.Extensions
             var assembly = typeof(DependencyInjection).Assembly;
 
             // Register services
+            services.AddScoped<IResponseCacheService, ResponseCacheService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IRoleService, RoleService>();
@@ -30,8 +32,8 @@ namespace Application.Extensions
 
             // Đăng ký tất cả Validators từ Assembly này
             services.AddValidatorsFromAssembly(assembly);
-            //services.AddValidatorsFromAssemblyContaining<CreateUserRequestValidator>();
-            //services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
+            services.AddValidatorsFromAssemblyContaining<CreateUserRequestValidator>();
+            services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
 
             // Đăng ký AutoMapper từ Assembly này
             services.AddAutoMapper(assembly);
