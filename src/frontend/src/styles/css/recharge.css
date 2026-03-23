@@ -158,7 +158,7 @@
 }
 
 .input-error{
-  color:#e73c3c;
+  color:#ef4444;
   font-size:14px;
   margin-top:-15px;
   margin-bottom:15px;
@@ -310,4 +310,7 @@
   padding: 4px 8px;
   border-radius: 999px;
   font-weight: 500;
+
+  /* FIX SHADOW */
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4);
 }
