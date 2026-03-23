@@ -7,13 +7,15 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
 
 namespace Api.Controllers
 {
     [ApiController]
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiVersion("1.0")]
-    [EnableRateLimiting("Login")]
+    //[EnableRateLimiting("Login")]
     public class AuthController : ControllerBase
     {
         private readonly IValidator<LoginRequest> _validator;
@@ -52,8 +54,45 @@ namespace Api.Controllers
             }
         }
 
+        [DisableRateLimiting]
+        [HttpGet("signin-google")]
+        public IActionResult SignInGoogle()
+        {
+            var properties = new AuthenticationProperties
+            {
+                RedirectUri = Url.Action(nameof(GoogleCallback))
+            };
+            return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+        }
+
+        [DisableRateLimiting]
+        [HttpGet("google-callback")]
+        public async Task<IActionResult> GoogleCallback()
+        {
+            var authenticateResult = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
+
+            if (!authenticateResult.Succeeded)
+                return BadRequest(new { Message = "Đăng nhập Google thất bại!" });
+
+            var claims = authenticateResult.Principal.Identities.FirstOrDefault()?.Claims;
+            var email = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var name = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+            var googleId = claims?.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(email))
+                return BadRequest(new { Message = "Không lấy được email từ Google." });
+
+            return Ok(new
+            {
+                Message = "Đã lấy được thông tin từ Google!",
+                Email = email,
+                Name = name,
+                GoogleId = googleId
+            });
+        }
+
         [HttpPost("refresh-token")]
-        public async Task<ActionResult<LoginResponse>> RefreshToken([FromBody] RefreshRequest request)
+        public async Task<ActionResult<LoginResponse>> RefreshToken([FromBody] RefreshRequest request) 
         {
             try
             {
@@ -70,7 +109,7 @@ namespace Api.Controllers
 
         [HttpPost("logout")]
         [Authorize]
-        public async Task<IActionResult> Logout([FromBody] LogoutRequest request)
+        public async Task<IActionResult> Logout([FromBody] LogoutRequest request) 
         {
             var tokenUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
             if (tokenUserId != request.UserId)

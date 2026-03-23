@@ -51,6 +51,7 @@ namespace Api.Extensions
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
+                .AddCookie("Cookies")
                 .AddJwtBearer(options =>
                 {
                     options.SaveToken = true;
@@ -88,6 +89,14 @@ namespace Api.Extensions
                             }
                         };
                     }
+                })
+                .AddGoogle(options =>
+                {
+                    options.SignInScheme = "Cookies";
+
+                    options.ClientId = configuration["Authentication:Google:ClientId"];
+                    options.ClientSecret = configuration["Authentication:Google:ClientSecret"];
+                    options.SaveTokens = true;
                 });
               //ROLE_ADMIN
               //├─ user.create
