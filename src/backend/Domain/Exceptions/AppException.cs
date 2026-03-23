@@ -1,4 +1,4 @@
-﻿namespace Api.Middleware
+﻿namespace Domain.Exceptions
 {
     public class AppException : Exception
     {

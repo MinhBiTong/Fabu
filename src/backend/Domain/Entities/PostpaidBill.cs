@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
-    public class PostpaidBill : EntityBase<int>
+    public class PostpaidBill : EntityAuditSoftDeleteBase<long>
     {
-        public long CustomerId { get; set; }
+        public long? CustomerId { get; set; }
 
-        public virtual Customer Customer { get; set; }
+        public virtual Customer? Customer { get; set; }
 
         public DateTime BillMonth { get; set; }
 

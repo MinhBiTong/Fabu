@@ -23,19 +23,16 @@ namespace Persistence.Data.Configurations
             builder.Property(x => x.Status)
                 .HasMaxLength(50);
 
-            builder.HasOne(x => x.Customer)
-                .WithMany()
-                .HasForeignKey(x => x.CustomerId)
-                .OnDelete(DeleteBehavior.Restrict);
+            // FK rõ ràng, không để EF tự sinh 1
+            builder.HasOne(cu => cu.Coupon)
+                   .WithMany(c => c.CouponUsages)
+                   .HasForeignKey(cu => cu.CouponId)
+                   .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasOne(x => x.Coupon)
-                .WithMany()
-                .HasForeignKey(x => x.CouponId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.HasOne(x => x.Transaction)
-                .WithOne()
-                .HasForeignKey<CouponUsage>(x => x.TransactionId);
+            builder.HasOne(cu => cu.Transaction)
+                   .WithMany(t => t.CouponUsages) 
+                   .HasForeignKey(cu => cu.TransactionId)
+                   .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -33,15 +33,17 @@ namespace Persistence.Data.Configurations
             builder.Property(x => x.Status)
                 .HasConversion<int>();
 
-            builder.HasOne(x => x.Transaction)
-                .WithMany()
-                .HasForeignKey(x => x.TransactionId)
+            // Quan hệ với PostpaidBill (N - 1 hoặc 1 - 1 tùy logic Bill của bạn)
+            builder.HasOne(x => x.PostpaidBill)
+                .WithMany() // Giả định một Bill có thể có nhiều đợt Payment (trả góp/từng phần)
+                .HasForeignKey(x => x.BillId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            builder.HasOne(x => x.PostpaidBill)
-                .WithMany()
-                .HasForeignKey(x => x.BillId)
-                .OnDelete(DeleteBehavior.SetNull);
+            builder.HasMany(x => x.Transactions)
+                .WithOne(x => x.Payment)
+                .HasForeignKey(x => x.PaymentId)
+                .OnDelete(DeleteBehavior.NoAction); 
         }
     }
 }

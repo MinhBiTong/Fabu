@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
-    public class Coupon : EntityBase<int>
+    public class Coupon : EntityBase<long>
     {
         public string Code { get; set; }
 
@@ -34,8 +34,8 @@ namespace Domain.Entities
         
         public bool IsActive { get; set; } = true;
 
-        public long CreatedByUserId { get; set; }
-        public virtual User CreatedByUser { get; set; }
+        public long? CreatedByUserId { get; set; }
+        public virtual User? CreatedByUser { get; set; }
         public virtual ICollection<CouponUsage> CouponUsages { get; set; }
     }
 }

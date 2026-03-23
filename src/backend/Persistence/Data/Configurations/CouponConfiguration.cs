@@ -38,13 +38,28 @@ namespace Persistence.Data.Configurations
             builder.Property(x => x.MaxDiscount)
                 .HasPrecision(18, 2);
 
+            builder.Property(x => x.ValidFrom)
+                .IsRequired();
+            builder.Property(x => x.ValidTo)
+                .IsRequired();
+            builder.Property(x => x.UsageLimitPerUser)
+                .IsRequired()
+                .HasDefaultValue(1);
+            builder.Property(x => x.UsageLimitTotal)
+                .IsRequired()
+                .HasDefaultValue(1000);
+
+            builder.Property(x => x.CreatedByUserId)
+                .IsRequired(false);
+
             builder.HasIndex(x => x.Code)
                 .IsUnique();
 
             builder.HasOne(x => x.CreatedByUser)
-                .WithMany()
+                .WithMany(u => u.Coupons) 
                 .HasForeignKey(x => x.CreatedByUserId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

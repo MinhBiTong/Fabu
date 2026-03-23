@@ -10,13 +10,10 @@ using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
-    public class Payment : EntityAuditBase<long>
+    public class Payment : EntityAuditSoftDeleteBase<long>
     {
-        public long? TransactionId { get; set; }
-        public virtual Transaction Transaction { get; set; }
-
-        public int? BillId { get; set; }
-        public virtual PostpaidBill PostpaidBill { get; set; }
+        public long? BillId { get; set; }
+        public virtual PostpaidBill? PostpaidBill { get; set; }
 
         public decimal Amount { get; set; }
 
@@ -27,5 +24,6 @@ namespace Domain.Entities
         public string PaymentRef { get; set; }
 
         public StatusPayment Status { get; set; } = StatusPayment.Pending;
+        public virtual ICollection<Transaction> Transactions { get; set; }
     }
 }

@@ -27,12 +27,36 @@ namespace Persistence.Repositories
         private IUserRepository? _users;
         private IRoleRepository? _roles;
         private IPermissionRepository? _permissions;
+        private IAccountRepository? _accounts;
+        private IAuditLogRepository? _auditLogs;
+        private ICouponRepository? _coupons;
+        private ICouponUsageRepository? _couponUsages;
+        private ICustomerRepository? _customers;
+        private ICustomerServiceRepository? _customerServices;
+        private IPaymentRepository? _payments;
+        private IPostpaidBillRepository? _postpaidBills;
+        private IServiceRepository? _services;
+        private IFeedbackRepository? _feedbacks;
+        private IRechargePlanRepository? _rechargePlans;
+        private ITransactionRepository? _transactions;
 
 
         //trien khai property Users tu Interface
         public IUserRepository Users => _users ??= new UserRepository(_context);
         public IRoleRepository Roles => _roles ??= new RoleRepository(_context);
         public IPermissionRepository Permissions => _permissions ??= new PermissionRepository(_context);
+        public IAccountRepository Accounts => _accounts ??= new AccountRepository(_context);
+        public IAuditLogRepository AuditLogs => _auditLogs ??= new AuditLogRepository(_context);
+        public ICustomerRepository Customers => _customers ??= new CustomerRepository(_context);
+        public ICustomerServiceRepository CustomerServices => _customerServices ??= new CustomerServiceRepository(_context);
+        public ICouponRepository Coupons => _coupons ??= new CouponRepository(_context);
+        public ICouponUsageRepository CouponUsages => _couponUsages ??= new CouponUsageRepository(_context);
+        public IPostpaidBillRepository PostpaidBills => _postpaidBills ??= new PostpaidBillRepository(_context);
+        public IServiceRepository Services => _services ??= new ServiceRepository(_context);
+        public IFeedbackRepository Feedbacks => _feedbacks ??= new FeedbackRepository(_context);
+        public IRechargePlanRepository RechargePlans => _rechargePlans ??= new RechargePlanRepository(_context);
+        public ITransactionRepository Transactions => _transactions ??= new TransactionRepository(_context);
+        public IPaymentRepository Payments => _payments ??= new PaymentRepository(_context);
 
         public async Task<int> SaveChangesAsync()
         {
@@ -42,8 +66,7 @@ namespace Persistence.Repositories
 
         public async Task<int> CommitAsync()
         {
-            UpdateAuditFields();
-            return await _context.SaveChangesAsync();
+            return await SaveChangesAsync();
             //await _context.Database.CommitTransactionAsync();
         }
 
@@ -54,7 +77,15 @@ namespace Persistence.Repositories
             await Task.CompletedTask;
         }
 
-        public void Dispose() => _context.Dispose();
+        public async ValueTask DisposeAsync()
+        {
+            await _context.DisposeAsync();
+        }
+
+        public void Dispose()
+        {
+            _context.Dispose();
+        }
 
         public Task<int> CommitAsync(int commitId)
         {

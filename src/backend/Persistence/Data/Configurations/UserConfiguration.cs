@@ -40,6 +40,16 @@ namespace Persistence.Data.Configurations
             builder.HasIndex(x => x.PhoneNumber).IsUnique();
 
             builder.HasIndex(x => x.Username).IsUnique();
+            builder.HasMany(x => x.UserRoles)
+                .WithOne(x => x.User)
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(x => x.Coupons)
+                .WithOne(x => x.CreatedByUser)
+                .HasForeignKey(x => x.CreatedByUserId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

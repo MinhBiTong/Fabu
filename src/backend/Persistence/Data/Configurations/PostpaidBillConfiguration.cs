@@ -38,6 +38,15 @@ namespace Persistence.Data.Configurations
                 .WithMany(x => x.PostpaidBills)
                 .HasForeignKey(x => x.CustomerId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(x => x.Payments)
+                .WithOne(x => x.PostpaidBill)
+                .HasForeignKey(x => x.BillId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasIndex(b => new { b.CustomerId, b.BillMonth })
+                .HasDatabaseName("IX_PostpaidBills_CustomerId_BillMonth")
+                .IsUnique();
         }
     }
 }

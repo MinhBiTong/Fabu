@@ -1,0 +1,1231 @@
+body{
+margin : 0  ;
+margin-top: 100px;
+font-family:Arial, Helvetica, sans-serif;
+background:#f6f7fb;
+}
+
+@media (max-width: 700px) {
+body{
+margin : 0  ;
+margin-top: 80px;
+font-family:Arial, Helvetica, sans-serif;
+background:#f6f7fb;
+}
+
+}
+body::-webkit-scrollbar {
+  display: none;         
+}
+/* Header */
+.navibar{
+    position: fixed;
+    top : 0 ;
+    margin : 0 ;
+   background-color:rgb(244, 247, 250);
+    width : 100% ;
+    height: 80px ;
+      display: flex;
+  flex-direction: row;
+  align-items: center;
+ padding: 0 50px;
+  justify-content: space-between;
+  box-sizing: border-box;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  z-index: 1 ;
+}
+
+.navibar .menu{
+display : none  ;
+}
+
+.navibar .menu img{
+  width: auto;
+  height : 40px ;
+  
+}
+.navibar .menu img:hover{
+   cursor : pointer ;
+
+}
+
+.navibar .logo{
+display : flex ;
+}
+.navibar .logo img{
+  width: auto;
+  height : 60px ;
+  
+}
+.navibar .logo img:hover{
+   cursor : pointer ;
+
+}
+.navibar .logo img:active{
+   cursor : grabbing ;
+} 
+
+.navibar .navlinks{
+  display: flex;
+  gap: 20px;
+   height: 100%;
+  margin: auto;
+}
+
+.navibar .navlinks button{
+    font-weight : bolder ;
+    padding : 0px 20px ;
+  font-size: 18px;
+   height: 100%;
+   background-color: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-top: 2px solid transparent;
+  transition: border-bottom 0.3s ease;
+
+}.navibar .navlinks button:hover{
+  border-bottom : 2px solid rgb(0, 153, 255);
+  cursor : pointer ;
+}
+.navibar .navlinks button:active{
+  
+  cursor : grabbing ;
+}
+
+
+
+.navibar .signin{
+  display: flex;
+ 
+}
+
+.navibar .signin button{
+    font-weight: bolder ;
+  background-color: rgb(0, 145, 255);
+  border : 0px ;
+}
+
+.navibar .signin .SearchButton{
+  
+  padding: 15px 17px ;
+ margin-right: 20px ;
+  border-radius: 100px ;
+}
+
+.navibar .signin .SigninButton{
+   font-size: 18px;
+  padding: 15px 30px ;
+  border-radius: 40px ;
+   
+}
+.navibar .signin .ProfileButton{
+ align-items: center;
+  justify-content: center;
+  border-radius: 50px ;
+  padding : 0px 12px ;
+  display : none ;
+}
+
+.navibar .signin .ProfileButton img{
+  width: auto ;
+  height : 30px ;
+}
+
+.navibar .signin button:hover{
+ cursor : pointer ;
+ background-color: rgb(0, 129, 228);
+}
+
+.navibar .signin button:active{
+ cursor : grabbing ;
+ background-color: rgb(0, 111, 197);
+}
+
+@media (max-width: 1200px) {
+
+   .navibar{
+         padding: 0 20px;
+    }
+  .navibar .navlinks {
+    display : none ;
+  }
+ .navibar .menu{
+  display : block ;
+ }
+}
+@media (max-width: 700px) {
+.navibar{
+    height: 60px ;
+}
+.navibar .logo img{
+  height : 50px ;
+}
+.navibar .menu img{
+  width: auto;
+  height : 30px ;
+  
+}
+.navibar .signin .SearchButton{
+  
+  padding: 10px 12px ;
+ margin-right: 20px ;
+}
+
+.navibar .signin .SigninButton{
+  
+  padding: 10px 20px ;
+  font-size: 16px;
+  border-radius: 40px ;
+}
+.navibar .signin .ProfileButton{
+  padding : 0px 7px ;
+}
+}
+/* Header */
+
+/* Header Sidebar */
+.MenuList{
+    background-color: rgba(0, 0, 0, 0.3) ;
+  position: fixed;
+  top: 80px;
+  left: 0;
+
+  width: 100vw;
+  height: 100vh;
+  z-index: 1 ;
+  display: none ;
+  flex-direction: column;
+}
+.MenuList button{
+  background-color: rgb(246, 248, 249);
+  font-size: 18px ;
+  padding : 5px 0 ;
+  border : 0.1px solid black;
+  cursor: pointer;
+}
+.MenuList button:hover{
+  background-color: rgb(220, 225, 227);
+
+}
+.MenuList button:active{
+  background-color: rgb(193, 199, 202);
+
+}
+@media (max-width :1200px){
+  .MenuList{
+    display: flex;
+  }
+}
+@media (max-width: 700px) {
+  .MenuList{
+  top : 60px ;
+  }
+
+}
+/* Header Sidebar */
+
+
+/* Footer */
+.footer{
+  background-color: rgb(237, 237, 237);
+    min-height: 300px;
+  display: flex ;
+  flex-direction: column;
+    align-items: flex-start;
+  padding : 10px 0px ;
+  align-items: center;
+  gap : 20px ;
+}
+
+.footer .Choosebox{
+    font-size: clamp(14px, 1.2vw, 18px);
+  font-weight: bold;
+  padding: 20px clamp(50px, 4vw, 300px);
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  width: 80% ;
+  gap : clamp(40px, 4vw, 60px); ;
+  align-content: start;
+   min-height: 150px;
+}
+.footer .Choosebox .helpbox{
+  padding : 20px ;
+  background-color: rgb(241, 240, 240) ;
+  border-radius: 20px;
+    width: clamp(80px, 7vw, 100px);
+  height: clamp(80px, 7vw, 100px);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; 
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.footer .Choosebox .helpbox img{
+  width: auto ;
+  height: clamp(20px, 6vw, 40px);;
+}
+.footer .Choosebox .helpbox:hover{
+ box-shadow: 0 4px 12px rgba(2, 86, 255, 0.233);
+ cursor: pointer;
+}
+.footer .footerlinks{
+  width: 100%;
+  border-top:  0.4px solid rgb(179, 179, 179);
+  border-bottom: 0.4px solid rgb(179, 179, 179);
+}
+.footer .footerlinks .footerlinks-inner{
+  width: 82%;
+  margin: auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+.footer .footerlinks .footerlinks-inner .linkscolumn{
+  padding :  clamp(5px, 7vw, 10px)  clamp(10px, 7vw, 30px);
+  display: flex;
+  flex-direction: column;
+  border-right : 0.4px solid rgb(179, 179, 179) ;
+  gap : clamp(5px, 7vw, 10px) ;
+}
+.footer .footerlinks .footerlinks-inner .linkscolumn:last-child{
+  border-right : none ;
+}
+.footer .footerlinks .footerlinks-inner .linkscolumn p{
+  margin: 0;
+}
+.footer .footerlinks .footerlinks-inner .linkscolumn h3{
+margin : clamp(5px, 7vw, 10px) 0 ;
+
+}
+.footer .socialandcopyright{
+  width : 80% ;
+  margin-bottom : 10px ;
+      display: flex;
+  flex-direction: row;
+ padding: 0 50px;
+  justify-content: space-between;
+  align-items: center;
+}
+.footer .socialandcopyright .socialbar {
+    display : flex ;
+    flex-direction: row;
+    gap : clamp(10px, 7vw, 20px) ;
+}
+.footer .socialandcopyright .socialbar img{
+width : auto ;
+height : 40px ;
+cursor: pointer;
+}
+.footer .footerinfo {
+  font-size: 18px;
+  line-height: 1.5;
+width : 80%
+
+}
+.footer .footerinfo .topline{
+display: flex;
+  align-items: center;
+  gap: 20px;
+justify-content: center;
+
+}
+.footer .footerinfo .topline img{
+width: auto;
+height : 60px ;
+
+}
+
+
+
+@media (max-width: 900px) {
+
+
+.footer .socialandcopyright {
+    flex-direction: column;
+    gap : 5px ;
+}
+.footer .footerinfo {
+  font-size: 16px;
+  line-height: 1.5;
+width : 80%
+
+}
+.footer .footerlinks{
+   display : none ;
+}
+
+
+}
+/* Footer */
+
+
+/* Login Form */
+.FullScreen{
+  background-color: rgba(0, 0, 0, 0.3) ;
+  position: fixed;
+  top: 0px;
+  left: 0;
+
+  width: 100vw;
+  height: 100vh;
+  z-index: 2 ;
+}
+.FullScreen .loginOverlay {
+  width: 100%;
+  height: 90%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.FullScreen .loginOverlay .loginform {
+  background-color: whitesmoke;
+ width : 30%;
+ height : 60%;
+ align-items: center;
+display: flex;
+flex-direction: column;
+position : relative ;
+gap : 10px ;
+}
+.FullScreen .loginOverlay .loginform .closeBtn{
+  top : 5px ;
+  right : 5px ;
+  position: absolute;
+  background-color: transparent ;
+  border : none ;
+  font-size: 30px ;
+  cursor : pointer ;
+}
+
+.FullScreen .loginOverlay .loginform  h1{
+ margin-top : 50px ;
+}
+.FullScreen .loginOverlay .loginform .Mainform{
+ margin-top : 10px ;
+ display : flex ;
+ flex-direction: column ;
+  align-items: center ;
+  gap : 10px ;
+  width : 100% ;
+}
+
+.FullScreen .loginOverlay .loginform .Mainform input{
+  width : 75% ;
+ height : 40px ;
+ padding : 0 10px ;
+}
+
+.FullScreen .loginOverlay .loginform .Mainform button{
+ margin-top : 10px ;
+ display : flex ;
+ flex-direction: column ;
+ justify-content: center;
+  align-items: center ;
+   height : 40px ;
+  width : 40% ;
+}
+.FullScreen .loginOverlay .loginform .Mainform p{
+  margin: 0;
+  cursor: pointer ;
+}
+.FullScreen .loginOverlay .loginform .Mainform p:hover{
+  color : rgb(108, 13, 175) ;
+}
+.FullScreen .loginOverlay .loginform .Mainform p:active{
+  color : rgb(147, 43, 220) ;
+  cursor: grabbing;
+}
+
+
+.FullScreen .loginOverlay .loginform .Mainform .Signuplink{
+  display: flex;
+  flex-direction: row;
+  gap : 10px ;
+}
+.FullScreen .loginOverlay .loginform .Mainform .Signuplink p:last-child{
+color : rgb(13, 13, 117);
+cursor : pointer ;
+}
+.FullScreen .loginOverlay .loginform .Mainform .Signuplink p:last-child:hover{
+color : rgb(36, 36, 140);
+}
+.FullScreen .loginOverlay .loginform .Mainform .Signuplink p:last-child:active{
+color : rgb(64, 64, 232);
+cursor : grabbing ;
+}
+/* Login Form */
+
+/* Sign up Form */
+
+.FullScreenup{
+  background-color: rgba(0, 0, 0, 0.5) ;
+  position: fixed;
+  top: 0px;
+  left: 0;
+
+  width: 100vw;
+  height: 100vh;
+  z-index: 2 ;
+}
+.FullScreenup .SignupOverlay{
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.FullScreenup .SignupOverlay .SignupContain {
+  background-color: whitesmoke;
+ width : 70%;
+ height : 85%;
+display: flex;
+flex-direction: row;
+position : relative ;
+border-radius: 30px;
+}
+.FullScreenup .SignupOverlay .SignupContain .image{
+height: 100% ;
+width : 35% ;
+background-color: rgb(0, 115, 255);
+border-radius : 30px 0 0 30px ;
+box-sizing: border-box;
+}
+.FullScreenup .SignupOverlay .SignupContain .Signupform{
+display: flex;
+flex-direction: column;
+width : 65% ;
+padding : 5px 10px ;
+align-items: center;
+box-sizing: border-box;
+gap : 10px ;
+}
+.FullScreenup .SignupOverlay .SignupContain .Signupform .CorrectLine{
+display: flex;
+flex-direction: column ;
+padding : 3px 15px ;
+width : 80% ;
+gap : 5px ;
+}
+.FullScreenup .SignupOverlay .SignupContain .Signupform .CorrectLine p{
+ margin : 0 ;
+font-size: 16px ;
+}
+.FullScreenup .SignupOverlay .SignupContain .Signupform .CorrectLine input{
+  height : 35px ;
+  border : none ;
+  font-size: 18px ;
+ padding : 0px 10px ;
+  border-radius: 10px ;
+  box-sizing: border-box;
+  border : 1px solid black ;
+}
+.FullScreenup .SignupOverlay .SignupContain .Signupform .JoinLine .CorrectLine{
+display: flex;
+flex-direction: column ;
+padding : 3px 15px ;
+width : 80% ;
+gap : 5px ;
+}
+.FullScreenup .SignupOverlay .SignupContain .Signupform .JoinLine{
+ display: flex;
+ flex-direction: row ;
+ width : 85% ;
+box-sizing: border-box;
+padding: 0 ;
+}
+.FullScreenup .SignupOverlay .SignupContain .Signupform .JoinLine .CorrectLine input{
+  height : 35px ;
+  border : none ;
+  font-size: 18px ;
+ padding : 0px 10px ;
+  border-radius: 10px ;
+  box-sizing: border-box;
+  border : 1px solid black ;
+}
+
+.FullScreenup .SignupOverlay .SignupContain .Signupform .JoinLine .CorrectLine p{
+ margin : 0 ;
+font-size: 16px ;
+}
+.FullScreenup .SignupOverlay .SignupContain .Signupform .ToS{
+display: flex; 
+flex-direction: row;
+gap : 5px ;
+}
+.FullScreenup .SignupOverlay .SignupContain .Signupform button{
+  width : 100px ;
+  height : 50px ;
+  border-radius: 20px ;
+}
+
+/* Sign up Form */
+
+
+/* Contact  */
+.ContactContainer{
+  display : flex ;
+  flex-direction: column ;
+  align-items: center ;
+  width :100% ;
+}
+.ContactContainer .ContactContent{
+  background-color: white ;
+  display : flex ;
+  flex-direction: column ;
+  align-items: center ;
+  width :60% ;
+  gap : 5px ;
+  border-radius: 20px ;
+  margin-bottom : 40px ;
+  padding : 20px 30px ;
+  border: 1px solid rgb(201, 201, 201);
+}
+.ContactContainer  .ContactContent .ContactForm{
+  display : flex ;
+  flex-direction: column ;
+  width : 90% ;
+  gap : 5px ;
+  padding : 10px 20px ;
+}
+.ContactContainer .ContactContent h3{
+  white-space: normal;
+word-wrap: break-word;
+}
+.ContactContainer  .ContactContent .ContactForm button{
+  margin-top: 30px ;
+  width : 100px  ;
+  height : 50px ;
+  background-color: rgb(0, 145, 255);
+  border : none ;
+  color : white ;
+  font-size: 18px;
+  border-radius: 40px ;
+  align-self: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}
+.ContactContainer  .ContactContent .ContactForm button:hover{
+ background-color: rgb(0, 129, 228);
+}
+
+.ContactContainer  .ContactContent .ContactForm button:active{
+ cursor : grabbing ;
+ background-color: rgb(0, 111, 197);
+}
+
+.ContactContainer  .ContactContent .ContactForm input{
+  height : 40px ;
+  padding : 0 10px ;
+
+}
+.ContactContainer  .ContactContent .ContactForm textarea{
+  height : 100px ;
+  padding : 10px ;
+}
+
+@media (max-width: 900px) {
+  .ContactContainer  .ContactContent .ContactForm button{
+  margin-top: 25px ;
+  width : 80px  ;
+  height : 40px ;
+  font-size: 16px;
+}
+ .ContactContainer h1{
+  font-size: 24px ;
+ }
+.ContactContainer .ContactContent h3{
+  font-size: 16px ;
+  white-space: normal;
+word-wrap: break-word;
+}
+}
+
+/* Contact  */
+
+/* Phone Service Page */
+
+.PhoneServiceContainer{
+  display : flex ;
+  flex-direction: column ;
+  align-items: center ;
+  width :100% ;
+}
+.PhoneServiceContainer .PhoneServiceBanner{
+  background-color: white;
+  width : 90% ;
+  height : 200px ;
+  flex-direction: column;
+  display : flex ;
+box-sizing: border-box;
+  padding : 10px 30px ;
+  border-radius: 30px ;
+}
+/* Phone Service Page */
+
+/* 5G Data Plan Page */
+
+.p5GContainer{
+  display : flex ;
+  flex-direction: column ;
+  align-items: center ;
+  width :100% ;
+}
+.p5GContainer .ChoosePackage{
+  width : 90% ;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row ;
+  display : flex ;
+}
+.p5GContainer .ChoosePackage .MobilePackageType{
+  font-size: 22px ;
+  padding :10px 20px ;
+  border-bottom: 2px solid rgb(176, 176, 176) ;
+}
+.p5GContainer .ChoosePackage .MobilePackageType:hover{
+  border-bottom: 2px solid rgb(0, 104, 240) ;
+  cursor: pointer;
+}
+.p5GContainer .ChoosePackage .MobilePackageType:active{
+  cursor: grabbing;
+}
+.p5GContainer .ValueOptions{
+  width : 90% ;
+  display : flex ;
+  flex-direction: row ;
+  align-items: center ;
+  justify-content: center ;
+  margin-top : 20px ;
+  gap : 10px ;
+}
+
+.p5GContainer .ValueOptions .Opted{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+   justify-content: center ;
+   gap : 8px ;
+  background-color : white ;
+  font-size: 16px ;
+  padding :10px 15px ;
+  height : 15px ;
+  border-radius: 12px;
+  font-weight: bold;
+  border : 1px transparent solid ;
+  box-shadow : 0 1px 2px rgb(0, 0, 0 , 0.1) ;
+}
+.p5GContainer .ValueOptions .Opted:hover{
+
+  border : 1px solid rgb(0, 136, 255 , 0.5) ;
+  color : rgb(0, 119, 255) ;
+  cursor : pointer ;
+}
+.p5GContainer .ValueOptions .Opted:active{
+
+  border : 1px solid rgba(1, 89, 165, 0.799) ;
+  color : rgb(0, 94, 201) ;
+  cursor : grabbing ;
+}
+.p5GContainer .ValueOptions .Opted img{
+  width : auto ;
+  height : 18px ;
+}
+.p5GContainer .PackageContain{
+  width : 100% ;
+  padding : 20px 0px ;
+   box-sizing: border-box;
+   display : flex ;
+    flex-direction: column ;
+   align-items: center;
+
+}
+.p5GContainer .PackageContain .PackageandViewAll{
+  width : 100% ;
+ box-sizing: border-box;
+ padding : 5px clamp(30px , 10vw , 150px) ;
+ display: flex;
+ flex-direction: row ;
+ justify-content: space-between;
+ align-items: center;
+}
+.p5GContainer .PackageContain .PackageandViewAll h3{
+ 
+
+}
+.p5GContainer .PackageContain .PackageandViewAll h3:hover{
+ color : rgb(0, 119, 255) ;
+ cursor: pointer;
+}
+.p5GContainer .PackageContain .PackageandViewAll h3:active{
+ color : rgb(0, 94, 201) ;
+ cursor: grabbing ;
+}
+.p5GContainer .PackageContain .PackageSet{
+  display : grid ;
+   grid-template-columns: repeat(3, 1fr); 
+   gap : 50px  ;
+ width : 88% ;
+  padding : 20px 20px ;
+   box-sizing: border-box;
+
+}
+.p5GContainer .PackageContain .PackageSet .Package{
+ display : flex ;
+ flex-direction: column ;
+  background-color: rgb(255, 255, 255) ;
+  min-width : 370px ;
+  height : 300px ;
+  border-radius: 30px ;
+  margin : auto ;
+  box-shadow : 0 2px 2px rgb(0, 0, 0 , 0.2) 
+}
+.p5GContainer .PackageContain .PackageSet .Package:hover{
+
+  box-shadow : 0 3px 4px rgb(0, 0, 0 , 0.3) 
+}
+.p5GContainer .PackageContain .PackageSet .Package .PackageTitle{
+  height : 23% ;
+width : 100% ;
+  background-image: url("../styles/images/blueytitlebackground.png");
+  background-repeat: no-repeat;
+   background-position: top ;
+border-radius : 30px 30px 0px 0px ;
+align-items: center;
+padding : 0px 30px ;
+color : white ;
+box-sizing: border-box;
+display : flex ;
+}
+.p5GContainer .PackageContain .PackageSet .Package .PackageOffer{
+  padding : 0 20px ;
+box-shadow: 0px 2px 2px rgb(0, 0, 0 , 0.2);
+ box-sizing: border-box;
+ margin : auto ;
+  height : 30% ;
+font-size : 18px ;
+  align-self: center;
+width : 95% ;
+padding : 10px 30px ;
+display: flex ;
+justify-content: center;
+ word-break: break-word;
+ flex-direction: column;
+ gap : 5px ;
+}
+.p5GContainer .PackageContain .PackageSet .Package .PackageOffer p{
+ margin : 0 ;
+}
+.p5GContainer .PackageContain .PackageSet .Package .PackagePrice{
+  height : 10% ;
+  width : 100% ;
+  font-size: 24px;
+  padding : 0 40px ;
+box-sizing: border-box;
+display : flex ;
+align-items: center;
+}
+.p5GContainer .PackageContain .PackageSet .Package .PackageChoices{
+height : 30%;
+width : 100% ;
+display : flex ;
+flex-direction: row ;
+padding : 15px 30px  ;
+ box-sizing: border-box;
+ justify-content: space-between;
+ align-items: center;
+}
+.p5GContainer .PackageContain .PackageSet .Package .PackageChoices button{
+ font-size: 18px;
+ height : 100% ;
+  border-radius: 30px ;
+  width : 40% ;
+  border : 1px solid black ;
+  background-color : white ;
+   cursor : pointer ;
+}
+.p5GContainer .PackageContain .PackageSet .Package .PackageChoices button:hover{
+background-color: rgb(0, 94, 255);
+}
+.p5GContainer .PackageContain .PackageSet .Package .PackageChoices h3{
+   font-size: 20px;
+   cursor : pointer ;
+}
+.p5GContainer .PackageContain .PackageSet .Package .PackageChoices h3:hover{
+   color : rgb(0, 94, 255) ;
+}
+.p5GContainer .PackageContain .PackageSet .Package .PackageChoices h3:active{
+   color : rgb(0, 71, 194) ;
+}
+@media (max-width: 1300px) {
+.p5GContainer .PackageContain .PackageSet{
+   grid-template-columns: repeat(2, 1fr); 
+
+}
+}
+@media (max-width: 900px){
+.p5GContainer .PackageContain .PackageSet{
+   grid-template-columns: repeat(1, 1fr); 
+
+}
+  .p5GContainer h1{
+    font-size: 24px ;
+  }
+.p5GContainer .ChoosePackage .MobilePackageType{
+  font-size : 14px ;
+}
+.p5GContainer .PackageContain .PackageandViewAll h2{
+font-size: 18px ;
+}
+.p5GContainer .PackageContain .PackageandViewAll h3{
+ font-size: 14px;
+}
+}
+/* 5G Data Plan Page */
+
+/* 5G Data Plan Details */
+.Totality {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.Totality .DpDetailsContainer{
+  width: 100% ;
+  padding : 0px clamp(10px ,11vw,200px) ;
+
+display : flex ;
+flex-direction: row;
+box-sizing: border-box;
+justify-content: space-between;
+}
+.Totality .DpDetailsContainer .MainInfos{
+width : 25% ;
+align-items: center;
+justify-content: center;
+display: flex;
+flex-direction: column;
+padding : 20px 0px ;
+gap : 30px ;
+ box-sizing: border-box;
+}
+.Totality .DpDetailsContainer .MainInfos .Infobox{
+background-color: rgb(255, 255, 255);
+   width : 95% ;
+   padding : 10px 20px ;
+   box-sizing: border-box;
+   border-radius: 10px ;
+   border : 2px solid rgb(188, 188, 188,0.5);
+  gap : 3px ;
+  align-items: center;
+display: flex;
+flex-direction: row;
+}
+.Totality .DpDetailsContainer .MainInfos .Infobox img{
+  width : auto ;
+  height : 35px ;
+  margin-right: 10px ;
+}
+.Totality .DpDetailsContainer .MainInfos .Infobox .Infotexts{
+display: flex;
+flex-direction: column;
+}
+.Totality .DpDetailsContainer .MainInfos .Infobox .Infotexts p{
+ margin : 0 ;
+
+}
+.Totality .DpDetailsContainer .MainInfos .Infobox .Infotexts p:first-child{
+  font-size: 14px ;
+}
+.Totality .DpDetailsContainer .MainInfos .Infobox .Infotexts p:last-child{
+  font-size : 18px ;
+  font-weight: bold ;
+}
+.Totality .DpDetailsContainer .Descriptions{
+  width : 70% ;
+   box-sizing: border-box;
+   padding : 20px ;
+}
+.Totality .DpDetailsContainer .Descriptions .Descriptioncontent{
+ background-color: rgb(255, 255, 255);
+   width : 100% ;
+   height : 100% ;
+   box-sizing: border-box;
+   border-radius: 10px ;
+   border : 2px solid rgb(188, 188, 188,0.5);
+   padding : 10px 30px  ;
+   font-size: 18px ;
+}
+.Totality .ChoiceButtons{
+  padding : 30px 10px ;
+  margin-bottom: 30px ;
+}
+.Totality .ChoiceButtons button{
+ width : 180px ;
+ height : 50px ;
+ background-color: rgb(192, 215, 255);
+ border-radius: 10px 10px 10px 0px ;
+ border : 2px solid rgb(117, 117, 117,0.5);
+ font-size: large;
+ font-weight: bold;
+}
+.Totality .ChoiceButtons button:hover{
+background-color: rgb(166, 190, 232);
+cursor : pointer;
+}
+.Totality .ChoiceButtons button:aCtive{
+background-color: rgb(138, 167, 215);
+cursor : grabbing ;
+}
+@media(max-width : 1000px ) {
+  .Totality .DpDetailsContainer{
+    gap: 40px ;
+  width: 100% ;
+  padding : 0px clamp(2px ,8vw,100px) ;
+display : flex ;
+flex-direction: column;
+box-sizing: border-box;
+}
+.Totality .DpDetailsContainer .MainInfos{
+width : 100% ;
+display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); 
+ box-sizing: border-box;
+ padding : 0px;
+}
+.Totality .DpDetailsContainer .Descriptions{
+  width : 100% ;
+   box-sizing: border-box;
+   padding : 0px;
+}
+.Totality .DpDetailsContainer .Descriptions .Descriptioncontent{
+   font-size: 15px;
+   min-height: 300px ;
+}
+/* 5G Data Plan Details */
+}
+/* About us */
+.AboutContainer{
+  width : 100% ;
+  display : flex ;
+  flex-direction: column;
+  align-items: center;
+  gap : 20px ;
+
+}
+.AboutContainer .WhatisFabu{
+width : 100% ;
+display : flex ;
+flex-direction: row ;
+ align-items: stretch;
+justify-content: center;
+height : 350px ;
+gap : 60px ;
+box-sizing: border-box;
+}
+.AboutContainer .WhatisFabu img{
+   width : auto ;
+   height : 100% ;
+   box-sizing: border-box;
+}
+
+.AboutContainer .WhatisFabu .Lineofsomething{
+   width : 30% ;
+   height : 100% ;
+   padding : 10px ;
+   box-sizing: border-box;
+   justify-content: center;
+   align-items: center;
+}
+.AboutContainer .WhatisFabu .Lineofsomething p{
+  font-size: 20px ;
+
+}
+
+.AboutContainer .GridInvestor{
+ width :70% ;
+ display: grid ;
+ grid-template-columns: repeat(3 , 1fr);
+ align-items: center;
+ box-sizing: border-box;
+ margin-bottom: 50px ;
+}
+.AboutContainer .GridInvestor .Investorbox{
+  background-color: rgb(241, 248, 251);
+width : 100% ;
+height : 150px ;
+ box-sizing: border-box;
+border: 1px solid rgb(160, 160, 160 ,0.5) ;
+justify-self: center;
+display: flex ;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+padding : 30px ;
+}
+.AboutContainer .GridInvestor .Investorbox img{
+    max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+@media (max-width : 1100px){
+
+.AboutContainer .WhatisFabu{
+width : 100% ;
+display : flex ;
+flex-direction: column ;
+ align-items: center;
+justify-content: center;
+gap : 30px ;
+box-sizing: border-box;
+padding : 20px ;
+margin-bottom: 100px ;
+}
+.AboutContainer .WhatisFabu img{
+   width : auto ;
+   height : 80% ;
+   box-sizing: border-box;
+   margin-top: 100px ;
+}
+.AboutContainer .WhatisFabu .Lineofsomething{
+   width : 100% ;
+   height : 100% ;
+   padding : 10px ;
+   box-sizing: border-box;
+   justify-content: center;
+   align-items: center;
+}
+.AboutContainer .WhatisFabu .Lineofsomething p{
+  font-size: 16px ;
+}
+
+.AboutContainer .GridInvestor{
+ width :70% ;
+ display: grid ;
+ grid-template-columns: repeat(2 , 1fr);
+ align-items: center;
+ box-sizing: border-box;
+ margin-bottom: 50px ;
+}
+
+
+
+}
+/* About us */
+
+/* Profile */
+.ProfileContainer{
+ width: 100%;
+ display: flex ;
+ flex-direction: column;
+padding : 30px ;
+ box-sizing: border-box;
+justify-content: center;
+}
+.ProfileContainer .MainInformation{
+ width : 100% ;
+ height : 320px ;
+ background-color: rgb(66, 66, 66) ;
+ display: flex;
+ flex-direction: row ;
+ justify-content: space-between ;
+box-sizing: border-box;
+border-radius: 300px;
+gap : 20px ;
+}
+.ProfileContainer .MainInformation img{
+width: auto ;
+height : 100%;
+object-fit: contain;
+border-radius: 300px;
+border: 5px solid rgb(36, 36, 36);
+box-sizing: border-box;
+}
+
+.ProfileContainer .MainInformation .BasicInfos{
+background-color: rgb(236, 236, 236);
+width : 75% ;
+border-radius: 30px 200px 200px 30px;
+box-sizing: border-box;
+padding: 20px 40px;
+border: 5px solid rgb(36, 36, 36);
+}
+.ProfileContainer .MainInformation .BasicInfos .Lineeach{
+ display: flex;
+ flex-direction: row;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+ line-height: 5px ;
+ font-size: 18px;
+}
+
+.ProfileContainer .MainInformation .BasicInfos .Lineeach:first-child{
+    font-weight: bold ;
+    font-size: 20px;
+  margin-bottom : 5px ;
+}
+.ProfileContainer .AccountsInfo{
+  margin-top: 60px ;
+  display: flex ;
+  flex-direction: column;
+  width : 100%;
+  border : 2px solid black ;
+  align-items: center;
+  box-sizing: border-box;
+  justify-content: center;
+padding : 20px ;
+border-radius: 20px ;
+}
+
+.ProfileContainer .AccountsInfo .Balances{
+  width: 100% ;
+ display: flex ;
+  flex-direction: row;
+   gap : 30px ;
+justify-content: center;
+}
+.ProfileContainer .AccountsInfo .Balances p{
+  font-size: 26px ;
+  font-weight: bold;
+  margin : 0;
+}
+.ProfileContainer .AccountsInfo .Balance{
+ width: 100% ;
+ display: flex ;
+  flex-direction: row;
+   gap : 20px ;
+justify-content: center;
+}
+.ProfileContainer .AccountsInfo .Balance p{
+  font-size: 20px ;
+  margin : 0;
+}
+.ProfileContainer .AccountsInfo .HistoryList{
+ width: 100%;
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+}
+.ProfileContainer .AccountsInfo .HistoryList .HistoryBox{
+ width : 90% ;
+ display: flex ;
+ flex-direction: row;
+ justify-content: space-between;
+ align-items: center;
+background-color: rgb(185, 124, 124);
+box-sizing: border-box;
+padding :0 100px ;
+}
+.ProfileContainer .AccountsInfo .HistoryList .HistoryBox:first-child{
+ background-color: rgb(86, 243, 146);
+  
+
+}
+
+.ProfileContainer .AccountsInfo .Bot{
+font-size: 16px;
+margin: 0;
+margin-bottom: 5px;
+}
+/* Profile */

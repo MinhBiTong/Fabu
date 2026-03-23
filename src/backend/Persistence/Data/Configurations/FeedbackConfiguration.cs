@@ -29,14 +29,10 @@ namespace Persistence.Data.Configurations
             builder.Property(x => x.Status)
                 .HasConversion<int>();
 
-            builder.HasOne(x => x.User)
-                .WithMany()
-                .HasForeignKey(x => x.UserId)
-                .OnDelete(DeleteBehavior.SetNull);
-
             builder.HasOne(x => x.Customer)
-                .WithMany()
+                .WithMany(c => c.Feedbacks)
                 .HasForeignKey(x => x.CustomerId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.SetNull);
         }
     }

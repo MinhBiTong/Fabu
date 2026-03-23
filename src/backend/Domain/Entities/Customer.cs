@@ -21,13 +21,11 @@ namespace Domain.Entities
         public string Address { get; set; }
 
         public long? UserId { get; set; }
-        public virtual User User { get; set; }
-        public long? AccountId { get; set; }
-        public virtual Account Account { get; set; }
+        public virtual User? User { get; set; }
+        public virtual Account? Account { get; set; }
         public virtual ICollection<PostpaidBill> PostpaidBills { get; set; }
         public virtual ICollection<Feedback> Feedbacks { get; set; }
         public virtual ICollection<CustomerService> CustomerServices { get; set; }
         public virtual ICollection<Transaction> Transactions { get; set; }
-        public virtual ICollection<CouponUsage> CouponUsages { get; set; }
     }
 }
