@@ -15,7 +15,37 @@ namespace Persistence.Repositories
         {
         }
 
-        public Task<Payment> FindAsync(long id, bool includeAccount = false, bool includeService = false, bool includePostpaidBill = false, bool includeCustomer = false)
+        public Task<bool> ExistsByTransactionRefAsync(string transactionRef)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Payment?> GetByTransactionRefAsync(string transactionRef)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<Payment>> GetFailedPaymentsAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Payment?> GetLatestPaymentAsync(long customerId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<Payment>> GetPaymentsByTransactionAsync(long transactionId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<Payment>> GetSuccessfulPaymentsAsync(long customerId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<decimal> GetTotalPaidAmountAsync(long customerId)
         {
             throw new NotImplementedException();
         }

@@ -10,5 +10,8 @@ namespace Domain.Repositories
 {
     public interface IFeedbackRepository : IRepositoryBase<Feedback, int>
     {
+        Task<IEnumerable<Feedback>> GetAllPendingAsync(); //chua xy ly status = pending
+        Task MarkAsReadAsync(long feedbackId);
+        Task MarkAsRepliedAsync(long feedbackId, string replyNote);
     }
 }

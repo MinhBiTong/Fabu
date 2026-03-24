@@ -1,5 +1,7 @@
-﻿using Application.DTOs.Responses.UserResponse;
+﻿using Application.DTOs.Requests.UserRequest;
+using Application.DTOs.Responses.UserResponse;
 using Application.Interfaces;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
@@ -12,10 +14,17 @@ namespace Api.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IValidator<CreateUserRequest> _createValidator; //fluentValid
+        private readonly IValidator<UpdateUserRequest> _updateValidator; //fluentValid
 
-        public UsersController(IUserService userService)
+        public UsersController(
+            IUserService userService,
+            IValidator<UpdateUserRequest> updateValidator,
+            IValidator<CreateUserRequest> createValidator)
         {
             _userService = userService;
+            _updateValidator = updateValidator;
+            _createValidator = createValidator;
         }
 
         [HttpGet("me")] //object level: tu check claims userId

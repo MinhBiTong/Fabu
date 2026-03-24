@@ -9,6 +9,8 @@ using System.Security.Claims;
 using Domain.Abstractions;
 using Serilog.Core;
 using Persistence.Data.Configurations;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 namespace Application.Services
 {
     public class UserService : IUserService
@@ -16,14 +18,19 @@ namespace Application.Services
         //inject
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly IResponseCacheService _responseCacheService;
+        private readonly IResponseCacheService? _responseCacheService;
         private readonly IUserContext _userContext;
-        private readonly Logger _logger;
-        private readonly UserConfiguration _userConfiguration;
+        private readonly ILogger<UserService> _logger;
+        private readonly IOptions<UserConfiguration> _userConfiguration;
 
-        public UserService(IUnitOfWork unitOfWork, IMapper mapper, IResponseCacheService? responseCacheService, IUserContext userContext, Logger logger, UserConfiguration _userConfiguration)
+        public UserService(
+            IUnitOfWork unitOfWork, 
+            IMapper mapper,
+            IUserContext userContext, 
+            ILogger<UserService> logger, 
+            IOptions<UserConfiguration> _userConfiguration,
+            IResponseCacheService? responseCacheService = null)
         {
-            
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _responseCacheService = responseCacheService;
@@ -104,7 +111,7 @@ namespace Application.Services
                 return _mapper.Map<List<UserResponse>>(users);
             } catch (Exception ex)
             {
-                _logger.Error("Error in GetAllUsersPagedAsync: {Message}", ex.Message);
+                _logger.LogInformation("Error in GetAllUsersPagedAsync: {Message}", ex.Message);
             }
             return new List<UserResponse>();
         }

@@ -163,3 +163,66 @@
   margin-top:-15px;
   margin-bottom:15px;
 }
+
+@media (max-width:768px){
+
+  .nap-layout{
+    flex-direction:column;
+    align-items:center;
+  }
+
+  .nap-left,
+  .nap-right{
+    width:100%;
+    max-width:500px; 
+  }
+
+  .nap-left{
+    margin-bottom:20px;
+  }
+
+  .nap-input{
+    width:100%;
+  }
+
+  .money-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+}
+
+/* SUCCESS TEXT */
+.success-text{
+  color:green;
+  margin-top:10px;
+  font-size:14px;
+}
+
+/* CARRIER */
+.carrier{
+  font-size:14px;
+  color:#2563eb;
+  margin-top:5px;
+  margin-bottom:10px;
+}
+
+/* BUTTON ACTIVE */
+.nap-submit{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:10px;
+  background:#d1d5db;
+  cursor:not-allowed;
+  transition:0.2s;
+}
+
+.nap-submit.active{
+  background:#2563eb;
+  color:white;
+  cursor:pointer;
+}
+
+.nap-submit.active:hover{
+  background:#1d4ed8;
+}

@@ -128,21 +128,21 @@ export default function HomePage() {
           <div className="package-card">
             <h3>Basic</h3>
             <p>300 Mbps</p>
-            <span>250,000 VND / month</span>
+            <span>250.000 VND / month</span>
             <button>View Details</button>
           </div>
 
           <div className="package-card">
             <h3>Standard</h3>
             <p>500 Mbps</p>
-            <span>289,000 VND / month</span>
+            <span>289.000 VND / month</span>
             <button>View Details</button>
           </div>
 
           <div className="package-card">
             <h3>Premium</h3>
             <p>1 Gbps</p>
-            <span>359,000 VND / month</span>
+            <span>359.000 VND / month</span>
             <button>View Details</button>
           </div>
 
