@@ -10,7 +10,7 @@ namespace Domain.Abstractions.Repositories
 {
     public interface IRepositoryBase<T, TKey> where T : class, IEntityBase<TKey> where TKey : struct
     {
-        Task<T?> GetByIdAsync(TKey id);
+        Task<T> GetByIdAsync(TKey id);
         Task<List<T>> GetAllAsync();
         Task<List<T>> GetAllPagedAsync(int pageNumber, int pageSize);
         Task<T> AddAsync(T entity);

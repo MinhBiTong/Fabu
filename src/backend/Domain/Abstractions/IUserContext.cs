@@ -8,7 +8,7 @@ namespace Domain.Abstractions
 {
     public interface IUserContext
     {
-        string? UserId { get; }
+        string UserId { get; }
         string UserName { get; }
         bool IsAuthenticated { get; }
     }

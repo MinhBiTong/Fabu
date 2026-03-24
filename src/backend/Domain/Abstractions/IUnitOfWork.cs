@@ -1,4 +1,5 @@
 ﻿using Domain.Repositories;
+using Domain.Abstractions.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ namespace Domain.Abstractions
         IUserRepository Users { get; }
         IRoleRepository Roles { get; }
         IPermissionRepository Permissions { get; }
+        IRechargePlanRepository RechargePlans { get; }
         Task<int> CommitAsync();
         Task RollbackAsync();
         Task<int> CommitAsync(int commitId);

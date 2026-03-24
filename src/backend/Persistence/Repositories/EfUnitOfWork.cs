@@ -1,4 +1,5 @@
-﻿using Domain.Abstractions;
+﻿using Domain.Abstractions.Repositories;
+using Domain.Abstractions;
 using Domain.Abstractions.Entities;
 using Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -24,15 +25,17 @@ namespace Persistence.Repositories
         }
 
         //backing field de dung lazy loading cho repository
-        private IUserRepository? _users;
-        private IRoleRepository? _roles;
-        private IPermissionRepository? _permissions;
+        private IUserRepository _users;    
+        private IRoleRepository _roles;
+        private IPermissionRepository _permissions;
+        private IRechargePlanRepository? _rechargePlans;
 
 
         //trien khai property Users tu Interface
         public IUserRepository Users => _users ??= new UserRepository(_context);
         public IRoleRepository Roles => _roles ??= new RoleRepository(_context);
         public IPermissionRepository Permissions => _permissions ??= new PermissionRepository(_context);
+        public IRechargePlanRepository RechargePlans => _rechargePlans ??= new RechargePlanRepository(_context);
 
         public async Task<int> SaveChangesAsync()
         {

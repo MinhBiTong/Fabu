@@ -35,7 +35,7 @@ namespace Persistence.Repositories
             _context.Set<T>().Remove(entity);
         }
 
-        public async Task<T?> GetByIdAsync(TKey id)
+        public async Task<T> GetByIdAsync(TKey id)
         {
             return await _context.Set<T>().FindAsync(id);
         }
