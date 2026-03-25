@@ -43,8 +43,6 @@ builder.Services.AddScoped<IUserContext, UserContext>();
 builder.Services.AddMemoryCache();
 
 // Đăng ký class giả để "lừa" hệ thống
-builder.Services.AddSingleton<IResponseCacheService, DummyCacheService>();
-
 //// ĐẢM BẢO DÒNG NÀY NẰM NGAY DƯỚI ĐOẠN VỪA DÁN
 //var app = builder.Build(); 
 //builder.Services.AddDistributedMemoryCache();
@@ -127,7 +125,6 @@ if (oldCacheService != null)
     builder.Services.Remove(oldCacheService); // Nhẫn tâm gỡ bỏ dịch vụ cũ đang bị lỗi
 }
 builder.Services.AddMemoryCache();
-builder.Services.AddSingleton<IResponseCacheService, DummyCacheService>(); // Ép dùng dịch vụ giả của chúng ta
 // --- KẾT THÚC ĐOẠN ÉP BUỘC ---
 //builder.Logging.ClearProviders(); 
 builder.Host.UseSerilog((ctx, lc) => lc
@@ -178,28 +175,3 @@ app.MapControllers();
 app.UseSerilogRequestLogging();
 
 app.Run();
-
-public class DummyCacheService : IResponseCacheService
-{
-    private readonly IMemoryCache _cache;
-    public DummyCacheService(IMemoryCache cache) => _cache = cache;
-
-    public Task SetCacheResponseAsync(string cacheKey, object response, TimeSpan timeOut)
-    {
-        _cache.Set(cacheKey, response, timeOut);
-        return Task.CompletedTask;
-    }
-
-    public Task<T?> GetCachedResponseAsync<T>(string cacheKey)
-    {
-        // Ép kiểu chuẩn C# để không bị lỗi 'out T'
-        _cache.TryGetValue(cacheKey, out object? result);
-        return Task.FromResult(result == null ? default : (T)result);
-    }
-
-    public Task RemoveCacheResponseAsync(string cacheKey)
-    {
-        _cache.Remove(cacheKey);
-        return Task.CompletedTask;
-    }
-}

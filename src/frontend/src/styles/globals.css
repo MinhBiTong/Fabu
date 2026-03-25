@@ -497,7 +497,7 @@ padding : 0px 15px ;
 }
 .FullScreen .loginOverlay .loginform {
   background-color: whitesmoke;
- width : 30%;
+ width : 450px;
  height : 60%;
  align-items: center;
 display: flex;
@@ -698,6 +698,7 @@ gap : 5px ;
   margin-bottom : 40px ;
   padding : 20px 30px ;
   border: 1px solid rgb(201, 201, 201);
+    box-sizing: border-box;
 }
 .ContactContainer  .ContactContent .ContactForm{
   display : flex ;
@@ -705,6 +706,7 @@ gap : 5px ;
   width : 90% ;
   gap : 5px ;
   padding : 10px 20px ;
+    box-sizing: border-box;
 }
 .ContactContainer .ContactContent h3{
   white-space: normal;
@@ -741,6 +743,64 @@ word-wrap: break-word;
   height : 100px ;
   padding : 10px ;
 }
+
+.ContactContainer .ContactInfos{
+  display : flex ;
+  flex-direction: column ;
+  align-items: center ;
+  width :80% ;
+border-radius: 20px ;
+  box-sizing: border-box;
+  margin-bottom : 40px  ;
+}
+.ContactContainer .ContactInfos .ContactLine{
+  display: flex ;
+  flex-direction: row ;
+  width : 100% ;
+  align-items: center;
+  justify-content: center;
+  padding: 20px ;
+  gap : 30px ;
+  box-sizing: border-box;
+}
+.ContactContainer .ContactInfos .ContactLine .ContactBox{
+  width : 300px ;
+  height : 240px; 
+ background-color: white ;
+ box-sizing: border-box;
+   box-sizing: border-box;
+   border-radius: 10px ;
+   border: 1px solid rgb(166, 166, 166 ,0.6);
+   display : flex ;
+   flex-direction : column ;
+   align-items: center ;
+   gap : 20px ; 
+   padding: 25px 20px ;
+}
+.ContactContainer .ContactInfos .ContactLine .ContactBox .Lines{
+   box-sizing: border-box;
+}
+
+.ContactContainer .ContactInfos .ContactLine .ContactBox h3{
+  margin:  0 ;
+}
+.ContactContainer .ContactInfos .ContactLine .ContactBox .Lines p{
+  margin: 0 ;
+  line-height: 22px ;
+  font-size: 18px ;
+}
+.ContactContainer .ContactInfos .ContactLine .ContactBox img{
+  width : 50px ;
+  height : auto ;
+  object-fit: fill;
+
+}
+
+
+
+
+
+
 
 @media (max-width: 900px) {
   .ContactContainer  .ContactContent .ContactForm button{
@@ -1357,17 +1417,90 @@ margin-bottom: 5px;
 
 /* Admin Dashboard */
 
+/* Main Sheet of dashboard */
+.DashboardContainer{
+ width : 100% ;
+ display : flex ;
+ flex-direction: row ;
 
 
+}
+.DashboardContainer .DashboardSidebar{
+ display: flex;
+ flex-direction : column ;
+ width : 15% ;
+ border-right: 1px solid rgb(176, 176, 176)  ;
+align-items: center;
 
+}
 
+.DashboardContainer .DashboardSidebar .DashboardChoices{
+ width : 100% ;
+ font-size: 18px ;
+ text-align: center;
+ box-sizing: border-box;
 
+ padding: 15px ;
+}
+/* Main Sheet of dashboard */
 
+/* Finance */
+.DashboardContainer .DashboardMainContent{
+ width : 85% ;
+  display: flex;
+  flex-direction: column;
+  background-color: aliceblue;
+}
+.DashboardContainer .DashboardMainContent .FinanceLine1{
+  width : 100% ;
+background-color: aquamarine;
+ display: flex;
+ flex-direction: row;
+}
 
+.DashboardContainer .DashboardMainContent .FinanceLine1  .GridFinance{
+  display: flex ;
+ flex-direction: column ;
+width : 40% ;
+gap : 20px ;
+padding : 20px ;
+}
+.DashboardContainer .DashboardMainContent .FinanceLine1  .GridFinance .GridLine1{
+ display: flex;
+ flex-direction: row  ;
+ background-color: blueviolet;
+ align-items: center;
+ gap : 20px  ;
+ justify-content: center;
+ width : 100% ;
+}
+.DashboardContainer .DashboardMainContent .FinanceLine1  .GridFinance .GridLine2{
+ display: flex;
+ flex-direction: row  ;
+ background-color: blueviolet;
+ align-items: center;
+  justify-content: center;
+ width : 100% ;
+  gap : 20px  ;
 
+}
 
+.DashboardContainer .DashboardMainContent .FinanceLine1 .GridFinance .GridLine1 .Gridbox{
+  width : 40% ;
+  height :150px ;
+  background-color: black;
+}
 
+.DashboardContainer .DashboardMainContent .FinanceLine1 .GridFinance .GridLine2 .Gridbox{
+  width : 40% ;
+  height :150px ;
+  background-color: black;
+}
+.DashboardContainer .DashboardMainContent .FinanceLine1 .MonthFinance{
+  width : 60% ;
+  background-color:  red ;
+}
 
-
+/* Finance */
 
 /* Admin Dashboard */
