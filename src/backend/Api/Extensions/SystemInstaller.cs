@@ -21,7 +21,7 @@ namespace Api.Extensions
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "greenginger API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Fabu API", Version = "v1" });
                 // Nếu dùng JWT, add security definition
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {

@@ -24,27 +24,22 @@ namespace Infrastructure.Services
             _connectionMultiplexer = connectionMultiplexer;
         }
 
-        public IDatabase? GetRedisDb()
-        {
-            return _connectionMultiplexer?.GetDatabase();
-        }
-
+        public IDatabase? GetRedisDb() => _connectionMultiplexer?.GetDatabase();
+        
         public async Task<T?> GetCachedResponseAsync<T>(string cacheKey)
         {
             var cachedResponse = await _distributedCache.GetStringAsync(cacheKey);
-            if (string.IsNullOrEmpty(cachedResponse)) return default;
 
             // Deserialize the JSON string using JsonConvert.DeserializeObject
-            return JsonConvert.DeserializeObject<T>(cachedResponse);
+            return string.IsNullOrEmpty(cachedResponse)
+                ? default
+                : JsonConvert.DeserializeObject<T>(cachedResponse);
         }
 
         //xoa 1 key cu the
         public async Task RemoveCacheResponseAsync(string cacheKey)
         {
-            if (string.IsNullOrWhiteSpace(cacheKey))
-            {
-                throw new ArgumentException("Value cannot be null or whitespace");
-            }
+            if (string.IsNullOrWhiteSpace(cacheKey)) return;
 
             await _distributedCache.RemoveAsync(cacheKey);
             
@@ -68,9 +63,7 @@ namespace Infrastructure.Services
             if(keys.Length == 0) return; // Nếu nhóm không có key nào thì không cần xóa gì cả
 
             foreach (var key in keys)
-            {
                 await _distributedCache.RemoveAsync(key.ToString());
-            }
 
             // Xóa luôn cái Set quản lý nhóm đó
             await db.KeyDeleteAsync(groupKey);
@@ -100,10 +93,7 @@ namespace Infrastructure.Services
         public async Task SetCacheResponseByGroupAsync(string cacheKey, object response, TimeSpan? absoluteExpiry = null, TimeSpan? slidingExpiry = null)
         {
             //check response co du lieu chua
-            if (response == null)
-            {
-                return;
-            }
+            if (response == null) return;
 
             //viet lai de co the truyen vao thoi gian het han tu ngoai, neu khong truyen thi mac dinh la 5 phut
             var settings = new JsonSerializerSettings
@@ -132,9 +122,7 @@ namespace Infrastructure.Services
         {
             var db = GetRedisDb();
             if (db != null)
-            {
                 await db.SetAddAsync(groupKey, value);
-            }
         }
     }
 }
