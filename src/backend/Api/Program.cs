@@ -1,23 +1,14 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using System.Text.Json.Serialization;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Domain.Entities;
-using Persistence.Data.Contexts;
-using Domain.Abstractions;
-using Persistence.Repositories;
 using Api.Extensions;
+using Api.Extensions.ContextExtensions;
 using Api.Middleware;
 using Application.Extensions;
-using Persistence.Data.Configurations;
-using Domain.Configurations;
-using Api.Extensions.ContextExtensions;
 using Application.Interfaces;
+using Domain.Abstractions;
+using Domain.Configurations;
+using Hangfire;
 using Infrastructure.Services;
-using Infrastructure;
+using Persistence.Data.Configurations;
+using Hangfire.MemoryStorage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,7 +26,13 @@ builder.Services.Configure<RateLimiterConfiguration>(builder.Configuration.GetSe
 builder.Services.Configure<JwtConfiguration>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddScoped<IUserContext, UserContext>();
 
+//hien them
 builder.Services.AddScoped<IResponseCacheService, MemoryResponseCacheService>();
+builder.Services.AddScoped<ISmsService, SmsService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+//Queue + Retry Email
+builder.Services.AddHangfire(config => config.UseMemoryStorage());
+builder.Services.AddHangfireServer();
 
 var app = builder.Build();
 app.UseMiddleware<GlobalException>();
@@ -52,10 +49,10 @@ else
     app.UseHsts(); // https strict transport - misconfiguration fix
     app.UseExceptionHandler("/Error"); //generic error o prod
 }
-
 app.UseHttpsRedirection();
 app.UseCors("AllowReactApp");
 app.UseRateLimiter();
+app.UseHangfireDashboard(); //hien them
 app.MapReverseProxy();
 app.UseAuthentication();
 app.UseMiddleware<TokenBlacklistMiddleware>();

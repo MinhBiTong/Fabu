@@ -1,15 +1,8 @@
 ﻿using Application.Interfaces;
-using Application.Validators.LoginValidator;
-using Application.Validators.UserValidator;
 using Domain.Abstractions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Persistence.Data.Contexts;
 using Persistence.Repositories;
-using System.Reflection;
-using Application.Services;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Api.Extensions
 {
