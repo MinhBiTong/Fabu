@@ -30,7 +30,7 @@ builder.Services.AddHttpContextAccessor(); //httpContextAccessor cho claims
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
-//builder.Services.AddReverseProxy().LoadFromConfig(builder.Configuration.GetSection("ReverseProxy")); //cau hinh reverse proxy tu appsettings.json
+builder.Services.AddReverseProxy().LoadFromConfig(builder.Configuration.GetSection("ReverseProxy")); //cau hinh reverse proxy tu appsettings.json
 builder.Services.Configure<UserConfiguration>(builder.Configuration.GetSection("UserSettings"));
 builder.Services.Configure<RoleConfiguration>(builder.Configuration.GetSection("RoleSettings"));
 builder.Services.Configure<PermissionConfiguration>(builder.Configuration.GetSection("PermissionSettings"));
@@ -39,6 +39,7 @@ builder.Services.Configure<RateLimiterConfiguration>(builder.Configuration.GetSe
 builder.Services.Configure<JwtConfiguration>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddScoped<IUserContext, UserContext>();
 //builder.Services.AddSingleton<IResponseCacheService, ResponseCacheService>();
+<<<<<<< HEAD
 // Đăng ký bộ nhớ tạm mặc định
 builder.Services.AddMemoryCache();
 
@@ -126,12 +127,13 @@ if (oldCacheService != null)
 }
 builder.Services.AddMemoryCache();
 // --- KẾT THÚC ĐOẠN ÉP BUỘC ---
+=======
+>>>>>>> 695f42f2c854881b423351f8bc6b72093181c3ed
 //builder.Logging.ClearProviders(); 
 builder.Host.UseSerilog((ctx, lc) => lc
     .ReadFrom.Configuration(ctx.Configuration)
     .WriteTo.Console()
     .Enrich.FromLogContext());
-
 
 var app = builder.Build();
 app.UseMiddleware<GlobalException>();
@@ -144,7 +146,6 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = string.Empty;
 });
 
-// Check môi trường (Mình đã xóa đoạn bị lặp lại của bạn)
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -166,12 +167,12 @@ app.UseStaticFiles();
 app.UseCors("AllowReactApp");
 app.UseRouting();
 app.UseRateLimiter();
-app.MapReverseProxy();
 app.UseAuthentication();
 app.UseMiddleware<TokenBlacklistMiddleware>();
 app.UseMiddleware<GlobalException>();
 app.UseAuthorization();
 app.MapControllers();
 app.UseSerilogRequestLogging();
+app.MapReverseProxy();
 
 app.Run();
