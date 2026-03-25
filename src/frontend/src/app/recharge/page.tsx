@@ -21,7 +21,7 @@ const moneyList = [
   { value: 200000, discount: 0.15 },
   { value: 500000, discount: 0.2 },
 ];
-  // 🎁 Danh sách coupon
+  
   const coupons = [
     { code: "SALE10", discount: 0.1 },
     { code: "SALE5", discount: 0.05 },
@@ -80,7 +80,6 @@ const moneyList = [
           {error && <p className="input-error">{error}</p>}
           {success && <p className="success-text">{success}</p>}
 
-          {/* 💰 Nhập số tiền custom */}
           <input
             type="number"
             placeholder="Enter the amount..."
@@ -105,12 +104,10 @@ const moneyList = [
                   className={`money-btn ${amount === item.value ? "active" : ""
                     }`}
                 >
-                  {/* 💰 Giá tiền */}
                   <span className="money-btn__value">
                     {item.value.toLocaleString("vi-VN")} VND
                   </span>
 
-                  {/* 🎁 Badge giảm giá */}
                   {item.discount > 0 && (
                     <span className="money-btn__badge">
                       🪙 -{item.discount * 100}%
