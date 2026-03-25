@@ -78,10 +78,7 @@ namespace Application.Services
             };
         }
 
-        private bool VerifyPassword(string password, string passwordHash)
-        {
-            return BCrypt.Net.BCrypt.Verify(password, passwordHash); // This is just a placeholder. In a real implementation, you would compare the provided password with the stored hash.
-        }
+        private bool VerifyPassword(string password, string passwordHash) =>  BCrypt.Net.BCrypt.Verify(password, passwordHash);
 
         //validate request fluent + basic
         private async Task ValidateLoginRequestAsync(LoginRequest request)
@@ -173,7 +170,6 @@ namespace Application.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-
         //generate rt random long-lived string
         private string GenerateRefreshToken()
         {
@@ -195,6 +191,7 @@ namespace Application.Services
         //store rt trong redis - key: "refresh:{userId}:{hash}", value: expiry -> expiry
         private async Task StoreRefreshTokenAsync(long userId, string refreshHash, TimeSpan expiry)
         {
+            if (_responseCache == null) return;
             var key = $"refresh:{userId}:{refreshHash}";
             var expiryTicks = DateTime.UtcNow.Add(expiry).Ticks;
             
