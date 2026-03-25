@@ -20,6 +20,8 @@ using Persistence.Repositories;
 using Serilog;
 using System.Text;
 using System.Text.Json.Serialization;
+using Hangfire;
+using Hangfire.MemoryStorage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,6 +46,14 @@ builder.Host.UseSerilog((ctx, lc) => lc
     .ReadFrom.Configuration(ctx.Configuration)
     .WriteTo.Console()
     .Enrich.FromLogContext());
+
+//hien them
+builder.Services.AddScoped<IResponseCacheService, MemoryResponseCacheService>();
+builder.Services.AddScoped<ISmsService, SmsService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+//Queue + Retry Email
+builder.Services.AddHangfire(config => config.UseMemoryStorage());
+builder.Services.AddHangfireServer();
 
 var app = builder.Build();
 app.UseMiddleware<GlobalException>();

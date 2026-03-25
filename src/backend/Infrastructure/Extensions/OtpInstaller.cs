@@ -5,11 +5,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure.Extensions
 {
-    public class EmailIstaller : IInstaller
+    public class OtpInstaller : IInstaller
     {
         public void InstallServices(IServiceCollection services, IConfiguration configuration)
         {
-            services.AddScoped<IEmailService, EmailService>();
+            services.AddHttpClient<ISmsService, SmsService>();
         }
     }
 }

@@ -196,10 +196,10 @@ namespace Application.Services
             var expiryTicks = DateTime.UtcNow.Add(expiry).Ticks;
             
             //luu token
-            await _responseCache.SetCacheResponseByGroupAsync(key, expiryTicks, absoluteExpiry: expiry);
+            await _responseCache.SetCacheResponseByGroupAsync(key, expiryTicks, null, expiry);
 
             // Thêm key vào group của user qua service response cache
-            var groupKey = $"group:refresh:{userId}";
+            var groupKey = $"Group:refresh:{userId}";
             await _responseCache.AddToGroupAsync(groupKey, key);
         }
 
@@ -261,7 +261,7 @@ namespace Application.Services
         {
             // Delete all refresh for user (pattern keys – assume _responseCache supports GetKeysAsync)
             // Xóa group refresh của user
-            var groupKey = $"group:refresh:{request.UserId}";
+            var groupKey = $"Group:refresh:{request.UserId}";
 
             await _responseCache.RemoveCacheResponseByGroupAsync(groupKey);
 

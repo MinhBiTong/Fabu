@@ -24,6 +24,13 @@ namespace Api.Middleware
         //middleware entry point
         public async Task InvokeAsync(HttpContext context)
         {
+            //hien thêm
+            if (context.Request.Path.StartsWithSegments("/swagger"))
+            {
+                await _next(context);
+                return;
+            }
+
             try
             {
                 await _next(context);
@@ -33,6 +40,7 @@ namespace Api.Middleware
                 await HandleAppExceptionAsync(context, appEx);
             } catch (Exception ex)
             {
+                Console.WriteLine(ex); //hien thêm
                 await HandleUnexpectedExceptionAsync(context, ex);
             }
         }
