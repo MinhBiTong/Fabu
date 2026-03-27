@@ -1449,13 +1449,15 @@ align-items: center;
  width : 85% ;
   display: flex;
   flex-direction: column;
-  background-color: aliceblue;
+  
+  gap : 10px ;
 }
 .DashboardContainer .DashboardMainContent .FinanceLine1{
   width : 100% ;
-background-color: aquamarine;
+
  display: flex;
  flex-direction: row;
+  box-sizing: border-box;
 }
 
 .DashboardContainer .DashboardMainContent .FinanceLine1  .GridFinance{
@@ -1464,41 +1466,121 @@ background-color: aquamarine;
 width : 40% ;
 gap : 20px ;
 padding : 20px ;
+ box-sizing: border-box;
 }
 .DashboardContainer .DashboardMainContent .FinanceLine1  .GridFinance .GridLine1{
  display: flex;
  flex-direction: row  ;
- background-color: blueviolet;
+ 
  align-items: center;
  gap : 20px  ;
  justify-content: center;
  width : 100% ;
+ box-sizing: border-box;
 }
 .DashboardContainer .DashboardMainContent .FinanceLine1  .GridFinance .GridLine2{
  display: flex;
  flex-direction: row  ;
- background-color: blueviolet;
+
  align-items: center;
   justify-content: center;
  width : 100% ;
   gap : 20px  ;
-
+ box-sizing: border-box;
 }
 
 .DashboardContainer .DashboardMainContent .FinanceLine1 .GridFinance .GridLine1 .Gridbox{
   width : 40% ;
-  height :150px ;
-  background-color: black;
+  height : 180px ;
+  background-color: rgb(255, 255, 255);
+   box-sizing: border-box;
+   border-radius: 20px ;
+   border : 2px solid rgba(71, 71, 71, 0.6) 
 }
 
 .DashboardContainer .DashboardMainContent .FinanceLine1 .GridFinance .GridLine2 .Gridbox{
   width : 40% ;
-  height :150px ;
-  background-color: black;
+  height :180px ;
+  background-color: rgb(255, 255, 255);
+   box-sizing: border-box;
+    border-radius: 20px ;
+    border : 2px solid rgba(71, 71, 71, 0.6) 
 }
 .DashboardContainer .DashboardMainContent .FinanceLine1 .MonthFinance{
   width : 60% ;
-  background-color:  red ;
+ 
+  padding : 20px ;
+  box-sizing: border-box;
+}
+.DashboardContainer .DashboardMainContent .FinanceLine1 .MonthFinance .Charter{
+ width : 100% ;
+ background-color: white ;
+ height: 100% ;
+ padding : 20px ;
+   box-sizing: border-box;
+     border-radius: 20px ;
+     border : 2px solid rgba(71, 71, 71, 0.6) 
+}
+
+.DashboardContainer .DashboardMainContent .FinanceLine2{
+  width : 100% ;
+
+ display: flex;
+ flex-direction: row;
+}
+.DashboardContainer .DashboardMainContent .FinanceLine2 .CircleChart{
+  width : 40% ;
+ 
+  height : 500px ;
+  box-sizing: border-box;
+  padding : 20px 70px ;
+}
+.DashboardContainer .DashboardMainContent .FinanceLine2 .CountryBarChart{
+ width : 60% ;
+
+  box-sizing: border-box ;
+  padding : 20px ;
+}
+.DashboardContainer .DashboardMainContent .FinanceLine2 .CircleChart .ChartContainer{
+  width : 100% ;
+  height: 100% ;
+  background-color : white ;
+  box-sizing: border-box;
+  padding : 10px ;
+    border-radius: 20px ;
+    border : 2px solid rgba(71, 71, 71, 0.6) 
+}
+.DashboardContainer .DashboardMainContent .FinanceLine2 .CountryBarChart .CountryContainer{
+ width : 100% ;
+  background-color :white ;
+  box-sizing: border-box ;
+  padding : 20px ;
+  height : 100% ;
+    border-radius: 20px ;
+    border : 2px solid rgba(71, 71, 71, 0.6) 
+}
+.DashboardContainer .DashboardMainContent .FinanceLine2 .CircleChart .ChartContainer .PieLegend{
+   display : flex ;
+   flex-direction: column ;
+  align-items: center;
+  padding : 30px 0px  ;
+  gap :20px ;
+  justify-content: center;
+
+}
+
+.DashboardContainer .DashboardMainContent .FinanceLine2 .CircleChart .ChartContainer .PieLegend .LegendItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+}
+
+.DashboardContainer .DashboardMainContent .FinanceLine2 .CircleChart .ChartContainer .PieLegend .LegendColor {
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  
 }
 
 /* Finance */

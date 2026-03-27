@@ -39,7 +39,6 @@ builder.Services.Configure<RateLimiterConfiguration>(builder.Configuration.GetSe
 builder.Services.Configure<JwtConfiguration>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddScoped<IUserContext, UserContext>();
 //builder.Services.AddSingleton<IResponseCacheService, ResponseCacheService>();
-<<<<<<< HEAD
 // Đăng ký bộ nhớ tạm mặc định
 builder.Services.AddMemoryCache();
 
@@ -127,8 +126,7 @@ if (oldCacheService != null)
 }
 builder.Services.AddMemoryCache();
 // --- KẾT THÚC ĐOẠN ÉP BUỘC ---
-=======
->>>>>>> 695f42f2c854881b423351f8bc6b72093181c3ed
+
 //builder.Logging.ClearProviders(); 
 builder.Host.UseSerilog((ctx, lc) => lc
     .ReadFrom.Configuration(ctx.Configuration)
