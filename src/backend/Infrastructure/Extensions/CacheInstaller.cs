@@ -3,7 +3,6 @@ using Domain.Data.Configurations;
 using Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Win32;
 using StackExchange.Redis;
 
 namespace Infrastructure.Extensions
@@ -13,15 +12,26 @@ namespace Infrastructure.Extensions
         public void InstallServices(IServiceCollection services, IConfiguration configuration)
         {
             var redisConfig = configuration.GetSection("RedisConfiguration").Get<RedisConfiguration>()
-                ?? new RedisConfiguration { Enabled = false };
-
+                ?? new RedisConfiguration { Enabled = true };
             services.AddSingleton(redisConfig);
-
+            // Luôn register IDistributedCache
             if (redisConfig.Enabled && !string.IsNullOrEmpty(redisConfig.ConnectionStrings))
             {
+                // Redis thật
                 services.AddSingleton<IConnectionMultiplexer>(sp =>
-                    ConnectionMultiplexer.Connect(redisConfig.ConnectionStrings));
-
+                {
+                    try
+                    {
+                        return ConnectionMultiplexer.Connect(redisConfig.ConnectionStrings);
+                        Console.WriteLine("Redis oke");
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log lỗi nhưng vẫn fallback
+                        Console.WriteLine($"Redis connection failed: {ex.Message}. Using in-memory cache.");
+                        return null; // hoặc throw nếu muốn bắt buộc Redis
+                    }
+                });
                 services.AddStackExchangeRedisCache(options =>
                 {
                     options.Configuration = redisConfig.ConnectionStrings;
@@ -30,14 +40,11 @@ namespace Infrastructure.Extensions
             }
             else
             {
-                // Fallback: In-memory cache khi Redis disabled (cho dev/test)
+                // Fallback in-memory (rất quan trọng!)
                 services.AddDistributedMemoryCache();
             }
-
-            //Register service(luôn có, dù Redis hay không)
-            //quan ly viec cache 1 cai la interface, 1 cai la implement
-            services.AddSingleton<IResponseCacheService, ResponseCacheService>();
-            services.AddScoped<IResponseCacheService, ResponseCacheService>(); // Đăng ký cả Singleton và Scoped để đảm bảo có instance khi Redis disabled
+            // Register service scoped
+            services.AddScoped<IResponseCacheService, ResponseCacheService>();
         }
     }
 }

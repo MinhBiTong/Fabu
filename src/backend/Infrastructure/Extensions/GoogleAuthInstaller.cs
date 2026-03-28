@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Extensions
 {
-    public class GoogleAuthInstaller : IInstaller
-    {
-        public void InstallServices(IServiceCollection services, IConfiguration configuration)
-        {
-            throw new NotImplementedException();
-        }
-    }
+    //public class GoogleAuthInstaller : IInstaller
+    //{
+    //    public void InstallServices(IServiceCollection services, IConfiguration configuration)
+    //    {
+    //        throw new NotImplementedException();
+    //    }
+    //}
 }
