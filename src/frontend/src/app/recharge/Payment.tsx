@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import "../../styles/css/payment.css";
 
@@ -13,15 +14,15 @@ export default function Payment({
   phone,
   amount,
   selectedCoupon,
-  onFinalChange
+  onFinalChange,
 }: Props) {
   const [method, setMethod] = useState("");
   const [discount, setDiscount] = useState(0);
   const [final, setFinal] = useState(0);
 
   const methods = [
-    { id: "001", method: "Viettel", label: "Viettel Gate", discount: 0.025 },
-    { id: "002", method: "Zalopay", label: "ZaloPay", discount: 0.05 },
+    { id: "001", label: "Viettel Gate", discount: 0.025 },
+    { id: "002", label: "ZaloPay", discount: 0.05 },
   ];
 
   const couponMap: any = {
@@ -31,6 +32,8 @@ export default function Payment({
 
   useEffect(() => {
     if (!amount) {
+      setDiscount(0);
+      setFinal(0);
       onFinalChange(0);
       return;
     }
@@ -51,14 +54,12 @@ export default function Payment({
 
   return (
     <div className="payment-container">
-      {/* METHODS */}
       {phone && amount && (
         <div className="methods">
           {methods.map((m) => (
             <div
               key={m.id}
-              className={`method ${method === m.id ? "active" : ""
-                }`}
+              className={`method ${method === m.id ? "active" : ""}`}
               onClick={() => setMethod(m.id)}
             >
               {m.label} (-{m.discount * 100}%)
@@ -67,13 +68,10 @@ export default function Payment({
         </div>
       )}
 
-      {/* SUMMARY */}
       <div className="summary">
         <p>Total: {amount?.toLocaleString("vi-VN")} VND</p>
         <p>Discount: -{discount.toLocaleString("vi-VN")} VND</p>
-        <h3>
-          Total payment: {final.toLocaleString("vi-VN")} VND
-        </h3>
+        <h3>Total Payment: {final.toLocaleString("vi-VN")} VND</h3>
       </div>
     </div>
   );
