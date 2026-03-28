@@ -14,5 +14,30 @@ namespace Persistence.Repositories
         public ServiceRepository(AppDbContext context) : base(context)
         {
         }
+
+        public Task<List<Service>> GetActiveServicesByCategoryAsync(string category)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Service?> GetByCodeAsync(string code)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<Service>> GetPopularServicesAsync(int top)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> IsServiceActiveAsync(long serviceId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<Service>> SearchServicesAsync(string keyword)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

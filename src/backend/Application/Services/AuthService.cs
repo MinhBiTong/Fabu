@@ -27,16 +27,19 @@ namespace Application.Services
     public class AuthService : IAuthService
     {
         private readonly IConfiguration _configuration; // de lay jwt setting
-        private readonly IValidator<LoginRequest> _validator; //fluentValid
-        private readonly IResponseCacheService _responseCache;
+        private readonly IResponseCacheService? _responseCache;
         private readonly TimeSpan _refreshTokenExpiry = TimeSpan.FromDays(7); //7 days
         private readonly JwtConfiguration _jwtConfiguration;
         private readonly IUnitOfWork _unitOfWork;
 
-        public AuthService(IConfiguration configuration, IValidator<LoginRequest> validator,IResponseCacheService responseCache, IOptions<JwtConfiguration> jwtOptions, IResponseCacheService responseCacheService, IUnitOfWork unitOfWork)
+        public AuthService(
+            IConfiguration configuration,
+            IValidator<LoginRequest> validator,
+            IOptions<JwtConfiguration> jwtOptions,
+            IUnitOfWork unitOfWork,
+            IResponseCacheService? responseCache = null) 
         {
             _configuration = configuration;
-            _validator = validator;
             _responseCache = responseCache;
             _jwtConfiguration = jwtOptions.Value;
             _unitOfWork = unitOfWork;
@@ -75,16 +78,13 @@ namespace Application.Services
             };
         }
 
-        private bool VerifyPassword(string password, string passwordHash)
-        {
-            return BCrypt.Net.BCrypt.Verify(password, passwordHash); // This is just a placeholder. In a real implementation, you would compare the provided password with the stored hash.
-        }
+        private bool VerifyPassword(string password, string passwordHash) =>  BCrypt.Net.BCrypt.Verify(password, passwordHash);
 
         //validate request fluent + basic
         private async Task ValidateLoginRequestAsync(LoginRequest request)
         {
-            var validationResult = await _validator.ValidateAsync(request);
-            if (!validationResult.IsValid) throw new AppException(ErrorCode.UNAUTHENTICATED); //400 request
+            //var validationResult = await _validator.ValidateAsync(request);
+            //if (!validationResult.IsValid) throw new AppException(ErrorCode.UNAUTHENTICATED); //400 request
         }
 
         //validate user/password identity
@@ -170,7 +170,6 @@ namespace Application.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-
         //generate rt random long-lived string
         private string GenerateRefreshToken()
         {
@@ -192,6 +191,7 @@ namespace Application.Services
         //store rt trong redis - key: "refresh:{userId}:{hash}", value: expiry -> expiry
         private async Task StoreRefreshTokenAsync(long userId, string refreshHash, TimeSpan expiry)
         {
+            if (_responseCache == null) return;
             var key = $"refresh:{userId}:{refreshHash}";
             var expiryTicks = DateTime.UtcNow.Add(expiry).Ticks;
             

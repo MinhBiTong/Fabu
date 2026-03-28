@@ -10,5 +10,10 @@ namespace Domain.Repositories
 {
     public interface IServiceRepository : IRepositoryBase<Service, long>
     {
+        Task<List<Service>> GetActiveServicesByCategoryAsync(string category);
+        Task<List<Service>> GetPopularServicesAsync(int top);
+        Task<Service?> GetByCodeAsync(string code);
+        Task<bool> IsServiceActiveAsync(long serviceId);
+        Task<List<Service>> SearchServicesAsync(string keyword);
     }
 }

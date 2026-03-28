@@ -14,5 +14,45 @@ namespace Persistence.Repositories
         public CouponUsageRepository(AppDbContext context) : base(context)
         {
         }
+
+        public Task<int> CountUsageAsync(long couponId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> ExistsAsync(long customerId, long couponId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<Coupon>> GetActiveCouponsForCustomerAsync(long customerId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<CouponUsage>> GetByCustomerAsync(long customerId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CouponUsage?> GetByTransactionIdAsync(long transactionId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<CouponUsage>> GetRecentUsagesAsync(int top)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<int> GetUsageCountByUserAsync(long customerId, long couponId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> HasUserUsedCouponAsync(long customerId, long couponId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
