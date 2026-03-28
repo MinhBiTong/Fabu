@@ -1,4 +1,4 @@
-import "../styles/homepage.css";
+import "../styles/css/homepage.css";
 import Link from "next/link";
 
 export default function HomePage() {

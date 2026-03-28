@@ -1,0 +1,316 @@
+/* WRAPPER */
+
+.nap-wrapper{
+  padding:40px 60px;
+  background:#f4f6fb;
+  min-height:80vh;
+  font-family:system-ui, sans-serif;
+}
+
+.nap-title{
+  text-align:center;
+  margin-bottom:35px;
+  font-size:30px;
+  font-weight:700;
+}
+
+/* LAYOUT */
+
+.nap-layout{
+  display:flex;
+  gap:35px;
+  align-items:flex-start;
+}
+
+/* LEFT */
+
+.nap-left{
+  flex:2;
+  background:#fff;
+  padding:35px;
+  border-radius:14px;
+  box-shadow:0 8px 20px rgba(0,0,0,0.06);
+}
+
+.nap-left label{
+  display:block;
+  margin-bottom:10px;
+  font-weight:600;
+  font-size:15px;
+}
+
+/* INPUT */
+
+.nap-input{
+  width:70%;
+  max-width:500px;
+  padding:14px 16px;
+  border-radius:10px;
+  border:1px solid #e5e7eb;
+  margin-bottom:28px;
+  font-size:15px;
+  transition:all .2s;
+}
+
+.nap-input:focus{
+  outline:none;
+  border-color:#2563eb;
+  box-shadow:0 0 0 2px rgba(37,99,235,0.15);
+}
+
+/* MONEY GRID */
+
+.money-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:15px;
+}
+
+/* MONEY BUTTON */
+
+.money-btn{
+  padding:14px;
+  border-radius:12px;
+  border:1px solid #e5e7eb;
+  background:#fff;
+  cursor:pointer;
+  font-weight:600;
+  font-size:15px;
+  transition:all .2s;
+}
+
+.money-btn:hover{
+  border-color:#2563eb;
+  color:#2563eb;
+}
+
+/* ACTIVE MONEY */
+
+.money-btn.active{
+  background:#2563eb;
+  color:white;
+  border-color:#2563eb;
+}
+
+/* RIGHT */
+
+.nap-right{
+  flex:1;
+}
+
+/* PAYMENT BOX */
+
+.payment-box{
+  background:#fff;
+  padding:28px;
+  border-radius:14px;
+  box-shadow:0 8px 20px rgba(0,0,0,0.06);
+}
+
+/* ROW */
+
+.payment-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:16px;
+  font-size:15px;
+}
+
+.payment-row.total{
+  font-size:19px;
+  font-weight:700;
+}
+
+/* NAP BUTTON RIGHT */
+
+.nap-submit{
+  width:100%;
+  padding:15px;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
+  font-weight:600;
+  margin-top:20px;
+  background:#2563eb;
+  color:white;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.nap-submit:disabled{
+  background:#d1d5db;
+  cursor:not-allowed;
+  color:#666;
+}
+
+.nap-submit:hover{
+  background:#1d4ed8;
+}
+
+/* NOTE */
+
+.payment-note{
+  margin-top:16px;
+  font-size:13px;
+  color:#6b7280;
+  line-height:1.5;
+}
+
+.input-error{
+  color:#ef4444;
+  font-size:14px;
+  margin-top:-15px;
+  margin-bottom:15px;
+}
+
+@media (max-width:768px){
+
+  .nap-layout{
+    flex-direction:column;
+    align-items:center;
+  }
+
+  .nap-left,
+  .nap-right{
+    width:100%;
+    max-width:500px; 
+  }
+
+  .nap-left{
+    margin-bottom:20px;
+  }
+
+  .nap-input{
+    width:100%;
+  }
+
+  .money-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+}
+
+/* SUCCESS TEXT */
+.success-text{
+  color:green;
+  margin-top:10px;
+  font-size:14px;
+}
+
+/* CARRIER */
+.carrier{
+  font-size:14px;
+  color:#2563eb;
+  margin-top:5px;
+  margin-bottom:10px;
+}
+
+/* BUTTON ACTIVE */
+.nap-submit{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:10px;
+  background:#d1d5db;
+  cursor:not-allowed;
+  transition:0.2s;
+}
+
+.nap-submit.active{
+  background:#2563eb;
+  color:white;
+  cursor:pointer;
+}
+
+.nap-submit.active:hover{
+  background:#1d4ed8;
+}
+
+/* COUPON LIST */
+.coupon-list {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+/* COUPON ITEM */
+.coupon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  border: 1px solid transparent;
+}
+
+.coupon:hover {
+  background: #fff7ed;
+  border-color: linear-gradient(135deg, #6983b9, #4d648a);
+}
+
+/* ACTIVE */
+.coupon.active {
+  background-color: (135deg, #2563eb, #3b82f6);
+  color: white;
+  border-color: linear-gradient(135deg, #6983b9, #4d648a);
+  box-shadow:  linear-gradient(135deg, #6983b9, #4d648a);
+}
+
+/* ICON COIN */
+.coin {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.money-item {
+  position: relative;
+}
+
+/* BUTTON */
+.money-btn {
+  position: relative;
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.money-btn:hover {
+  border-color: #2563eb;
+}
+
+.money-btn.active {
+  border-color: #2563eb;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+}
+
+/* GIÁ TIỀN */
+.money-btn__value {
+  font-weight: 600;
+}
+
+/* BADGE GIẢM GIÁ */
+.money-btn__badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: linear-gradient(135deg, #0b399e, #3b82f6);
+  color: #fff;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-weight: 500;
+
+  /* FIX SHADOW */
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4);
+}
