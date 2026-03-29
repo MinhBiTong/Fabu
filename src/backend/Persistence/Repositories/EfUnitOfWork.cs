@@ -1,4 +1,5 @@
-﻿using Domain.Abstractions;
+﻿
+using Domain.Abstractions;
 using Domain.Abstractions.Entities;
 using Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +16,7 @@ namespace Persistence.Repositories
     public class EfUnitOfWork : IUnitOfWork
     {
         private readonly AppDbContext _context;
-        private readonly IUserContext _userContext; 
+        private readonly IUserContext _userContext;
 
         public EfUnitOfWork(AppDbContext context, IUserContext userContext)
         {
@@ -39,6 +40,7 @@ namespace Persistence.Repositories
         private IFeedbackRepository? _feedbacks;
         private IRechargePlanRepository? _rechargePlans;
         private ITransactionRepository? _transactions;
+
 
 
         //trien khai property Users tu Interface
@@ -131,3 +133,4 @@ namespace Persistence.Repositories
         }
     }
 }
+

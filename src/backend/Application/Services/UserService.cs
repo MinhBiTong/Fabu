@@ -4,13 +4,14 @@ using Application.Interfaces;
 using AutoMapper;
 using Domain.Abstractions;
 using Domain.Entities;
+using Domain.Configurations;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 using Domain.Abstractions;
 using Serilog.Core;
-using Persistence.Data.Configurations;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Exchange.WebServices.Data;
 namespace Application.Services
 {
     public class UserService : IUserService

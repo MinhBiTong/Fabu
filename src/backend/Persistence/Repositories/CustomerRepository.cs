@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿
+using Domain.Entities;
 using Domain.Repositories;
 using Persistence.Data.Contexts;
 using System;
@@ -56,3 +57,4 @@ namespace Persistence.Repositories
         }
     }
 }
+

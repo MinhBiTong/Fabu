@@ -1,3 +1,8 @@
+using Persistence.Repositories;
+using Infrastructure.Extensions;
+using Infrastructure.Services;
+using Domain.Configurations;
+using Application;
 using Microsoft.Extensions.Caching.Memory;
 using Api.Extensions;
 using Api.Extensions.ContextExtensions;
@@ -20,10 +25,22 @@ using Persistence.Repositories;
 using Serilog;
 using System.Text;
 using System.Text.Json.Serialization;
+using Domain.Repositories;
+using Persistence.Repositories;
+using Infrastructure.Extensions;
+using Infrastructure.Services;
+using Domain.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
 
 //DI tu dong redis, mail, payment
+builder.Services.AddScoped<Domain.Abstractions.IUserContext, UserContext>();
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<ICustomersService, CustomersService>();
+builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
+builder.Services.AddScoped<IServiceService, ServiceService>();
+builder.Services.AddScoped<IRechargePlanRepository, RechargePlanRepository>();
+builder.Services.AddScoped<IRechargePlanService, RechargePlanService>();
 builder.Services.InstallerServicesInAssembly(builder.Configuration);
 builder.Services.AddScoped<IResponseCacheService, ResponseCacheService>();
 builder.Services.AddHttpContextAccessor(); //httpContextAccessor cho claims
@@ -37,7 +54,6 @@ builder.Services.Configure<PermissionConfiguration>(builder.Configuration.GetSec
 builder.Services.Configure<MailConfiguration>(builder.Configuration.GetSection("MailSettings"));
 builder.Services.Configure<RateLimiterConfiguration>(builder.Configuration.GetSection("RateLimiting"));
 builder.Services.Configure<JwtConfiguration>(builder.Configuration.GetSection("Jwt"));
-builder.Services.AddScoped<IUserContext, UserContext>();
 //builder.Services.AddSingleton<IResponseCacheService, ResponseCacheService>();
 //builder.Logging.ClearProviders(); 
 builder.Host.UseSerilog((ctx, lc) => lc
@@ -86,3 +102,4 @@ app.UseSerilogRequestLogging();
 app.MapReverseProxy();
 
 app.Run();
+

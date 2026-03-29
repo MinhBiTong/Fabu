@@ -11,11 +11,10 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Persistence.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.IdentityModel.Tokens.Jwt; //de hash RT
+using System.IdentityModel.Tokens.Jwt; 
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;

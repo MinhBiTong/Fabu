@@ -20,6 +20,11 @@ namespace Persistence.Repositories
             throw new NotImplementedException();
         }
 
+        public Task<Feedback> GetByIdAsync(long id)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task MarkAsReadAsync(long feedbackId)
         {
             throw new NotImplementedException();
