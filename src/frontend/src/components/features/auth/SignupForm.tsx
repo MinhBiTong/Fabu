@@ -3,11 +3,72 @@ import Image from "next/image";
 
 import test from "../../../styles/images/blueytitlebackground.png";
 
+import { useState } from "react";
+import { signupSchema } from "../../../core/validations/SignupSchema";
+
 type Props = {
   onClose: () => void;
 };
 
 function SignUpForm({ onClose }: Props) {
+
+   const [form, setForm] = useState({
+    email: "",
+    username: "",
+    phone: "",
+    birthDate: "",
+    password: "",
+    confirmPassword: ""
+  });
+
+  const [errors, setErrors] = useState<any>({});
+
+  const handleChange = (e: any) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async () => {
+    
+    const result = signupSchema.safeParse(form);
+
+    if (!result.success) {
+      const fieldErrors: any = {};
+      result.error.issues.forEach((err) => {
+        fieldErrors[err.path[0]] = err.message;
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/signin-google", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email: form.email,
+          username: form.username,
+          phone: form.phone,
+          birthDate: form.birthDate,
+          password: form.password
+        })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("Account created!");
+        onClose();
+      } else {
+        alert(data.message);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  
+
   return (
     <div className= "FullScreenup" >
     <div className="SignupOverlay" onClick={onClose}>
@@ -19,32 +80,32 @@ function SignUpForm({ onClose }: Props) {
       <h1>Sign up</h1>
       <div className="CorrectLine">
        <p>Email</p>
-      <input type="Email" placeholder="Enter Email"></input>
+      <input name="email" type="Email" placeholder="Enter Email" onChange={handleChange}></input>
       </div>
      <div className="CorrectLine">
        <p>Username</p>
-      <input type="text" placeholder="Enter Username"></input>
+      <input name="username" type="text" placeholder="Enter Username" onChange={handleChange}></input>
       </div>
 
     <div className="JoinLine">
      <div className="CorrectLine">
        <p>Phone Number</p>
-      <input type="number" placeholder="Enter your number"></input>
+      <input name="phone" type="number" placeholder="Enter your number"onChange={handleChange}></input>
       </div>
       <div className="CorrectLine">
        <p>Birth Date</p>
-      <input type="date" placeholder="Choose a Date"></input>
+      <input name="birthDate" type="date" placeholder="Choose a Date" onChange={handleChange}></input>
       </div>
    </div>
        
         <div className="CorrectLine">
        <p>Password</p>
-      <input type="password" placeholder="Enter Password"></input>
+      <input name="password" type="password" placeholder="Enter Password" onChange={handleChange}></input>
       </div>
 
       <div className="CorrectLine">
        <p>Confirm Password</p>
-      <input type="password" placeholder="Confirm Password"></input>
+      <input name="confirmPassword" type="password" placeholder="Confirm Password" onChange={handleChange}></input>
       </div>
      
        <div className="ToS">
@@ -52,7 +113,7 @@ function SignUpForm({ onClose }: Props) {
        <p>Agreed with Term of Services</p>
        </div>
 
-       <button> Sign Up </button>
+       <button onClick={handleSubmit}> Sign Up </button>
 
 
     </div>
