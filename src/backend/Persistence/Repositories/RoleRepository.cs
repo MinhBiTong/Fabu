@@ -1,5 +1,6 @@
 ﻿using Domain.Entities;
 using Domain.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Persistence.Data.Contexts;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,11 @@ namespace Persistence.Repositories
     {
         public RoleRepository(AppDbContext context) : base(context)
         {
+        }
+
+        public async Task<Role?> GetByNameAsync(string name)
+        {
+            return await _dbSet.FirstOrDefaultAsync(r => r.Name == name);
         }
     }
 }

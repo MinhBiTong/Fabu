@@ -1,5 +1,7 @@
 ﻿using Domain.Entities;
 using Domain.Repositories;
+using Domain.ValueObjects;
+using Microsoft.EntityFrameworkCore;
 using Persistence.Data.Contexts;
 using System;
 using System.Collections.Generic;
@@ -15,39 +17,65 @@ namespace Persistence.Repositories
         {
         }
 
-        public Task<bool> ExistsByTransactionRefAsync(string transactionRef)
+        public async Task<bool> ExistsByPaymentRefAsync(string paymentRef)
         {
-            throw new NotImplementedException();
+            return await _dbSet.AnyAsync(p => p.PaymentRef == paymentRef && !p.IsDeleted);
         }
 
-        public Task<Payment?> GetByTransactionRefAsync(string transactionRef)
+        public async Task<Payment?> GetByPaymentRefAsync(string paymentRef)
         {
-            throw new NotImplementedException();
+            return await _dbSet
+            .Include(p => p.Transactions)
+            .Include(p => p.PostpaidBill)
+            .FirstOrDefaultAsync(p => p.PaymentRef == paymentRef && !p.IsDeleted);
         }
 
-        public Task<List<Payment>> GetFailedPaymentsAsync()
+        public async Task<List<Payment>> GetFailedPaymentsAsync()
         {
-            throw new NotImplementedException();
+            return await _dbSet
+                .Where(p => p.Status == StatusPayment.Failed && !p.IsDeleted)
+                .OrderByDescending(p => p.PaymentDate)
+                .ToListAsync();
         }
 
-        public Task<Payment?> GetLatestPaymentAsync(long customerId)
+        public async Task<Payment?> GetLatestPaymentAsync(long customerId)
         {
-            throw new NotImplementedException();
+            return await _dbSet
+                .Where(p => p.Transactions.Any(t => t.CustomerId == customerId) && !p.IsDeleted)
+                .OrderByDescending(p => p.PaymentDate)
+                .FirstOrDefaultAsync();
         }
 
-        public Task<List<Payment>> GetPaymentsByTransactionAsync(long transactionId)
+        public async Task<List<Payment>> GetPaymentsByTransactionAsync(long transactionId)
         {
-            throw new NotImplementedException();
+            return await _dbSet
+                .Include(p => p.Transactions)
+                .Where(p => p.Transactions.Any(t => t.Id == transactionId) && !p.IsDeleted)
+                .OrderByDescending(p => p.PaymentDate)
+                .ToListAsync();
         }
 
-        public Task<List<Payment>> GetSuccessfulPaymentsAsync(long customerId)
+        public async Task<List<Payment>> GetSuccessfulPaymentsAsync(long customerId)
         {
-            throw new NotImplementedException();
+            return await _dbSet
+                .Where(p => p.Transactions.Any(t => t.CustomerId == customerId)
+                    && p.Status == Domain.ValueObjects.StatusPayment.Completed
+                    && !p.IsDeleted)
+                .OrderByDescending(p => p.PaymentDate)
+                .ToListAsync();
         }
 
-        public Task<decimal> GetTotalPaidAmountAsync(long customerId)
+        public async Task<decimal> GetTotalPaidAmountAsync(long customerId, DateTime? from = null, DateTime? to = null)
         {
-            throw new NotImplementedException();
+            var query = _dbSet
+                .Where(p => p.Transactions.Any(t => t.CustomerId == customerId)
+                    && p.Status == StatusPayment.Completed    
+                    && !p.IsDeleted);
+
+            if (from.HasValue) query = query.Where(p => p.PaymentDate >= from.Value);
+            if (to.HasValue) query = query.Where(p => p.PaymentDate <= to.Value);
+
+            return await query.SumAsync(p => p.Amount);
         }
     }
 }

@@ -9,10 +9,6 @@ namespace Application.DTOs.Requests.LoginRequest
 {
     public class LoginRequest
     {
-        [Required(ErrorMessage = "Username is required")]
-        [StringLength(50)]
-        public string Username { get; set; }
-
         [Required]
         [StringLength(256)]
         public string Password { get; set; }

@@ -13,14 +13,12 @@ namespace Application.DTOs.Requests.UserRequest
         [StringLength(100)]
         public string Email { get; set; }
 
+        public string Password { get; set; }
+
         [Required]
         [StringLength(10)]
         [RegularExpression(@"^\d{10}$", ErrorMessage = "Phone number must be more 10 number")]
         public string PhoneNumber { get; set; }
-
-        [Required]
-        [StringLength(256)]
-        public string PasswordHash { get; set; }
 
         [StringLength(100)]
         public string FullName { get; set; }
