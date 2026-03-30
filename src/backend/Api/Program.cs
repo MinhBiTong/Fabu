@@ -47,7 +47,6 @@ builder.Host.UseSerilog((ctx, lc) => lc
     .WriteTo.Console()
     .Enrich.FromLogContext());
 
-//hien them
 builder.Services.AddScoped<IResponseCacheService, MemoryResponseCacheService>();
 builder.Services.AddScoped<ISmsService, SmsService>();
 builder.Services.AddScoped<IEmailService, EmailService>();

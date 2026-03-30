@@ -8,9 +8,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.DTOs.Requests.TransactionRequest
+namespace Application.DTOs.Responses.TransactionResponse
 {
-    public class TransactionCreateRequest
+    public class TransactionResponse
     {
         public long CustomerId { get; set; }
         [ForeignKey("CustomerId")]
@@ -35,5 +35,18 @@ namespace Application.DTOs.Requests.TransactionRequest
         public DateTime? CompletedAt { get; set; }
 
         public virtual ICollection<CouponUsage> CouponUsages { get; set; }
+        public static TransactionResponse FromEntity(Transaction entity)
+        {
+            if (entity == null) return null;
+            return new TransactionResponse
+            {
+                TransactionRef = entity.TransactionRef,
+                Amount = entity.Amount,
+                TransactionType = entity.TransactionType,
+                Status = entity.Status,
+                PaymentMethod = entity.PaymentMethod,
+                CompletedAt = entity.CompletedAt,
+            };
+        }
     }
 }

@@ -2,13 +2,14 @@
 using Application.DTOs.Requests.LoginRequest;
 using Application.DTOs.Responses.LoginResponse;
 using Application.Interfaces;
+using Azure;
 using FluentValidation;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Google;
 
 namespace Api.Controllers
 {
@@ -25,6 +26,24 @@ namespace Api.Controllers
         {
             _validator = validator ?? throw new ArgumentNullException(nameof(validator));
             _authService = authService ?? throw new ArgumentNullException(nameof(authService));
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+        {
+            try
+            {
+                var result = await _authService.RegisterAsync(request);
+                if (result)
+                {
+                    return Ok(new { message = "Register successfully!" });
+                }
+                return BadRequest(ApiResponse<LoginResponse>.Fail(400, "Register failed! Try again please!"));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error" });
+            }
         }
 
         [HttpPost("login")]

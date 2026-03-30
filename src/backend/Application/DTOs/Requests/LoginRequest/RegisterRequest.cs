@@ -7,8 +7,18 @@ using System.Threading.Tasks;
 
 namespace Application.DTOs.Requests.LoginRequest
 {
-    public class LoginRequest
+    public class RegisterRequest
     {
+        [Required(ErrorMessage = "Username is required")]
+        [StringLength(50)]
+        public string Username { get; set; }
+
+        [Required(ErrorMessage = "FullName is required")]
+        [StringLength(50)]
+        public string FullName { get; set; }
+
+        public string PhoneNumber { get; set; }
+
         [Required]
         [StringLength(256)]
         public string Password { get; set; }

@@ -22,7 +22,7 @@ namespace greenginger.Controllers
             var otp = new Random().Next(100000, 999999);
             string phone = "84377843050";
             var message = $"OTP {otp}";
-            //await _sms.SendSmsAsync("84377843050", $"Xin chao tu ASP.NET toi la hien. Ma OTP cua ban la: {otp}");
+            //await _sms.SendSmsAsync("84377843050", $"Welcome to you! We're Fabu, your OTP code: {otp}");
             await _sms.SendSmsAsync(phone, message);
 
             return Ok("Sent");

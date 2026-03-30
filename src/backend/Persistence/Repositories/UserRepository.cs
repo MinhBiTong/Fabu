@@ -23,7 +23,8 @@ namespace Persistence.Repositories
 
         public async Task<User?> GetByEmailAsync(string email)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
+            return await _dbSet
+                .FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
         }
     }
 }
