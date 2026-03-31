@@ -1,90 +1,105 @@
+/* ===== WRAPPER ===== */
 .bill-wrapper {
   min-height: 100vh;
-  background: #f4f6fb;
+  background: linear-gradient(135deg, #e6f4ff, #f5fbff);
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px;
 }
 
+/* ===== CARD ===== */
 .bill-card {
-  width: 100%;
-  max-width: 420px;
-  background: white;
+  width: 360px;
+  background: #fff;
   border-radius: 20px;
-  padding: 30px 25px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  padding: 30px 20px;
   text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  animation: fadeIn 0.5s ease;
 }
 
-/* ICON */
+/* ===== ICON ===== */
 .success-icon {
   width: 70px;
   height: 70px;
-  border-radius: 50%;
-  border: 4px solid #22c55e;
+  background: #e6f9f0;
   color: #22c55e;
-  font-size: 32px;
+  border-radius: 50%;
+  font-size: 36px;
+  font-weight: bold;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 0 auto 20px;
+  margin: 0 auto 15px;
+  animation: scaleIn 0.4s ease;
 }
 
-/* TITLE */
-.bill-title {
-  font-size: 24px;
-  font-weight: 700;
+/* ===== TITLE ===== */
+.bill-card h2 {
+  font-size: 22px;
+  font-weight: 600;
   margin-bottom: 15px;
-  color: #0f172a;
+  color: #1f2937;
 }
 
-/* INFO */
-.bill-info {
+/* ===== INFO ===== */
+.bill-card p {
   font-size: 14px;
-  color: #64748b;
-  margin-bottom: 20px;
+  color: #6b7280;
+  margin: 6px 0;
 }
 
-.bill-info p {
-  margin: 5px 0;
-}
-
-.highlight {
-  color: #0f172a;
-  font-weight: 600;
-}
-
-/* AMOUNT */
-.bill-amount {
-  font-size: 40px;
-  font-weight: bold;
-  color: #1d4ed8;
+/* ===== AMOUNT ===== */
+.bill-card h3 {
+  font-size: 32px;
+  color: #2563eb;
   margin: 20px 0;
+  font-weight: bold;
 }
 
-/* BUTTONS */
-.bill-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 25px;
-}
-
-.bill-actions button {
-  flex: 1;
+/* ===== BUTTON ===== */
+.bill-card button {
+  width: 100%;
   padding: 12px;
-  border-radius: 10px;
   border: none;
-  background: #e2e8f0;
-  cursor: pointer;
+  border-radius: 10px;
+  background: #2563eb;
+  color: #fff;
   font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
 }
 
-.bill-actions .primary {
+.bill-card button:hover {
   background: #1d4ed8;
-  color: white;
 }
 
-.bill-actions button:hover {
-  opacity: 0.9;
+/* ===== LOADING ===== */
+h2 {
+  font-family: sans-serif;
+  margin-top: 100px;
+  color: #374151;
+}
+
+/* ===== ANIMATION ===== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
