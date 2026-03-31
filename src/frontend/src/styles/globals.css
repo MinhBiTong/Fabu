@@ -116,14 +116,14 @@ display : flex ;
    font-size: 18px;
   padding: 15px 30px ;
   border-radius: 40px ;
-   
+  
 }
 .navibar .signin .ProfileButton{
  align-items: center;
   justify-content: center;
   border-radius: 50px ;
   padding : 0px 12px ;
-  display : none ;
+   display : none ;
 }
 
 .navibar .signin .ProfileButton img{
@@ -224,6 +224,52 @@ display : flex ;
 }
 /* Header Sidebar */
 
+/* Settings */
+.Settings{
+    background-color: rgba(255, 255, 255) ;
+  position: fixed;
+  top: 100px;
+  right : 30px ;
+border-radius: 7px ;
+  width: 150px;
+ min-height: 200px;
+  z-index: 1 ;
+  flex-direction: column;
+  border: 1px inset rgb(33, 112, 216) ;
+}
+.Settings button{
+ width : 100% ;
+ height: 50px ;
+background: white ;
+border : none ;
+cursor: pointer;
+}
+.Settings button:hover{
+
+background: rgb(231, 231, 231) ;
+
+}
+.Settings button:active{
+
+background: rgb(212, 212, 212) ;
+
+}
+
+
+.Settings button:first-child{
+  border-radius: 7px 7px 0 0 ;
+}
+.Settings button:last-child{
+  border-radius:  0 0 7px 7px ;
+}
+
+/* Settings */
+
+/* Settings Choices*/
+
+
+
+/* Settings Choices*/
 
 /* Footer */
 .footer{
@@ -676,7 +722,28 @@ gap : 5px ;
   height : 50px ;
   border-radius: 20px ;
 }
+@media (max-width : 1100px) {
+.FullScreenup .SignupOverlay .SignupContain .image{
+display : none ;
+}
+.FullScreenup .SignupOverlay .SignupContain .Signupform{
+gap : 5px ;
+width : 100% ;
 
+}
+.FullScreenup .SignupOverlay .SignupContain .Signupform .JoinLine{
+ display: flex;
+flex-direction: column ;
+padding : 3px 15px ;
+width : 100% ;
+gap : 0px ;
+}
+.FullScreenup .SignupOverlay .SignupContain .Signupform .JoinLine .CorrectLine input{
+ padding : 0px 10px ;
+ width : 100% ;
+}
+
+}
 /* Sign up Form */
 
 
@@ -685,7 +752,7 @@ gap : 5px ;
   display : flex ;
   flex-direction: column ;
   align-items: center ;
-  width :100% ;
+  width : 100% ;
 }
 .ContactContainer .ContactContent{
   background-color: white ;
@@ -1380,6 +1447,7 @@ justify-content: center;
   margin : 0;
 }
 .ProfileContainer .AccountsInfo .HistoryList{
+  margin-top: 10px ;
  width: 100%;
  display: flex;
  flex-direction: column;
@@ -1391,13 +1459,20 @@ justify-content: center;
  flex-direction: row;
  justify-content: space-between;
  align-items: center;
-background-color: rgb(185, 124, 124);
 box-sizing: border-box;
+background-color: rgb(207, 207, 207);
 padding :0 100px ;
+border : 1px solid black ;
 }
 .ProfileContainer .AccountsInfo .HistoryList .HistoryBox:first-child{
- background-color: rgb(86, 243, 146);
-  
+ background-color: rgb(161, 161, 161);
+  border-radius: 10px 10px 0 0;
+
+}
+
+.ProfileContainer .AccountsInfo .HistoryList .HistoryBox:last-child{
+ border-bottom : 2px solid black ;
+ 
 
 }
 

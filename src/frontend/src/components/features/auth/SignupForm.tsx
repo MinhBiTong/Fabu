@@ -5,6 +5,7 @@ import test from "../../../styles/images/blueytitlebackground.png";
 
 import { useState } from "react";
 import { signupSchema } from "../../../core/validations/SignupSchema";
+import { globalApiClient } from "@/app/api/ApiClient";
 
 type Props = {
   onClose: () => void;
@@ -41,32 +42,26 @@ function SignUpForm({ onClose }: Props) {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/signin-google", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          email: form.email,
-          username: form.username,
-          phone: form.phone,
-          birthDate: form.birthDate,
-          password: form.password
-        })
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        alert("Account created!");
-        onClose();
-      } else {
-        alert(data.message);
+   
+    const res = await globalApiClient.post<any>(
+      "/auth/signin-google", 
+      {
+        email: form.email,
+        username: form.username,
+        phone: form.phone,
+        birthDate: form.birthDate,
+        password: form.password
       }
-    } catch (err) {
-      console.error(err);
+    );
+
+    if (res.code === 200) {
+      alert("Account created!");
+      onClose();
     }
-  };
+  } catch (err) {
+    console.error(err);
+  }
+};
   
 
   return (
