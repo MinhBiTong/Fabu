@@ -14,6 +14,8 @@ namespace Domain.Configurations
 
         [Range(1, 65535)]
         public int Port { get; set; }
+        [Required]
+        public string SenderName { get; set; } = default!;
 
         [Required]
         public string Username { get; set; } = default!;

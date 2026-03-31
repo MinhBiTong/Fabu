@@ -34,8 +34,6 @@ namespace Persistence.Data.Configurations
             builder.Property(x => x.Status)
                 .HasConversion<int>();
 
-            builder.Property(x => x.CompletedAt);
-
             // Quan hệ với Customer (N - 1)
             builder.HasOne(x => x.Customer)
                 .WithMany(c => c.Transactions)

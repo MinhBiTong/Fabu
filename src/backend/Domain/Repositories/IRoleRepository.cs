@@ -10,6 +10,6 @@ namespace Domain.Repositories
 {
     public interface IRoleRepository : IRepositoryBase<Role, long>
     {
-        
+        Task<Role?> GetByNameAsync(string name);
     }
 }

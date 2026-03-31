@@ -20,7 +20,7 @@ namespace Application.DTOs.Requests.TransactionRequest
         [StringLength(30)]
         public string TransactionType { get; set; } // Recharge, BillPayment...
 
-        [Range(0.01, double.MaxValue, ErrorMessage = "Số tiền phải lớn hơn 0")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than 0")]
         public decimal Amount { get; set; }
 
         [StringLength(20)]
@@ -33,5 +33,7 @@ namespace Application.DTOs.Requests.TransactionRequest
         public string TransactionRef { get; set; }
 
         public DateTime? CompletedAt { get; set; }
+
+        public virtual ICollection<CouponUsage> CouponUsages { get; set; }
     }
 }

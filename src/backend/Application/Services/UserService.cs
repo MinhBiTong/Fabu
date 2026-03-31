@@ -21,14 +21,12 @@ namespace Application.Services
         private readonly IResponseCacheService? _responseCacheService;
         private readonly IUserContext _userContext;
         private readonly ILogger<UserService> _logger;
-        private readonly IOptions<UserConfiguration> _userConfiguration;
 
         public UserService(
             IUnitOfWork unitOfWork, 
             IMapper mapper,
             IUserContext userContext, 
             ILogger<UserService> logger, 
-            IOptions<UserConfiguration> _userConfiguration,
             IResponseCacheService? responseCacheService = null)
         {
             _unitOfWork = unitOfWork;
@@ -44,7 +42,7 @@ namespace Application.Services
             var existing = await _unitOfWork.Users.GetByEmailAsync(request.Email);
             if (existing != null) throw new InvalidOperationException("Email exists");
 
-            var user = new User { Username = request.Username, Email = request.Email, PasswordHash = request.PasswordHash };
+            var user = new User { Username = request.Username, Email = request.Email, PasswordHash = request.Password };
             //them vao Repository - luc nay chua luu xuong db
             await _unitOfWork.Users.AddAsync(user);
             //await _unitOfWork.Orders.AddAsync(order);

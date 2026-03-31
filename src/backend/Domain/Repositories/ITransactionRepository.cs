@@ -10,7 +10,6 @@ namespace Domain.Repositories
 {
     public interface ITransactionRepository : IRepositoryBase<Transaction, long>
     {
-        Task<Transaction> GetByIdAsync(long id);
         Task<List<Transaction>> GetByUserIdAsync(long userId);
         Task<List<Transaction>> GetTransactionsByCustomerAsync(
            long customerId,
@@ -20,9 +19,11 @@ namespace Domain.Repositories
         Task<Transaction?> GetByTransactionRefAsync(string transactionRef);
         Task<bool> ExistsByTransactionRefAsync(string transactionRef);
         Task<List<Transaction>> GetRecentTransactionsAsync(long customerId, int top);
-        Task<decimal> GetTotalAmountByCustomerAsync(long customerId);
+        Task<decimal> GetTotalAmountByCustomerAsync(long customerId, DateTime? from = null, DateTime? to = null);
         Task<List<Transaction>> GetFailedTransactionsAsync();
         Task<List<Transaction>> GetPendingTransactionsAsync();
         Task<Transaction?> GetLatestSuccessfulTransactionAsync(long customerId);
+        Task<List<Transaction>> GetRechargeTransactionAsync(long customerId);
+        Task<List<Transaction>> GetServiceActivationTransactionAsync(long customerId);
     }
 }

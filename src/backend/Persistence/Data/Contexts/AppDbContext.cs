@@ -16,24 +16,6 @@ namespace Persistence.Data.Contexts
             _userContext = userContext;
         }
 
-        public DbSet<User> Users { get; set; }
-        public DbSet<Role> Roles { get; set; }
-        public DbSet<Permission> Permissions { get; set; }
-        public DbSet<Customer> Customers { get; set; }
-        public DbSet<Account> Accounts { get; set; }
-        public DbSet<Order> Orders { get; set; }
-        public DbSet<CouponUsage> CouponUsages { get; set; }
-        public DbSet<Payment> Payments { get; set; }
-        public DbSet<AuditLog> AuditLogs { get; set; }
-        public DbSet<Service> Services { get; set; }
-        public DbSet<Coupon> Coupons { get; set; }
-        public DbSet<PostpaidBill> PostpaidBills { get; set; }
-        public DbSet<RechargePlan> RechargePlans { get; set; }
-        public DbSet<CustomerService> CustomerServices { get; set; }
-        public DbSet<Transaction> Transactions { get; set; }
-        public DbSet<Feedback> Feedbacks { get; set; }
-        public DbSet<RolePermission> RolePermissions { get; set; }
-        public DbSet<UserRole> UserRoles { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);            

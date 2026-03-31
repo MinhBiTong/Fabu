@@ -3,6 +3,7 @@ using Domain.Abstractions.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,8 +15,9 @@ namespace Domain.Abstractions.Repositories
         Task<List<T>> GetAllAsync();
         Task<List<T>> GetAllPagedAsync(int pageNumber, int pageSize);
         Task<T> AddAsync(T entity);
-        Task UpdateAsync(T entity);
+        void Update(T entity);
         void Delete(T entity);
         Task<bool> ExistsAsync(TKey id);
+        Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null);
     }
 }

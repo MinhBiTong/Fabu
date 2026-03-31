@@ -12,15 +12,15 @@ using System.Threading.Tasks;
 
 namespace Persistence.Repositories
 {
-    public class EfUnitOfWork : IUnitOfWork
+    public class EfUnitOfWork : IUnitOfWork, IAsyncDisposable
     {
         private readonly AppDbContext _context;
         private readonly IUserContext _userContext; 
 
         public EfUnitOfWork(AppDbContext context, IUserContext userContext)
         {
-            _context = context;
-            _userContext = userContext;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
         }
 
         //backing field de dung lazy loading cho repository
@@ -67,13 +67,22 @@ namespace Persistence.Repositories
         public async Task<int> CommitAsync()
         {
             return await SaveChangesAsync();
-            //await _context.Database.CommitTransactionAsync();
+        }
+
+        //transaction explicit khi can atomic
+        public async Task<IUnitOfWorkTransaction> BeginTransactionAsync()
+        {
+            var transaction = await _context.Database.BeginTransactionAsync();
+            return new EfUnitOfWorkTransaction(transaction, this);
         }
 
         public async Task RollbackAsync()
         {
             //hoan tac cac thay doi trong Change Tracker neu co loi
-            _context.ChangeTracker.Entries().ToList().ForEach(x => x.State = EntityState.Unchanged);
+            foreach (var entry in _context.ChangeTracker.Entries())
+            {
+                entry.State = EntityState.Unchanged;
+            }
             await Task.CompletedTask;
         }
 
@@ -112,9 +121,7 @@ namespace Persistence.Repositories
                 if (entry.Entity is IDateTracking dateEntity)
                 {
                     if (entry.State == EntityState.Added)
-                    {
                         dateEntity.CreatedDate = now;
-                    }
                     dateEntity.ModifiedDate = now;
                 }
 
@@ -122,9 +129,7 @@ namespace Persistence.Repositories
                 if (entry.Entity is IUserTracking userEntity)
                 {
                     if (entry.State == EntityState.Added)
-                    {
                         userEntity.CreatedBy = userId;
-                    }
                     userEntity.ModifiedBy = userId;
                 }
             }

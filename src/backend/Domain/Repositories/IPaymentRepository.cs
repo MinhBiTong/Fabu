@@ -10,12 +10,12 @@ namespace Domain.Repositories
 {
     public interface IPaymentRepository : IRepositoryBase<Payment, long>
     {
+        Task<Payment?> GetByPaymentRefAsync(string paymentRef);
+        Task<bool> ExistsByPaymentRefAsync(string paymentRef);
         Task<List<Payment>> GetPaymentsByTransactionAsync(long transactionId);
-        Task<Payment?> GetByTransactionRefAsync(string transactionRef);
-        Task<bool> ExistsByTransactionRefAsync(string transactionRef);
         Task<List<Payment>> GetSuccessfulPaymentsAsync(long customerId);
-        Task<decimal> GetTotalPaidAmountAsync(long customerId);
         Task<List<Payment>> GetFailedPaymentsAsync();
         Task<Payment?> GetLatestPaymentAsync(long customerId);
+        Task<decimal> GetTotalPaidAmountAsync(long customerId, DateTime? from = null, DateTime? to = null);
     }
 }

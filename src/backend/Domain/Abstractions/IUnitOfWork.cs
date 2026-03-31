@@ -13,10 +13,24 @@ namespace Domain.Abstractions
         IUserRepository Users { get; }
         IRoleRepository Roles { get; }
         IPermissionRepository Permissions { get; }
+        IAccountRepository Accounts { get; }
+        IAuditLogRepository AuditLogs { get; }
+        ICouponRepository Coupons { get; }
+        ICouponUsageRepository CouponUsages { get; }
+        ICustomerRepository Customers { get; }
+        ICustomerServiceRepository CustomerServices { get; }
+        IFeedbackRepository Feedbacks { get; }
+        IPaymentRepository Payments { get; }
+        IRechargePlanRepository RechargePlans { get; }
+        ITransactionRepository Transactions { get; }
+        IPostpaidBillRepository PostpaidBills { get; }
         Task<int> CommitAsync();
         Task RollbackAsync();
         Task<int> CommitAsync(int commitId);
         Task<int> SaveChangesAsync();
+        Task<IUnitOfWorkTransaction> BeginTransactionAsync();
+        void Dispose();
+        ValueTask DisposeAsync();
     }
 
     public interface IUnitOfWork<TContext> : IUnitOfWork where TContext : DbContext
