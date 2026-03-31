@@ -1,4 +1,4 @@
-﻿using Domain.Abstractions;
+using Domain.Abstractions;
 using Domain.Abstractions.Entities;
 using System;
 using System.Collections.Generic;

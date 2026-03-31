@@ -1,7 +1,29 @@
+using Microsoft.Extensions.Caching.Memory;
 using Api.Extensions;
 using Api.Extensions.ContextExtensions;
 using Api.Middleware;
-using Application.Extensions;
+using Infrastructure.Extensions;
+using Application.Interfaces;
+using Application.Services;
+using Domain.Abstractions;
+using Domain.Configurations;
+using Domain.Entities;
+using Infrastructure.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
+using Persistence.Data.Configurations;
+using Persistence.Data.Contexts;
+using Persistence.Repositories;
+using Serilog;
+using System.Text;
+using System.Text.Json.Serialization;
+using Api.Extensions;
+using Api.Extensions.ContextExtensions;
+using Api.Middleware;
+//using Application.Extensions;
 using Application.Interfaces;
 using Domain.Abstractions;
 using Domain.Configurations;
@@ -14,7 +36,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 //DI tu dong redis, mail, payment
 builder.Services.InstallerServicesInAssembly(builder.Configuration);
+builder.Services.AddScoped<IResponseCacheService, ResponseCacheService>();
 builder.Services.AddHttpContextAccessor(); //httpContextAccessor cho claims
+builder.Services.AddDistributedMemoryCache();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
 builder.Services.AddReverseProxy().LoadFromConfig(builder.Configuration.GetSection("ReverseProxy")); //cau hinh reverse proxy tu appsettings.json
@@ -25,9 +49,15 @@ builder.Services.Configure<MailConfiguration>(builder.Configuration.GetSection("
 builder.Services.Configure<RateLimiterConfiguration>(builder.Configuration.GetSection("RateLimiting"));
 builder.Services.Configure<JwtConfiguration>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddScoped<IUserContext, UserContext>();
+//builder.Services.AddSingleton<IResponseCacheService, ResponseCacheService>();
+//builder.Logging.ClearProviders(); 
+builder.Host.UseSerilog((ctx, lc) => lc
+    .ReadFrom.Configuration(ctx.Configuration)
+    .WriteTo.Console()
+    .Enrich.FromLogContext());
 
-//hien them
-builder.Services.AddScoped<IResponseCacheService, MemoryResponseCacheService>();
+//hien themj
+//builder.Services.AddScoped<IResponseCacheService, MemoryResponseCacheService>();
 builder.Services.AddScoped<ISmsService, SmsService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 //Queue + Retry Email
@@ -37,26 +67,43 @@ builder.Services.AddHangfireServer();
 var app = builder.Build();
 app.UseMiddleware<GlobalException>();
 
-// Configure the HTTP request pipeline.
+// Bật Swagger
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "greenginger v1");
+    c.RoutePrefix = string.Empty;
+});
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "greenginger v1");
+        c.RoutePrefix = "swagger";  // mặc định là swagger
+    });
     app.UseDeveloperExceptionPage(); //chi tiet loi chi dev - misconfiguration fix
 }
 else
 {
-    app.UseHsts(); // https strict transport - misconfiguration fix
-    app.UseExceptionHandler("/Error"); //generic error o prod
+    app.UseExceptionHandler("/Error");
+    app.UseHsts();
 }
-app.UseHttpsRedirection();
+
+//app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseCors("AllowReactApp");
+app.UseRouting();
 app.UseRateLimiter();
 app.UseHangfireDashboard(); //hien them
 app.MapReverseProxy();
 app.UseAuthentication();
 app.UseMiddleware<TokenBlacklistMiddleware>();
+app.UseMiddleware<GlobalException>();
 app.UseAuthorization();
 app.MapControllers();
+app.UseSerilogRequestLogging();
+app.MapReverseProxy();
 
 app.Run();

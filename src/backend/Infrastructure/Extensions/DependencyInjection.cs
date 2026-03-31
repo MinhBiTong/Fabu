@@ -11,9 +11,10 @@ using AutoMapper;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Application.Services;
+using Infrastructure.Services;
+using Microsoft.Identity.Client;
 
-
-namespace Application.Extensions
+namespace Infrastructure.Extensions
 {
     public static class DependencyInjection
     {
@@ -23,15 +24,28 @@ namespace Application.Extensions
             var assembly = typeof(DependencyInjection).Assembly;
 
             // Register services
+            services.AddScoped<IResponseCacheService, ResponseCacheService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<IPermissionService, PermissionService>();
+            services.AddScoped<ITransactionService, TransactionService>();
+            services.AddScoped<IPaymentService, PaymentService>();
+            services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<IAuditLogService, AuditLogService>();
+            services.AddScoped<ICouponService, CouponService>();
+            services.AddScoped<ICouponUsageService, CouponUsageService>();
+            services.AddScoped<ICustomerService, Application.Services.CustomerService>();
+            services.AddScoped<ICustomerServiceService, CustomerServiceService>();
+            services.AddScoped<IFeedbackService, FeedbackService>();
+            services.AddScoped<IPostpaidBillService, PostpaidBillService>();
+            services.AddScoped<IRechargePlanService, RechargePlanService>();
+            services.AddScoped<IServiceService, ServiceService>();
 
             // Đăng ký tất cả Validators từ Assembly này
             services.AddValidatorsFromAssembly(assembly);
-            //services.AddValidatorsFromAssemblyContaining<CreateUserRequestValidator>();
-            //services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
+            services.AddValidatorsFromAssemblyContaining<CreateUserRequestValidator>();
+            services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
 
             // Đăng ký AutoMapper từ Assembly này
             services.AddAutoMapper(assembly);

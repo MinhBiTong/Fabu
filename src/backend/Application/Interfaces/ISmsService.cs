@@ -2,6 +2,6 @@
 {
     public interface ISmsService
     {
-        Task SendSmsAsync(string phone, string sms_message);
+        Task<EsmsResponse> SendSmsAsync(string phone, string message);
     }
 }

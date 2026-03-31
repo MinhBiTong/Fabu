@@ -14,5 +14,35 @@ namespace Persistence.Repositories
         public PostpaidBillRepository(AppDbContext context) : base(context)
         {
         }
+
+        public Task<List<PostpaidBill>> GetBillsByDateRangeAsync(long customerId, DateTime from, DateTime to)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<PostpaidBill?> GetLatestBillAsync(long customerId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<PostpaidBill>> GetOverdueBillsAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<decimal> GetTotalUnpaidAmountAsync(long customerId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<PostpaidBill>> GetUnpaidBillsByCustomerAsync(long customerId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> HasUnpaidBillAsync(long customerId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

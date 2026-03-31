@@ -8,8 +8,8 @@ namespace greenginger.Controllers
     [Route("api/v{version:apiVersion}/[controller]")]
     public class SendEmailController : ControllerBase
     {
-        //http://localhost:5055/api/v1/SendEmail/send
-        //http://localhost:5055/hangfire
+        //http://localhost:5000/api/v1/SendEmail/send
+        //http://localhost:5000/hangfire
         private readonly IEmailService _emailService;
 
         public SendEmailController(IEmailService emailService)

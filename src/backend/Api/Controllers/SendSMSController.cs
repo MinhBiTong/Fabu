@@ -7,7 +7,7 @@ namespace greenginger.Controllers
     [Route("api/v{version:apiVersion}/[controller]")]
     public class SendSMSController : ControllerBase
     {
-        //http://localhost:5055/api/v1/SendSMS
+        //http://localhost:5000/api/v1/SendSMS
 
         private readonly ISmsService _sms;
 

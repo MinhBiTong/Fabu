@@ -1,7 +1,14 @@
+"use client";
+
 import Image from "next/image";
+
+import { useRouter } from "next/navigation";
+
 import Arrow from "../../styles/images/upward-arrow.png";
-export default function PhoneService() {
+export default function DataPlan() {
+   const router = useRouter()
   return (
+    
     <div className="p5GContainer">
     <h1>5G Data Plans</h1>
     <div className="ChoosePackage">
@@ -46,7 +53,7 @@ export default function PhoneService() {
                 </div>
               <div className="PackageChoices">
                 <button>Subscribe</button>
-                <h3>View Details</h3>
+                <h3  onClick={() => router.push("/P5GDataPlan/Details")}>View Details</h3>
               </div>
             </div>
          
@@ -71,7 +78,7 @@ export default function PhoneService() {
                 </div>
               <div className="PackageChoices">
                 <button>Subscribe</button>
-                <h3>View Details</h3>
+                <h3  onClick={() => router.push("/P5GDataPlan/Details")}>View Details</h3>
               </div>
             </div>
             <div className="Package">
@@ -88,7 +95,7 @@ export default function PhoneService() {
                 </div>
               <div className="PackageChoices">
                 <button>Subscribe</button>
-                <h3>View Details</h3>
+                <h3  onClick={() => router.push("/P5GDataPlan/Details")}>View Details</h3>
               </div>
             </div>
                <div className="Package">
@@ -105,7 +112,7 @@ export default function PhoneService() {
                 </div>
               <div className="PackageChoices">
                 <button>Subscribe</button>
-                <h3>View Details</h3>
+                <h3  onClick={() => router.push("/P5GDataPlan/Details")}>View Details</h3>
               </div>
             </div>
         </div>
@@ -133,7 +140,7 @@ export default function PhoneService() {
                 </div>
               <div className="PackageChoices">
                 <button>Subscribe</button>
-                <h3>View Details</h3>
+                <h3  onClick={() => router.push("/P5GDataPlan/Details")} >View Details</h3>
               </div>
             </div>
 

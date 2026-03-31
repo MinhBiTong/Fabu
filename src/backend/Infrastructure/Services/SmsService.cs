@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
 using Application.Interfaces;
+using Infrastructure.Models;
 
 namespace Infrastructure.Services
 {
@@ -13,31 +14,29 @@ namespace Infrastructure.Services
             _httpClient = httpClient;
         }
 
-        public async Task SendSmsAsync(string phone, string message)
+        public async Task<EsmsResponse> SendSmsAsync(string phone, string message)
         {
             var body = new
             {
-                ApiKey = "B49D17381C1A3A2606F5380E6D0B1F",
-                SecretKey = "AAE0E51F1C8271841419198BFE91C4",
+                ApiKey = "B49D17381C1A3A2606F5380E6D0B1F", //tai khoan
+                SecretKey = "AAE0E51F1C8271841419198BFE91C4", //mat khau
                 Phone = phone, //dien thoai nguoi nhan
                 Content = message, //noi dung tin nhan
-                SmsType = 8 // 2 = CSKH/OTP
+                //SmsType = 4 // 2 = CSKH/OTP
             };
 
-            var json = new StringContent(JsonSerializer.Serialize(body),
-                Encoding.UTF8,
-                "application/json"
-            );
+            var json_body = JsonSerializer.Serialize(body);
 
             var response = await _httpClient.PostAsync(
-                "https://rest.esms.vn/MainService.svc/json/SendMultipleMessage_V4_post_json/",
-                json
+                "https://rest.esms.vn/MainService.svc/SendOtpMessage",
+                new StringContent(json_body, Encoding.UTF8, "application/json")
             );
 
             var result = await response.Content.ReadAsStringAsync();
+            Console.WriteLine("Request: " + json_body);
+            Console.WriteLine("Response: " + result);
 
-            Console.WriteLine(JsonSerializer.Serialize(body));
-            Console.WriteLine(result);
+            return JsonSerializer.Deserialize<EsmsResponse>(result);
         }
     }
 }
