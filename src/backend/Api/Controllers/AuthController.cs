@@ -47,7 +47,7 @@ namespace Api.Controllers
         }
 
         [HttpPost("login")]
-        [EnableRateLimiting("AuthPolicy")]
+        //[EnableRateLimiting("AuthPolicy")]
         public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request)
         {
             var validationResult = await _validator.ValidateAsync(request);
