@@ -3,7 +3,7 @@ using System.Security.Claims;
 
 namespace Api.Extensions.ContextExtensions
 {
-    public class UserContext: IUserContext
+    public class UserContext : Domain.Abstractions.IUserContext
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
 

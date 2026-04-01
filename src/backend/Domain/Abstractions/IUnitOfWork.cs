@@ -1,4 +1,5 @@
-﻿using Domain.Repositories;
+﻿
+using Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,12 @@ namespace Domain.Abstractions
 {
     public interface IUnitOfWork : IDisposable
     {
+        IFeedbackRepository Feedbacks { get; }
+        ICustomerServiceRepository CustomerServices { get; }
+        ICustomerRepository Customers { get; }
+        IServiceRepository Services { get; }
         IUserRepository Users { get; }
+        IRechargePlanRepository RechargePlans { get; }
         IRoleRepository Roles { get; }
         IPermissionRepository Permissions { get; }
         IAccountRepository Accounts { get; }
@@ -38,3 +44,4 @@ namespace Domain.Abstractions
 
     }
 }
+

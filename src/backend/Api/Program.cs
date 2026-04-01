@@ -20,8 +20,6 @@ using Persistence.Repositories;
 using Serilog;
 using System.Text;
 using System.Text.Json.Serialization;
-using Hangfire;
-using Hangfire.MemoryStorage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,17 +37,15 @@ builder.Services.Configure<PermissionConfiguration>(builder.Configuration.GetSec
 builder.Services.Configure<MailConfiguration>(builder.Configuration.GetSection("MailSettings"));
 builder.Services.Configure<RateLimiterConfiguration>(builder.Configuration.GetSection("RateLimiting"));
 builder.Services.Configure<JwtConfiguration>(builder.Configuration.GetSection("Jwt"));
-builder.Services.AddScoped<IUserContext, UserContext>();
-
-//builder.Services.AddAuthentication()
-//    .AddGoogle(options =>
-//    {
-//        options.ClientId = builder.Configuration["Authentication:Google:ClientId"]
-//                           ?? throw new InvalidOperationException("Missing Google ClientId");
-//        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]
-//                               ?? throw new InvalidOperationException("Missing Google ClientSecret");
-//    });
-
+builder.Services.AddScoped<Domain.Abstractions.IUserContext, UserContext>();
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<ICustomersService, CustomersService>();
+builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
+builder.Services.AddScoped<IServiceService, ServiceService>();
+builder.Services.AddScoped<IRechargePlanRepository, RechargePlanRepository>();
+builder.Services.AddScoped<IRechargePlanService, RechargePlanService>();
+//builder.Services.AddScoped<IUserContext, UserContext>();
+//builder.Services.AddSingleton<IResponseCacheService, ResponseCacheService>();
 //builder.Logging.ClearProviders(); 
 builder.Host.UseSerilog((ctx, lc) => lc
     .ReadFrom.Configuration(ctx.Configuration)
@@ -103,3 +99,4 @@ app.UseSerilogRequestLogging();
 app.MapReverseProxy();
 
 app.Run();
+
