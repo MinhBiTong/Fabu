@@ -38,14 +38,7 @@ builder.Services.Configure<MailConfiguration>(builder.Configuration.GetSection("
 builder.Services.Configure<RateLimiterConfiguration>(builder.Configuration.GetSection("RateLimiting"));
 builder.Services.Configure<JwtConfiguration>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddScoped<Domain.Abstractions.IUserContext, UserContext>();
-builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
-builder.Services.AddScoped<ICustomersService, CustomersService>();
-builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
-builder.Services.AddScoped<IServiceService, ServiceService>();
-builder.Services.AddScoped<IRechargePlanRepository, RechargePlanRepository>();
-builder.Services.AddScoped<IRechargePlanService, RechargePlanService>();
-//builder.Services.AddScoped<IUserContext, UserContext>();
-//builder.Services.AddSingleton<IResponseCacheService, ResponseCacheService>();
+
 //builder.Logging.ClearProviders(); 
 builder.Host.UseSerilog((ctx, lc) => lc
     .ReadFrom.Configuration(ctx.Configuration)
@@ -55,8 +48,8 @@ builder.Host.UseSerilog((ctx, lc) => lc
 builder.Services.AddScoped<ISmsService, SmsService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 //Queue + Retry Email
-builder.Services.AddHangfire(config => config.UseMemoryStorage());
-builder.Services.AddHangfireServer();
+//builder.Services.AddHangfire(config => config.UseMemoryStorage());
+//builder.Services.AddHangfireServer();
 
 var app = builder.Build();
 app.UseMiddleware<GlobalException>();

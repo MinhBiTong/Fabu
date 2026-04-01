@@ -11,7 +11,6 @@ using Domain.Abstractions;
 using Serilog.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.Exchange.WebServices.Data;
 namespace Application.Services
 {
     public class UserService : IUserService

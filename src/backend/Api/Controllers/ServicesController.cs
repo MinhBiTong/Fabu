@@ -1,75 +1,59 @@
-//using Domain.Abstractions;
-//using System;
-//using System.Collections.Generic;
-//using System.ComponentModel.DataAnnotations;
-//using System.ComponentModel.DataAnnotations.Schema;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
-
-//namespace Domain.Entities
-//{
-//    public class CustomerService : EntityAuditBase<long>
-//    {
-//        public long? CustomerId { get; set; }
-//        public virtual Customer? Customer { get; set; }
-
-//        public long? ServiceId { get; set; }
-//        public virtual Service? Service { get; set; }
-
-//        public DateTime ActivatedAt { get; set; } = DateTime.UtcNow;
-
-//        public DateTime ExpiresAt { get; set; } = DateTime.UtcNow;
-
-//        public bool IsAutoRenewed { get; set; } // 0: No, 1: Yes
-//    }
-//}
-
-using Application.DTOs;
+using Application.DTOs.Requests;
 using Application.DTOs.Requests.CustomerRequest;
-using Application.DTOs.Responses;
+
+using Application.DTOs.Requests.ServiceRequest;
 using Application.Interfaces;
-using AutoMapper;
-using Domain.Abstractions;
-using Domain.Entities;
-using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
-namespace Application.Services
+namespace Api.Controllers
 {
-    public class CustomersService : ICustomersService
+    [Route("api/[controller]")]
+    [ApiController]
+    public class ServiceController : ControllerBase
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
+        private readonly IServiceService _serviceService;
 
-        public CustomersService(IUnitOfWork unitOfWork, IMapper mapper)
+        public ServiceController(IServiceService serviceService)
         {
-            _unitOfWork = unitOfWork;
-            _mapper = mapper;
+            serviceService = _serviceService;
         }
 
-        public async Task<ApiResponse<List<CustomerResponse>>> GetAllAsync()
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
         {
-            var customers = await _unitOfWork.Customers.GetAllAsync();
-            var result = _mapper.Map<List<CustomerResponse>>(customers);
-            return ApiResponse<List<CustomerResponse>>.Success(result);
+            var response = await _serviceService.GetAllAsync();
+            if (response.Code != 200) return BadRequest(response);
+            return Ok(response);
         }
 
-        public async Task<ApiResponse<CustomerResponse>> GetByIdAsync(long id)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(long id)
         {
-            var customer = await _unitOfWork.Customers.GetByIdAsync(id);
-            if (customer == null) return ApiResponse<CustomerResponse>.Fail(404, "Customer not found.");
-            var result = _mapper.Map<CustomerResponse>(customer);
-            return ApiResponse<CustomerResponse>.Success(result);
+            var response = await _serviceService.GetByIdAsync(id);
+            if (response.Code != 200) return NotFound(response);
+            return Ok(response);
         }
 
-        public async Task<ApiResponse<CustomerResponse>> CreateAsync(CustomerCreateRequest request)
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] ServiceCreateRequest request)
         {
-            var customer = _mapper.Map<Customer>(request);
-            await _unitOfWork.Customers.AddAsync(customer);
-            await _unitOfWork.SaveChangesAsync();
-            var result = _mapper.Map<CustomerResponse>(customer);
-            return ApiResponse<CustomerResponse>.Success(result, "Customer created successfully.");
+            var response = await _serviceService.CreateAsync(request);
+            if (response.Code != 200) return BadRequest(response);
+            return Ok(response);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(long id, [FromBody] ServiceCreateRequest request)
+        {
+            
+            return null;
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(long id)
+        {
+            return null;
         }
     }
 }

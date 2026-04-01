@@ -24,12 +24,12 @@ using System.Threading.Tasks;
 
 namespace Application.Services
 {
-    public class CustomersService : ICustomersService
+    public class CustomerService : ICustomerService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public CustomersService(IUnitOfWork unitOfWork, IMapper mapper)
+        public CustomerService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -57,6 +57,16 @@ namespace Application.Services
             await _unitOfWork.SaveChangesAsync();
             var result = _mapper.Map<CustomerResponse>(customer);
             return ApiResponse<CustomerResponse>.Success(result, "Customer created successfully.");
+        }
+
+        public Task<ApiResponse<bool>> UpdateAsync(long id, CustomerUpdateRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ApiResponse<bool>> DeleteAsync(long id)
+        {
+            throw new NotImplementedException();
         }
     }
 }

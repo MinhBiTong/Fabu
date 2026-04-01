@@ -1,3 +1,5 @@
+﻿using Application.DTOs;
+using Application.DTOs.Requests;
 using Application.DTOs.Requests.CustomerRequest;
 using Application.DTOs.Responses;
 using System.Collections.Generic;

@@ -50,7 +50,7 @@ namespace Application.Services
             var feedback = await _unitOfWork.Feedbacks.GetByIdAsync(id);
             if (feedback == null) return ApiResponse<bool>.Fail(404, "Feedback not found.");
             _mapper.Map(request, feedback);
-            await _unitOfWork.Feedbacks.UpdateAsync(feedback);
+            _unitOfWork.Feedbacks.Update(feedback); 
             await _unitOfWork.SaveChangesAsync();
             return ApiResponse<bool>.Success(true, "Feedback updated.");
         }

@@ -81,9 +81,22 @@ namespace Persistence.Repositories
         public async Task RollbackAsync()
         {
             //hoan tac cac thay doi trong Change Tracker neu co loi
-            foreach (var entry in _context.ChangeTracker.Entries())
+            var entries = _context.ChangeTracker.Entries()
+                .Where(e => e.State != EntityState.Unchanged)
+                .ToList();
+
+            foreach (var entry in entries)
             {
-                entry.State = EntityState.Unchanged;
+                switch (entry.State)
+                {
+                    case EntityState.Modified:
+                    case EntityState.Deleted:
+                        entry.State = EntityState.Unchanged;
+                        break;
+                    case EntityState.Added:
+                        entry.State = EntityState.Detached;
+                        break;
+                }
             }
             await Task.CompletedTask;
         }
@@ -103,6 +116,8 @@ namespace Persistence.Repositories
             throw new NotImplementedException();
         }
 
+        public bool HasChanges() => _context.ChangeTracker.HasChanges();
+
         private void UpdateAuditFields()
         {
             var userId = _userContext.UserId ?? "System";
@@ -114,7 +129,7 @@ namespace Persistence.Repositories
                 if (entry.State == EntityState.Deleted && entry.Entity is ISoftDelete softDeleteEntity)
                 {
                     //chuyen tu xoa sang cap nhat
-                    entry.State = EntityState.Modified;
+                    entry.State = EntityState.Modified; //chan delete thuc
                     softDeleteEntity.IsDeleted = true;
                     softDeleteEntity.DeletedAt = now;
                 }

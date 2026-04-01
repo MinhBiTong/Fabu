@@ -40,7 +40,7 @@ namespace Application.Services
 
 		public async Task<ApiResponse<CustomerServiceResponse>> CreateAsync(CustomerServiceCreateRequest request)
 		{
-			var customerService = _mapper.Map<CustomerService>(request);
+			var customerService = _mapper.Map<Domain.Entities.CustomerService>(request);
 			await _unitOfWork.CustomerServices.AddAsync(customerService);
 			await _unitOfWork.SaveChangesAsync();
 			var result = _mapper.Map<CustomerServiceResponse>(customerService);
