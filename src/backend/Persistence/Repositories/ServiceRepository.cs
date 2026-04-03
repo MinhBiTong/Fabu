@@ -1,4 +1,6 @@
-﻿using Domain.Entities;
+﻿
+using Domain.Abstractions;
+using Domain.Entities;
 using Domain.Repositories;
 using Persistence.Data.Contexts;
 using System;
@@ -10,6 +12,7 @@ using System.Threading.Tasks;
 namespace Persistence.Repositories
 {
     public class ServiceRepository : BaseRepository<Service, long>, IServiceRepository
+
     {
         public ServiceRepository(AppDbContext context) : base(context)
         {
@@ -41,3 +44,4 @@ namespace Persistence.Repositories
         }
     }
 }
+
