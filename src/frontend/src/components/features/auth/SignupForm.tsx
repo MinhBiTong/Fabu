@@ -74,11 +74,11 @@ function SignUpForm({ onClose }: Props) {
     <div className="Signupform">
       <h1>Sign up</h1>
       <div className="CorrectLine">
-       <p>Email</p>
+       <p>Email*</p>
       <input name="Email" type="email" placeholder="Enter Email" onChange={handleChange}></input>
       </div>
      <div className="CorrectLine">
-       <p>Username</p>
+       <p>Username*</p>
       <input name="Username" type="text" placeholder="Enter Username" onChange={handleChange}></input>
       </div>   
       <div className="CorrectLine">
@@ -96,12 +96,12 @@ function SignUpForm({ onClose }: Props) {
       </div>
      
         <div className="CorrectLine">
-       <p>Password</p>
+       <p>Password*</p>
       <input name="Password" type="password" placeholder="Enter Password" onChange={handleChange}></input>
       </div>
 
       <div className="CorrectLine">
-       <p>Confirm Password</p>
+       <p>Confirm Password*</p>
       <input name="confirmPassword" type="password" placeholder="Confirm Password" onChange={handleChange}></input>
       </div>
      

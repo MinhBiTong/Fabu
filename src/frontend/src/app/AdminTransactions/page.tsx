@@ -2,8 +2,11 @@
 
 import Image from "next/image";
 import Way from "../../styles/images/Way.png"
+import { useRouter } from "next/navigation";
+
 
 export default function AdminTransactions() {
+   const router = useRouter()
 
 
   return ( 
@@ -48,7 +51,12 @@ export default function AdminTransactions() {
                <td>Data Plan</td>
                <td>9000$</td>
                <td>Completed</td>
-               <td>asdasd</td>
+               <td><span
+    className="Clickablewords"
+    onClick={() => router.push("/AdminTransactions/TransactionsDetails")}
+  >
+    Details
+  </span></td>
 
             </tr>
              <tr>
@@ -57,7 +65,12 @@ export default function AdminTransactions() {
                <td>Data Plan</td>
                <td>9000$</td>
                <td>Completed</td>
-               <td>asdasd</td>
+               <td><span
+    className="Clickablewords"
+    onClick={() => router.push("/AdminTransactions/TransactionsDetails")}
+  >
+    Details
+  </span></td>
 
             </tr>
 

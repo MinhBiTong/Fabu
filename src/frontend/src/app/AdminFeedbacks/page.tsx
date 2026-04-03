@@ -3,12 +3,15 @@
 import {    BarChart,Bar, XAxis, YAxis,Tooltip, ResponsiveContainer} from "recharts";
 import Image from "next/image";
 
+
+import { useRouter } from "next/navigation";
 import Way from "../../styles/images/Way.png"
 import Star from "../../styles/images/StarratingYes.png"
 import search from "../../styles/images/search.png"
 
 export default function AdminFeedbacks() {
 
+const router = useRouter()
 const data = [
   { star: "5", total: 30 },
   { star: "4", total: 10 },
@@ -52,7 +55,7 @@ const data = [
 
 
         <div className="Listing">
-          <div className="FeedbackBox">
+          <div className="FeedbackBox" onClick={() => router.push("/AdminFeedbacks/FeedbackDetails")}>
           <div className="Email">Email123456789@gmail.com</div>
           <div className="AmountStars">
              <Image src={Star} alt=""></Image>
@@ -63,7 +66,7 @@ const data = [
           </div>
           </div>
 
-          <div className="FeedbackBox">
+          <div className="FeedbackBox"  onClick={() => router.push("/AdminFeedbacks/FeedbackDetails")}>
           <div className="Email">Email123456789@gmail.com</div>
           <div className="AmountStars">
             <Image src={Star} alt=""></Image>
@@ -76,7 +79,7 @@ const data = [
           </div>
           </div>
 
-         <div className="FeedbackBox">
+         <div className="FeedbackBox"  onClick={() => router.push("/AdminFeedbacks/FeedbackDetails")}>
           <div className="Email">Email123456789@gmail.com</div>
           <div className="AmountStars">
             <Image src={Star} alt=""></Image>
@@ -85,7 +88,7 @@ const data = [
           </div>
         
 
-           <div className="FeedbackBox">
+           <div className="FeedbackBox"  onClick={() => router.push("/AdminFeedbacks/FeedbackDetails")}>
           <div className="Email">Email123456789@gmail.com</div>
           <div className="AmountStars">
                     <Image src={Star} alt=""></Image>
@@ -95,7 +98,7 @@ const data = [
           {/* 
              Each box
 
-           <div className="FeedbackBox">
+           <div className="FeedbackBox"  onClick={() => router.push("/AdminFeedbacks/FeedbackDetails")}>
           <div className="Email">Email123456789@gmail.com</div>
           <div className="AmountStars">
                     <Image src={Star} alt=""></Image>

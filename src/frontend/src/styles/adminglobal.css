@@ -1,5 +1,6 @@
-
-/* Admin Sidebar */
+.Clickablewords{
+  cursor: pointer;
+}
 
 
 /* Admin Sidebar */
@@ -63,6 +64,9 @@ cursor: grabbing;
 border-bottom: 1px solid black ;
 
 }
+
+/* Admin Sidebar */
+
 /* Admin Dashboard */
 
 /* Main Sheet of dashboard */
@@ -416,8 +420,8 @@ justify-content: center;
     width : 340px ;
     height : 130px ;
     border-radius:  13px ;
-    border : 2px solid grey
-
+    border : 2px solid grey;
+    cursor:  pointer ;
 }
 .AdminFeedbacksContainer .FeedbackListContainer .Listing .FeedbackBox .Email{
  width : 100% ;
@@ -452,10 +456,56 @@ justify-content: center;
 
 /* Admin Feedbacks Details */
 
+.AdminFeedDetailsContainer{
+ width : 100% ;
+ display: flex;
+ flex-direction: column ;
+align-items: center;
+}
+.AdminFeedDetailsContainer .StarsRated{
+ width: 80% ;
+ display: flex;
+ flex-direction: row;
+ align-items: center;
+ justify-content: center;
+ padding : 10px ;
+ gap : 15px ;
+}
+.AdminFeedDetailsContainer .StarsRated img{
+  width : 50px ;
+  height : auto ;
 
+}
+.AdminFeedDetailsContainer .Nameplace{
+  width : 70% ;
+  font-size: 22px ;
+  display: flex;
+  flex-direction: column;
+  gap : 10px ;
+}
+.AdminFeedDetailsContainer .DisplayContent{
+margin-top : 30px ;
+width : 70%;
+border-radius : 20px ;
+border : 2px solid black ;
+align-items: center;
+padding :  20px 40px ; 
+display: flex;
+flex-direction: column;
+gap : 10px ;
+background-color: white ;
+margin-bottom: 30px;
+}
+.AdminFeedDetailsContainer .DisplayContent h2{
+  margin: 0;
+}
+.AdminFeedDetailsContainer .DisplayContent span{
+ font-size: 21px ;
+
+}
 /* Admin Feedbacks Details */
 
-/* Admin Services */
+/* Admin Transactions */
 
 .TransactionsContainer{
    width : 100% ;
@@ -592,7 +642,60 @@ height: auto;
 }
 
 
-/* Admin Services */
+/* Admin Transactions */
+
+
+/* Admin Transactions Details*/
+
+.TransactionsDetailsContainer{
+  width : 100% ;
+   display: flex ;
+   flex-direction: column;
+   align-items: center;
+}
+.TransactionsDetailsContainer .TransactionsBox{
+ width : 60% ;
+ padding : 20px 20px 0px 20px;
+ background-color: rgb(215, 222, 227);
+ display: flex ;
+ flex-direction: column ;
+ align-items: center ;
+ border-radius: 20px ;
+ border : 2px solid black ;
+}
+.TransactionsDetailsContainer .TransactionsBox .EachLine{
+ width : 100% ;
+ padding : 20px ;
+ font-size: 18px ;
+ display: flex;
+ flex-direction: row;
+ align-items: center;
+ justify-content: space-between;
+border-bottom: 0.5px solid black ;
+}
+
+.TransactionsDetailsContainer .TransactionsBox .EachLine:last-child{
+  border-bottom: none;
+
+}
+.TransactionsDetailsContainer .Optionsbuttons{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+margin-bottom: 30px ;
+width : 80% ;
+padding : 20px ;
+}
+.TransactionsDetailsContainer .Optionsbuttons button{
+   width : 200px ;
+   height : 50px ;
+  border-radius: 10px ;
+  cursor: pointer;
+}
+
+/* Admin Transactions Details*/
+
 
 /*Admin Packages */
 
@@ -744,6 +847,135 @@ height: auto;
 
 /*Admin Packages */
 
+
+/*Admin 5G Data Plan Details */
+.AdminTotality {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.AdminTotality  .DpDetailsContainer{
+  width: 100% ;
+  padding : 0px clamp(10px ,11vw,200px) ;
+
+display : flex ;
+flex-direction: row;
+box-sizing: border-box;
+justify-content: space-between;
+}
+.AdminTotality .DpDetailsContainer .MainInfos{
+width : 25% ;
+align-items: center;
+justify-content: center;
+display: flex;
+flex-direction: column;
+padding : 20px 0px ;
+gap : 30px ;
+ box-sizing: border-box;
+}
+.AdminTotality  .DpDetailsContainer .MainInfos .Infobox{
+background-color: rgb(255, 255, 255);
+   width : 95% ;
+   padding : 10px 20px ;
+   box-sizing: border-box;
+   border-radius: 10px ;
+   border : 2px solid rgb(188, 188, 188,0.5);
+  gap : 3px ;
+  align-items: center;
+display: flex;
+flex-direction: row;
+}
+.AdminTotality .DpDetailsContainer .MainInfos .Infobox img{
+  width : auto ;
+  height : 35px ;
+  margin-right: 10px ;
+}
+.AdminTotality  .DpDetailsContainer .MainInfos .Infobox .Infotexts{
+display: flex;
+flex-direction: column;
+}
+.AdminTotality  .DpDetailsContainer .MainInfos .Infobox .Infotexts p{
+ margin : 0 ;
+
+}
+.AdminTotality  .DpDetailsContainer .MainInfos .Infobox .Infotexts p:first-child{
+  font-size: 14px ;
+}
+.AdminTotality  .DpDetailsContainer .MainInfos .Infobox .Infotexts p:last-child{
+  font-size : 18px ;
+  font-weight: bold ;
+}
+.AdminTotality  .DpDetailsContainer .Descriptions{
+  width : 70% ;
+   box-sizing: border-box;
+   padding : 20px ;
+}
+.AdminTotality  .DpDetailsContainer .Descriptions .Descriptioncontent{
+ background-color: rgb(255, 255, 255);
+   width : 100% ;
+   height : 100% ;
+   box-sizing: border-box;
+   border-radius: 10px ;
+   border : 2px solid rgb(188, 188, 188,0.5);
+   padding : 10px 30px  ;
+   font-size: 18px ;
+}
+.AdminTotality  .ChoiceButtons{
+  padding : 30px 10px ;
+  margin-bottom: 30px ;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap : 20px ;
+}
+.AdminTotality  .ChoiceButtons button{
+ width : 180px ;
+ height : 50px ;
+ background-color: rgb(192, 215, 255);
+ border-radius: 10px  ;
+ border : 2px solid rgb(117, 117, 117,0.5);
+ font-size: large;
+ font-weight: bold;
+}
+.AdminTotality  .ChoiceButtons button:hover{
+background-color: rgb(166, 190, 232);
+cursor : pointer;
+}
+.AdminTotality  .ChoiceButtons button:aCtive{
+background-color: rgb(138, 167, 215);
+cursor : grabbing ;
+}
+@media(max-width : 1000px ) {
+  .AdminTotality  .DpDetailsContainer{
+    gap: 40px ;
+  width: 100% ;
+  padding : 0px clamp(2px ,8vw,100px) ;
+display : flex ;
+flex-direction: column;
+box-sizing: border-box;
+}
+.AdminTotality  .DpDetailsContainer .MainInfos{
+width : 100% ;
+display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); 
+ box-sizing: border-box;
+ padding : 0px;
+}
+.AdminTotality  .DpDetailsContainer .Descriptions{
+  width : 100% ;
+   box-sizing: border-box;
+   padding : 0px;
+}
+.AdminTotality  .DpDetailsContainer .Descriptions .Descriptioncontent{
+   font-size: 15px;
+   min-height: 300px ;
+}
+}
+/* Admin 5G Data Plan Details */
+
+
+
 /*Admin Accounts*/
 
 .AccountsContainer{
@@ -892,7 +1124,6 @@ height: auto;
 
 
 
-
-
-
 /*Admin Accounts*/
+
+

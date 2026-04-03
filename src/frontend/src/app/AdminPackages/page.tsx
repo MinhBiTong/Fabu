@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import Way from "../../styles/images/Way.png"
+import { useRouter } from "next/navigation";
 
 export default function AdminPackages() {
-
+const router = useRouter()
 
   return ( 
   <>
@@ -14,9 +15,7 @@ export default function AdminPackages() {
    <div className="SearchTools">
       <input className="Search" placeholder="Search Package Name"></input>
 
-    
-
-
+  
     </div>
      <div className="SearchTools">
         <button className="AddPack">Add Package</button>
@@ -42,7 +41,12 @@ export default function AdminPackages() {
                <td>12GB</td>
                <td>9000$</td>
                <td>30 Dáy</td>
-               <td>Details</td>
+               <td>  <span
+    className="Clickablewords"
+    onClick={() => router.push("/AdminPackages/PackagesDetails")}
+  >
+    Details
+  </span></td>
 
             </tr>
               <tr>
@@ -51,7 +55,12 @@ export default function AdminPackages() {
                <td>12GB</td>
                <td>9000$</td>
                <td>30 Dáy</td>
-               <td>Details</td>
+               <td><span
+    className="Clickablewords"
+    onClick={() => router.push("/AdminPackages/PackagesDetails")}
+  >
+    Details
+  </span></td>
 
             </tr>
 
