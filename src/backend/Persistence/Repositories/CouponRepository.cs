@@ -11,9 +11,7 @@ namespace Persistence.Repositories
 {
     public class CouponRepository : BaseRepository<Coupon, long>, ICouponRepository
     {
-        public CouponRepository(AppDbContext context) : base(context)
-        {
-        }
+        public CouponRepository(AppDbContext context) : base(context) {}
 
         public Task DecreaseUsageAsync(long couponId)
         {

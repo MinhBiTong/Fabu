@@ -31,6 +31,7 @@ namespace Application.Services
         private readonly TimeSpan _refreshTokenExpiry = TimeSpan.FromDays(7); //7 days
         private readonly JwtConfiguration _jwtConfiguration;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IValidator<LoginRequest> _validator;
 
         public AuthService(
             IConfiguration configuration,
@@ -43,6 +44,46 @@ namespace Application.Services
             _responseCache = responseCache;
             _jwtConfiguration = jwtOptions.Value;
             _unitOfWork = unitOfWork;
+            _validator = validator;
+        }
+
+        public async Task<bool> RegisterAsync(RegisterRequest request)
+        {
+            //check email ton tai
+            var existingUser = await _unitOfWork.Users.GetByEmailAsync(request.Email);
+            if (existingUser != null) throw new Exception("Email really exists");
+            // get Role "Customer" from database
+            var customerRole = await _unitOfWork.Roles.GetByNameAsync("Customer");
+            if (customerRole == null) throw new Exception("The system not config Role Customer yet");
+
+            //2. hash pw
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+
+            //3. tao user moi
+            var newUser = new User
+            {
+                Username = request.Username,
+                FullName = request.FullName,
+                Email = request.Email,
+                PhoneNumber = request.PhoneNumber,
+                PasswordHash = passwordHash,
+                CreatedDate = DateTime.UtcNow,
+                IsActive = true,
+                IsDeleted = false,
+                UserRoles = new List<UserRole>
+                {
+                    new UserRole 
+                    { 
+                        RoleId = customerRole.Id                    
+                    }
+                }
+            };
+
+            //4. luu vao db thong qua repo va uow
+            await _unitOfWork.Users.AddAsync(newUser);
+            var result = await _unitOfWork.CommitAsync();
+
+            return result > 0;
         }
 
         //chain sub-method
@@ -83,8 +124,8 @@ namespace Application.Services
         //validate request fluent + basic
         private async Task ValidateLoginRequestAsync(LoginRequest request)
         {
-            //var validationResult = await _validator.ValidateAsync(request);
-            //if (!validationResult.IsValid) throw new AppException(ErrorCode.UNAUTHENTICATED); //400 request
+            var validationResult = await _validator.ValidateAsync(request);
+            if (!validationResult.IsValid) throw new AppException(ErrorCode.UNAUTHENTICATED); //400 request
         }
 
         //validate user/password identity
@@ -109,7 +150,7 @@ namespace Application.Services
             };
 
             //add roles
-            var roles = user.UserRoles?.Select(ur => ur.Role?.Name).Where(role => role != null).ToList() ?? new List<string>();
+            var roles = user.UserRoles?.Select(ur => ur.Role?.Name).Where(role => role != null).ToList() ?? new List<string?>();
             //var roles = rolesTask.Result;
             //claims.AddRange(rolesTask.Select(role => new Claim(ClaimTypes.Role, role)));
             foreach (var role in roles)
@@ -135,7 +176,7 @@ namespace Application.Services
             {
                 scopes.AddRange(new[] { "read:all", "write:all", "delete:all" });
             }
-            else if (roles.Contains("User"))
+            else if (roles.Contains("Customer"))
             {
                 scopes.AddRange(new[] { "read:user", "write:profile" });
             }

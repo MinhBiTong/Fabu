@@ -42,11 +42,6 @@ namespace Infrastructure.Extensions
             {
                 // Fallback in-memory (rất quan trọng!)
                 services.AddDistributedMemoryCache();
-                //hien thêm
-                Console.WriteLine("Using Memory Cache");
-                services.AddScoped<IResponseCacheService, MemoryResponseCacheService>();
-                Console.WriteLine("Registered MemoryResponseCacheService");
-                return;
             }
             // Register service scoped
             services.AddScoped<IResponseCacheService, ResponseCacheService>();

@@ -30,7 +30,6 @@ namespace Api.Middleware
                 await _next(context);
                 return;
             }
-
             try
             {
                 await _next(context);

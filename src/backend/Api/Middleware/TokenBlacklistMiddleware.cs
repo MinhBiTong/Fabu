@@ -1,5 +1,4 @@
 ﻿using Application.Interfaces;
-using Infrastructure.Services;
 
 namespace Api.Middleware
 {

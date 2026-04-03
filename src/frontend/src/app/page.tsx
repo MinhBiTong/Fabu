@@ -1,4 +1,4 @@
-import "../styles/homepage.css";
+import "../styles/css/homepage.css";
 import Link from "next/link";
 
 export default function HomePage() {
@@ -14,13 +14,13 @@ export default function HomePage() {
 
          <div className="service-card">
             <span>💳</span>
-            <p>Thanh toán hóa đơn</p>
-         </div>
-
+            <p>Bill Payment</p>
+          </div>
            <Link href="/P5GDataPlan" className="service-card">
             <span>📊</span>
-            <p>Mua gói data</p>
-           </Link>
+            <p>Buy Data Package</p>
+          </Link>
+
 
           <div className="service-card">
             <span>🧾</span>
@@ -29,9 +29,8 @@ export default function HomePage() {
 
           <Link  href="/Profile" className="service-card">
             <span>👤</span>
-            <p>Tài khoản</p>
+            <p>Account</p>
           </Link>
-
         </div>
       </section>
 

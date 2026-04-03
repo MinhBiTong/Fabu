@@ -25,7 +25,8 @@ namespace Persistence.Data.Configurations
                 .HasMaxLength(100);
 
             builder.Property(x => x.Description)
-                .HasMaxLength(1000);
+                .HasMaxLength(1000)
+                .IsRequired(false);
 
             builder.Property(x => x.IpAddress)
                 .HasMaxLength(50);

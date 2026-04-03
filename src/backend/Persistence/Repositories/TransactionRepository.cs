@@ -1,5 +1,7 @@
 ﻿using Domain.Entities;
 using Domain.Repositories;
+using Domain.ValueObjects;
+using Microsoft.EntityFrameworkCore;
 using Persistence.Data.Contexts;
 using System;
 using System.Collections.Generic;
@@ -16,49 +18,111 @@ namespace Persistence.Repositories
         {
         }
 
-        public Task<bool> ExistsByTransactionRefAsync(string transactionRef)
+        public async Task<bool> ExistsByTransactionRefAsync(string transactionRef)
         {
-            throw new NotImplementedException();
+            return await _dbSet.AnyAsync(t => t.TransactionRef == transactionRef && !t.IsDeleted);
         }
 
-        public Task<Domain.Entities.Transaction?> GetByTransactionRefAsync(string transactionRef)
+        public async Task<Domain.Entities.Transaction?> GetByTransactionRefAsync(string transactionRef)
         {
-            throw new NotImplementedException();
+            return await _dbSet
+                .Include(t => t.Customer)
+                .Include(t => t.CouponUsages)
+                .FirstOrDefaultAsync(t => t.TransactionRef == transactionRef && !t.IsDeleted);
         }
 
-        public Task<List<Domain.Entities.Transaction>> GetByUserIdAsync(long userId)
+        public async Task<List<Domain.Entities.Transaction>> GetByUserIdAsync(long userId)
         {
-            throw new NotImplementedException();
+            return await _dbSet
+                .Include(t => t.Customer)
+                .Where(t => t.Customer != null && t.Customer.UserId == userId && !t.IsDeleted)
+                .OrderByDescending(t => t.CreatedDate)
+                .ToListAsync();
         }
 
-        public Task<List<Domain.Entities.Transaction>> GetFailedTransactionsAsync()
+        public async Task<List<Domain.Entities.Transaction>> GetFailedTransactionsAsync()
         {
-            throw new NotImplementedException();
+            return await _dbSet
+                .Where(t => t.Status == StatusTransaction.Failed && !t.IsDeleted)
+                .OrderByDescending(t => t.CreatedDate)
+                .ToListAsync();
         }
 
-        public Task<Domain.Entities.Transaction?> GetLatestSuccessfulTransactionAsync(long customerId)
+        public async Task<Domain.Entities.Transaction?> GetLatestSuccessfulTransactionAsync(long customerId)
         {
-            throw new NotImplementedException();
+            return await _dbSet
+                .Where(t => t.CustomerId == customerId
+                    && t.Status == StatusTransaction.Success
+                    && !t.IsDeleted)
+                .OrderByDescending(t => t.CreatedDate)
+                .FirstOrDefaultAsync();
         }
 
-        public Task<List<Domain.Entities.Transaction>> GetPendingTransactionsAsync()
+        public async Task<List<Domain.Entities.Transaction>> GetPendingTransactionsAsync()
         {
-            throw new NotImplementedException();
+            return await _dbSet
+                .Where(t => t.Status == Domain.ValueObjects.StatusTransaction.Pending && !t.IsDeleted)
+                .OrderByDescending(t => t.CreatedDate)
+                .ToListAsync();
         }
 
-        public Task<List<Domain.Entities.Transaction>> GetRecentTransactionsAsync(long customerId, int top)
+        public async Task<List<Domain.Entities.Transaction>> GetRecentTransactionsAsync(long customerId, int top)
         {
-            throw new NotImplementedException();
+            return await _dbSet
+                .Include(t => t.CouponUsages)
+                .Where(t => t.CustomerId == customerId && !t.IsDeleted)
+                .OrderByDescending(t => t.CreatedDate)
+                .Take(top)
+                .ToListAsync();
         }
 
-        public Task<decimal> GetTotalAmountByCustomerAsync(long customerId)
+        public async Task<List<Domain.Entities.Transaction>> GetRechargeTransactionAsync(long customerId)
         {
-            throw new NotImplementedException();
+            return await _dbSet
+                .Where(t => t.CustomerId == customerId
+                    && t.TransactionType == "Recharge"
+                    && !t.IsDeleted)
+                .OrderByDescending(t => t.CreatedDate)
+                .ToListAsync();
         }
 
-        public Task<List<Domain.Entities.Transaction>> GetTransactionsByCustomerAsync(long customerId, DateTime? from, DateTime? to)
+        public async Task<List<Domain.Entities.Transaction>> GetServiceActivationTransactionAsync(long customerId)
         {
-            throw new NotImplementedException();
+            return await _dbSet
+                .Where(t => t.CustomerId == customerId
+                         && t.TransactionType == "ServiceActivation"
+                         && !t.IsDeleted)
+                .OrderByDescending(t => t.CreatedDate)
+                .ToListAsync();
+        }
+
+        public async Task<decimal> GetTotalAmountByCustomerAsync(long customerId, DateTime? from = null, DateTime? to = null)
+        {
+            var query = _dbSet
+                .Where(t => t.CustomerId == customerId
+                    && t.Status == StatusTransaction.Success
+                    && !t.IsDeleted);
+
+            if(from.HasValue) query = query.Where(t => t.CreatedDate >= from.Value);
+            if (to.HasValue) query = query.Where(t => t.CreatedDate <= to.Value);
+
+            return await query.SumAsync(t => t.Amount);
+        }
+
+        public async Task<List<Domain.Entities.Transaction>> GetTransactionsByCustomerAsync(long customerId, DateTime? from, DateTime? to)
+        {
+            var query = _dbSet
+                .Include(t => t.CouponUsages)
+                .Where(t => t.CustomerId == customerId && !t.IsDeleted);
+
+            if (from.HasValue)
+                query = query.Where(t => t.CreatedDate >= from.Value);
+            if (to.HasValue)
+                query = query.Where(t => t.CreatedDate <= to.Value);
+
+            return await query
+                .OrderByDescending(t => t.CreatedDate)
+                .ToListAsync();
         }
     }
 }

@@ -1,13 +1,13 @@
-﻿using System.Security.Claims;
-using Application.DTOs.Requests.UserRequest;
+﻿using Application.DTOs.Requests.UserRequest;
 using Application.DTOs.Responses.UserResponse;
 using Application.Interfaces;
 using AutoMapper;
 using Domain.Abstractions;
 using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using System.Security.Claims;
+using Domain.Abstractions;
+using Serilog.Core;
 using Persistence.Data.Configurations;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -21,14 +21,12 @@ namespace Application.Services
         private readonly IResponseCacheService? _responseCacheService;
         private readonly IUserContext _userContext;
         private readonly ILogger<UserService> _logger;
-        private readonly IOptions<UserConfiguration> _userConfiguration;
 
         public UserService(
             IUnitOfWork unitOfWork, 
             IMapper mapper,
             IUserContext userContext, 
             ILogger<UserService> logger, 
-            IOptions<UserConfiguration> _userConfiguration,
             IResponseCacheService? responseCacheService = null)
         {
             _unitOfWork = unitOfWork;
@@ -44,7 +42,7 @@ namespace Application.Services
             var existing = await _unitOfWork.Users.GetByEmailAsync(request.Email);
             if (existing != null) throw new InvalidOperationException("Email exists");
 
-            var user = new User { Username = request.Username, Email = request.Email, PasswordHash = request.PasswordHash };
+            var user = new User { Username = request.Username, Email = request.Email, PasswordHash = request.Password };
             //them vao Repository - luc nay chua luu xuong db
             await _unitOfWork.Users.AddAsync(user);
             //await _unitOfWork.Orders.AddAsync(order);
@@ -73,7 +71,6 @@ namespace Application.Services
             if (cacheUser != null) return cacheUser;
 
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
-            //hien thay != thanh ==
             if (user == null) return null;
 
             var response = _mapper.Map<UserResponse>(user);
@@ -93,13 +90,10 @@ namespace Application.Services
             if (cached != null) return cached;
 
             var user = await _unitOfWork.Users.GetByIdAsync(id);
-            //hien comment
-            //if (user != null) return null;
-            if (user == null) return null;
-
+            if (user != null) return null;
 
             var response = _mapper.Map<UserResponse>(user);
-            await _responseCacheService.SetCacheResponseByGroupAsync(cacheKey, response, null, TimeSpan.FromMinutes(10));
+            await _responseCacheService.SetCacheResponseByGroupAsync(cacheKey, response, TimeSpan.FromMinutes(10));
             return response;
         }
 

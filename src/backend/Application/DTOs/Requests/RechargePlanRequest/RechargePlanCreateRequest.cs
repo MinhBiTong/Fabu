@@ -9,8 +9,6 @@ namespace Application.DTOs.Requests.RechargePlanRequest
 {
     public class RechargePlanCreateRequest
     {
-        public int Id { get; set; }
-
         [Required]
         [StringLength(100)]
         public string PlanName { get; set; }
@@ -26,5 +24,6 @@ namespace Application.DTOs.Requests.RechargePlanRequest
         public string Description { get; set; }
 
         public bool IsActive { get; set; } = true;
+
     }
 }

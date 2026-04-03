@@ -25,7 +25,7 @@ namespace Application.DTOs.Requests.UserRequest
 
         [Required]
         [StringLength(256)]
-        public string PasswordHash { get; set; }
+        public string Password { get; set; }
 
         [StringLength(100)]
         public string FullName { get; set; }

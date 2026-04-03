@@ -30,10 +30,12 @@ namespace Persistence.Data.Configurations
                 .IsRequired();
 
             builder.Property(x => x.PhoneNumber)
-                .HasMaxLength(15);
+                .HasMaxLength(15)
+                .IsRequired(false);
 
             builder.Property(x => x.FullName)
-                .HasMaxLength(100);
+                .HasMaxLength(100)
+                .IsRequired(false);
 
             builder.HasIndex(x => x.Email).IsUnique();
 

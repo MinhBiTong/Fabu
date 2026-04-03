@@ -1,43 +1,53 @@
 ﻿using Domain.Entities;
 using Domain.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Persistence.Data.Contexts;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Persistence.Repositories
 {
     public class AuditLogRepository : BaseRepository<AuditLog, int>, IAuditLogRepository
     {
-        public AuditLogRepository(AppDbContext context) : base(context)
+        public AuditLogRepository(AppDbContext context) : base(context) {}
+
+        //lay log theo CRUD
+        public async Task<List<AuditLog>> GetByActionAsync(string action)
         {
+            return await _dbSet
+                .Where(x => x.Action == action)
+                .ToListAsync();
         }
 
-        public Task<List<AuditLog>> GetByActionAsync(string action)
+        //lay tat ca log cua 1 user
+        public async Task<List<AuditLog>> GetByUserAsync(long userId)
         {
-            throw new NotImplementedException();
+            return await _dbSet
+                .Where(x => x.UserId == userId)
+                .ToListAsync();
         }
 
-        public Task<List<AuditLog>> GetByUserAsync(long userId)
+        //lay log tu ngay A → ngay B
+        public async Task<List<AuditLog>> GetLogsByDateRangeAsync(DateTime from, DateTime to)
         {
-            throw new NotImplementedException();
+            return await _dbSet
+                .Where(x => x.CreatedDate >= from && x.CreatedDate <= to)
+                .ToListAsync();
         }
 
-        public Task<List<AuditLog>> GetLogsByDateRangeAsync(DateTime from, DateTime to)
+        //lay log cua entityType voi Id
+        public async Task<IEnumerable<AuditLog>> GetLogsByEntityAsync(string entityType, long entityId)
         {
-            throw new NotImplementedException();
+            return await _dbSet
+                .Where(x => x.EntityType == entityType && x.EntityId == entityId)
+                .ToListAsync();
         }
 
-        public Task<IEnumerable<AuditLog>> GetLogsByEntityAsync(string entityType, long entityId)
+        //lay N log gan nhat
+        public async Task<List<AuditLog>> GetRecentLogsAsync(int top)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<List<AuditLog>> GetRecentLogsAsync(int top)
-        {
-            throw new NotImplementedException();
+            return await _dbSet
+                .OrderByDescending(x => x.CreatedDate)
+                .Take(top)
+                .ToListAsync();
         }
     }
 }

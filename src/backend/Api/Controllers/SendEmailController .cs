@@ -21,12 +21,12 @@ namespace greenginger.Controllers
         public async Task<IActionResult> Send()
         {
             string toEmail = "nguyenhuyhien2k5@gmail.com";
-            string subject = "Test Email";
-            string email_message = "< h1 > Hello từ ASP.NET </ h1 >";
+            string subject = "Fabu's email service to customer";
+            string email_message = "< h1 > We're Fabu - solution recharge mobile </ h1 >";
 
             BackgroundJob.Enqueue<IEmailService>(x =>
                 x.SendEmailAsync(toEmail, subject, email_message));
-            return Ok("Đã gửi email");
+            return Ok("Sent email");
         }
     }
 }

@@ -1,7 +1,9 @@
-﻿namespace Application.Interfaces
+﻿using Application.DTOs.Responses.SmsResponse;
+
+namespace Application.Interfaces
 {
     public interface ISmsService
     {
-        Task<EsmsResponse> SendSmsAsync(string phone, string message);
+        Task<SmsResult> SendSmsAsync(string phone, string message);
     }
 }

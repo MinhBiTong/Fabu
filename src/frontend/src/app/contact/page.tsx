@@ -1,9 +1,17 @@
 import { ContactForm } from "@/components/ui/Form/contact-form";
+import Image from "next/image";
+
+import Phone from "../../styles/images/phonecall.png";
+
+import Location2 from "../../styles/images/location2.png";
+
+import Gmail from "../../styles/images/gmail.png"
+
 
 export default function ContactPage() {
   return (
     <div className="ContactContainer">
-          <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl">Contact Us</h1>
+          <h1>Contact Us</h1>
        
       <div className="ContactContent">
       
@@ -29,6 +37,51 @@ export default function ContactPage() {
                 <button type="submit">Submit</button>
                 </div>
                 </div>
-            </div>
+     <h1>You want to contact us directly ?</h1>
+       <div className="ContactInfos">
+        <div className="ContactLine">
+         <div className="ContactBox">
+         <Image src={Phone} alt="" ></Image>
+          <h3>Phone Numbers</h3>
+          <div className="Lines">
+            <p>0924010294</p>
+           <p>0694206767</p>
+                 <p>0694206767</p>
+                 
+           </div>
+          
+         </div>
+        <div className="ContactBox">
+          <Image src={Location2} alt="" ></Image>
+          <h3>Phone Numbers</h3>
+          <div className="Lines">
+            <p> fjsdkahksdj ashjkdg d ashkjdh kjasd d jkasdjk dh s hdsadjhd sajd sakd dsausad dhjekdwi sdkw </p>
+         
+                 
+           </div>
+
+         </div>
+        </div>
+
+       <div className="ContactLine">
+             <div className="ContactBox">
+         <Image src={Gmail} alt="" ></Image>
+          <h3>Phone Numbers</h3>
+          <div className="Lines">
+            <p> fjsdkahksdj ashjkdg d ashkjdh kjasd d jkasdjk dh s hdsadjhd sajd sakd dsausad dhjekdwi sdkw </p>
+         
+                 
+           </div>
+
+
+          
+         </div>
+      
+       </div>
+
+
+
+       </div>
+      </div>
   );
 }

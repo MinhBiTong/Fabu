@@ -1,1 +1,0 @@
-//trang lich su nap tien
