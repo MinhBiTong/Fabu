@@ -14,11 +14,11 @@ type Props = {
 function SignUpForm({ onClose }: Props) {
 
    const [form, setForm] = useState({
-    email: "",
-    username: "",
-    phone: "",
-    birthDate: "",
-    password: "",
+    Email: "",
+    Username: "",
+     FullName: "",
+    PhoneNumber: "",
+    Password: "",
     confirmPassword: ""
   });
 
@@ -44,13 +44,13 @@ function SignUpForm({ onClose }: Props) {
     try {
    
     const res = await globalApiClient.post<any>(
-      "/auth/signin-google", 
+      "/Auth/register", 
       {
-        email: form.email,
-        username: form.username,
-        phone: form.phone,
-        birthDate: form.birthDate,
-        password: form.password
+        Email: form.Email,
+        Username: form.Username,
+        FullName: form.FullName, 
+        PhoneNumber: form.PhoneNumber,
+        Password: form.Password
       }
     );
 
@@ -75,27 +75,29 @@ function SignUpForm({ onClose }: Props) {
       <h1>Sign up</h1>
       <div className="CorrectLine">
        <p>Email</p>
-      <input name="email" type="Email" placeholder="Enter Email" onChange={handleChange}></input>
+      <input name="Email" type="email" placeholder="Enter Email" onChange={handleChange}></input>
       </div>
      <div className="CorrectLine">
        <p>Username</p>
-      <input name="username" type="text" placeholder="Enter Username" onChange={handleChange}></input>
-      </div>
-
-    <div className="JoinLine">
+      <input name="Username" type="text" placeholder="Enter Username" onChange={handleChange}></input>
+      </div>   
+      <div className="CorrectLine">
+  <p>Full Name</p>
+  <input
+    name="FullName"
+    type="text"
+    placeholder="Enter Full Name"
+    onChange={handleChange}
+  />
+</div>
      <div className="CorrectLine">
        <p>Phone Number</p>
-      <input name="phone" type="number" placeholder="Enter your number"onChange={handleChange}></input>
+      <input name="PhoneNumber" type="text" placeholder="Enter your number"onChange={handleChange}></input>
       </div>
-      <div className="CorrectLine">
-       <p>Birth Date</p>
-      <input name="birthDate" type="date" placeholder="Choose a Date" onChange={handleChange}></input>
-      </div>
-   </div>
-       
+     
         <div className="CorrectLine">
        <p>Password</p>
-      <input name="password" type="password" placeholder="Enter Password" onChange={handleChange}></input>
+      <input name="Password" type="password" placeholder="Enter Password" onChange={handleChange}></input>
       </div>
 
       <div className="CorrectLine">

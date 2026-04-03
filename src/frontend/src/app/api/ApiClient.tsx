@@ -97,7 +97,7 @@ private async refreshToken(): Promise<string | null> {
             });
 
             //auto refresh token neu 401 va retry = true
-            if (response.status === 401 && retry) {
+            if (response.status === 401 && retry && this.token) {
                 if (!this.isRefreshing) {
                     this.isRefreshing = true;
                     this.refreshPromise = this.refreshToken();
@@ -116,7 +116,14 @@ private async refreshToken(): Promise<string | null> {
                 return this.apiCall<T>(url, options, false);
             }
 
-            const data: ApiResponse<T> = await response.json();
+            let data: ApiResponse<T>;
+
+try {
+    const text = await response.text();
+    data = text ? JSON.parse(text) : {} as ApiResponse<T>;
+} catch {
+    data = {} as ApiResponse<T>;
+}
             
             console.log("URL:", url);
 console.log("Status:", response.status);
