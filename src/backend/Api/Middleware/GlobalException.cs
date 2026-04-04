@@ -1,4 +1,5 @@
 ﻿using Application.DTOs.Requests;
+using Application.DTOs.Responses;
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Serilog;
@@ -37,7 +38,8 @@ namespace Api.Middleware
             catch (AppException appEx)
             {
                 await HandleAppExceptionAsync(context, appEx);
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Console.WriteLine(ex); //hien thêm
                 await HandleUnexpectedExceptionAsync(context, ex);
@@ -120,9 +122,10 @@ namespace Api.Middleware
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                 WriteIndented = false
-             });
+            });
 
             await context.Response.WriteAsync(json);
         }
     }
 }
+

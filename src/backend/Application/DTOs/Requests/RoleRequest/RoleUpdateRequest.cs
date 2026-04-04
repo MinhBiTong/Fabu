@@ -5,12 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.DTOs.Requests.PermissionRequest
+namespace Application.DTOs.Requests.RoleRequest
 {
-    public class PermissionCreateRequest
+    public class RoleUpdateRequest
     {
         [Required]
         public string Name { get; set; }
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
+        [Required]
+        public HashSet<string> Permissions;
     }
 }

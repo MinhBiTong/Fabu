@@ -11,6 +11,7 @@ namespace Application.DTOs.Requests.AuditLogRequest
     {
         public long? UserId { get; set; }
 
+        [Required]
         [StringLength(100)]
         public string Action { get; set; }
 

@@ -1,5 +1,6 @@
 ﻿using Application.DTOs.Requests.AuditLogRequest;
 using Application.Interfaces;
+using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace greenginger.Controllers
@@ -18,30 +19,67 @@ namespace greenginger.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] AuditLogCreateRequest request)
         {
-            var result = await _auditLogService.CreateLogAsync(request);
-            return Ok(result);
-        }
+            try
+            {
+                var userId = User.FindFirst("sub")?.Value;
 
+                if (string.IsNullOrEmpty(userId))
+                    return Unauthorized();
+
+                request.UserId = long.Parse(userId);
+
+                var result = await _auditLogService.CreateLogAsync(request);
+                return Ok(result);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+
+        }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            await _auditLogService.DeleteLogAsync(id);
-            return Ok(new { message = "Deleted successfully" });
+            try 
+            {
+                await _auditLogService.DeleteLogAsync(id);
+                return Ok(new { message = "Deleted successfully" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetByUser(int userId)
         {
-            var result = await _auditLogService.GetCurrentUserLogAsync(userId);
-            return Ok(result);
+            try
+            {
+                var result = await _auditLogService.GetCurrentUserLogAsync(userId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll(int page = 1, int pageSize = 10)
         {
-            var result = await _auditLogService.GetAllLogPagedAsync(page, pageSize);
-            return Ok(result);
+            try
+            {
+                var result = await _auditLogService.GetAllLogPagedAsync(page, pageSize);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

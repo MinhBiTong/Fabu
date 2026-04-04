@@ -10,6 +10,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
+using Application.DTOs.Responses;
 
 namespace Api.Controllers
 {
@@ -47,7 +50,7 @@ namespace Api.Controllers
         }
 
         [HttpPost("login")]
-        [EnableRateLimiting("AuthPolicy")]
+        //[EnableRateLimiting("AuthPolicy")]
         public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request)
         {
             var validationResult = await _validator.ValidateAsync(request);

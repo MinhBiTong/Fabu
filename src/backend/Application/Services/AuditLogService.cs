@@ -13,7 +13,7 @@ namespace Application.Services
         //inject
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        //private readonly IResponseCacheService? _responseCacheService;
+        private readonly IResponseCacheService? _responseCacheService;
         //private readonly IUserContext _userContext;
         private readonly ILogger<AuditLogService> _logger;
 

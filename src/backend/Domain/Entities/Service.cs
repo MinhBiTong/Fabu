@@ -1,4 +1,4 @@
-﻿    using Domain.Abstractions;
+﻿using Domain.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -18,7 +18,7 @@ namespace Domain.Entities
         public string Category { get; set; }
 
         public int DataAmountMB { get; set; }
-        
+
         public bool IsAutoRenew { get; set; }  // 0: No, 1: Yes
 
         public int MaxActivationsPerMonth { get; set; } = 1;
@@ -31,5 +31,5 @@ namespace Domain.Entities
         public bool IsActive { get; set; } = true;
 
         public virtual ICollection<CustomerService> CustomerServices { get; set; }
-        }
+    }
 }
