@@ -8,9 +8,9 @@ namespace Domain.ValueObjects
 {
     public enum StatusPayment
     {
-        Pending = 0,
-        Completed = 1,
-        Failed = 2,
-        Refunded = 3
+        Pending,
+        Completed,
+        Failed,
+        Refunded
     }
 }

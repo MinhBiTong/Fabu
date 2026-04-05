@@ -124,5 +124,19 @@ namespace Infrastructure.Services
             if (db != null)
                 await db.SetAddAsync(groupKey, value);
         }
+
+        public async Task SetRawStringAsync(string key, string value, TimeSpan expiry)
+        {
+            var options = new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = expiry
+            };
+            await _distributedCache.SetStringAsync(key, value, options);
+        }
+
+        public async Task<string?> GetRawStringAsync(string key)
+        {
+            return await _distributedCache.GetStringAsync(key);
+        }
     }
 }

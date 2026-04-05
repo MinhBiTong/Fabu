@@ -35,7 +35,7 @@ namespace Infrastructure.Extensions
                 services.AddStackExchangeRedisCache(options =>
                 {
                     options.Configuration = redisConfig.ConnectionStrings;
-                    options.InstanceName = "Fabu:";
+                    options.InstanceName = "";
                 });
             }
             else
