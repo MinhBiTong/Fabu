@@ -1,10 +1,11 @@
 "use client";
-
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
 
 import Loginform from "../features/auth/LoginForm";
+import { globalApiClient } from "../../app/api/ApiClient";
 
 import logo from "../../styles/images/FABUlogo.png";
 import Icon from "../../styles/images/search.png";
@@ -14,9 +15,19 @@ import SignUpForm from "../features/auth/SignupForm";
 
 function Header() {
     const router = useRouter()
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [showLogin, setShowLogin] = useState(false);
-    const [showSignup , setSignup] = useState(false);
+     const [showSignup , setSignup] = useState(false);
     const [showOptionbar, setOptionBar] = useState(false);
+    const [showSettings , setSettings] = useState(false);
+    const[showSettingOptions , setSettingOptions] = useState(false);
+
+    useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    setIsLoggedIn(!!token);
+    }, []);
+
+
   return (
     <>
     <div className="navibar">
@@ -41,10 +52,17 @@ function Header() {
         <Image src={Icon} alt="Search" width={20} height={20} />
       </button >
      
-        <button className="SigninButton"   onClick={() => setShowLogin(true)}>Sign in</button>
-         <button className="ProfileButton">
-           <Image src={User} alt="Search"/>
+      {!isLoggedIn && (
+        <button className="SigninButton" onClick={() => setShowLogin(true)}>
+         Sign in
          </button>
+      )}
+
+    {isLoggedIn && (
+       <button className="ProfileButton" onClick={() => setSettings(prev => !prev)}>
+        <Image src={User} alt="Profile"/>
+         </button>
+     )}
 
       </div>
 
@@ -72,6 +90,41 @@ function Header() {
   <SignUpForm onClose={() => setSignup(false)} />
    )}
  
+    {showSettings &&(
+         <div className="Settings">
+           <button onClick={() => setSettings(false)}>Profile</button>
+          <button onClick={() => setSettings(false)}>Settings</button>
+       <button onClick={() => setSettings(false)}>Contact</button>
+       <button
+  onClick={() => {
+    // remove stored token
+    localStorage.removeItem("accessToken");
+    // clear token from ApiClient
+    globalApiClient.setToken(null);
+    // update UI state
+    setIsLoggedIn(false);
+    // close dropdown
+    setSettings(false);
+
+    router.push("/");
+  }}
+>
+  Log out
+</button>
+        </div>
+      )}
+
+         {showSettingOptions &&(
+         <div className="SettingsChoicesContainer">
+            <div className="SettingsChoices">
+
+
+
+            </div>
+       </div>
+      )}
+
+
     </>
   );
 }

@@ -48,8 +48,8 @@ export default function DataPlanDetails() {
      <div className="Infobox">
          <Image src={Bonus} alt=""></Image>
         <div className="Infotexts">
-       <p>Bonus</p>
-       <p>2GB</p>
+       <p>Category</p>
+       <p>Something</p>
        </div>
      </div>
 

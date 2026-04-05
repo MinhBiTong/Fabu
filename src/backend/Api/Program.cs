@@ -30,6 +30,18 @@ builder.Services.AddHttpContextAccessor(); //httpContextAccessor cho claims
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:3000") // your Next.js
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials(); // 🔥 REQUIRED
+    });
+});
+
 builder.Services.AddReverseProxy().LoadFromConfig(builder.Configuration.GetSection("ReverseProxy")); //cau hinh reverse proxy tu appsettings.json
 builder.Services.Configure<UserConfiguration>(builder.Configuration.GetSection("UserSettings"));
 builder.Services.Configure<RoleConfiguration>(builder.Configuration.GetSection("RoleSettings"));
@@ -80,6 +92,7 @@ else
 
 //app.UseHttpsRedirection();
 app.UseStaticFiles();
+app.UseCors("AllowFrontend");
 app.UseCors("AllowReactApp");
 app.UseRouting();
 app.UseRateLimiter();
