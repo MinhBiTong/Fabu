@@ -52,6 +52,7 @@ namespace Application.Services
 
         public async Task<bool> RegisterAsync(RegisterRequest request)
         {
+
             //check email ton tai
             var existingUser = await _unitOfWork.Users.GetByEmailAsync(request.Email);
             if (existingUser != null) throw new Exception("Email really exists");

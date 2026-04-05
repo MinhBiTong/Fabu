@@ -32,7 +32,7 @@ body::-webkit-scrollbar {
   justify-content: space-between;
   box-sizing: border-box;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  z-index: 1 ;
+  z-index: 2 ;
 }
 
 .navibar .menu{
@@ -116,14 +116,14 @@ display : flex ;
    font-size: 18px;
   padding: 15px 30px ;
   border-radius: 40px ;
-   
+  
 }
 .navibar .signin .ProfileButton{
  align-items: center;
   justify-content: center;
   border-radius: 50px ;
   padding : 0px 12px ;
-  display : none ;
+
 }
 
 .navibar .signin .ProfileButton img{
@@ -224,6 +224,52 @@ display : flex ;
 }
 /* Header Sidebar */
 
+/* Settings */
+.Settings{
+    background-color: rgba(255, 255, 255) ;
+  position: fixed;
+  top: 100px;
+  right : 30px ;
+border-radius: 7px ;
+  width: 150px;
+ min-height: 200px;
+  z-index: 1 ;
+  flex-direction: column;
+  border: 1px inset rgb(33, 112, 216) ;
+}
+.Settings button{
+ width : 100% ;
+ height: 50px ;
+background: white ;
+border : none ;
+cursor: pointer;
+}
+.Settings button:hover{
+
+background: rgb(231, 231, 231) ;
+
+}
+.Settings button:active{
+
+background: rgb(212, 212, 212) ;
+
+}
+
+
+.Settings button:first-child{
+  border-radius: 7px 7px 0 0 ;
+}
+.Settings button:last-child{
+  border-radius:  0 0 7px 7px ;
+}
+
+/* Settings */
+
+/* Settings Choices*/
+
+
+
+/* Settings Choices*/
 
 /* Footer */
 .footer{
@@ -596,7 +642,7 @@ cursor : grabbing ;
 .FullScreenup .SignupOverlay .SignupContain {
   background-color: whitesmoke;
  width : 70%;
- height : 85%;
+ height : 90%;
 display: flex;
 flex-direction: row;
 position : relative ;
@@ -616,7 +662,7 @@ width : 65% ;
 padding : 5px 10px ;
 align-items: center;
 box-sizing: border-box;
-gap : 10px ;
+gap : 5px ;
 }
 .FullScreenup .SignupOverlay .SignupContain .Signupform .CorrectLine{
 display: flex;
@@ -676,7 +722,28 @@ gap : 5px ;
   height : 50px ;
   border-radius: 20px ;
 }
+@media (max-width : 1100px) {
+.FullScreenup .SignupOverlay .SignupContain .image{
+display : none ;
+}
+.FullScreenup .SignupOverlay .SignupContain .Signupform{
+gap : 5px ;
+width : 100% ;
 
+}
+.FullScreenup .SignupOverlay .SignupContain .Signupform .JoinLine{
+ display: flex;
+flex-direction: column ;
+padding : 3px 15px ;
+width : 100% ;
+gap : 0px ;
+}
+.FullScreenup .SignupOverlay .SignupContain .Signupform .JoinLine .CorrectLine input{
+ padding : 0px 10px ;
+ width : 100% ;
+}
+
+}
 /* Sign up Form */
 
 
@@ -685,7 +752,7 @@ gap : 5px ;
   display : flex ;
   flex-direction: column ;
   align-items: center ;
-  width :100% ;
+  width : 100% ;
 }
 .ContactContainer .ContactContent{
   background-color: white ;
@@ -699,6 +766,18 @@ gap : 5px ;
   padding : 20px 30px ;
   border: 1px solid rgb(201, 201, 201);
     box-sizing: border-box;
+}
+.ContactContainer .ContactContent .Starsrating{
+ display: flex;
+flex-direction: row;
+align-items: center;
+justify-content: center;
+gap : 10px ;
+}
+.ContactContainer .ContactContent .Starsrating img{
+  width : 30px ;
+  height : auto ;
+  cursor: pointer;
 }
 .ContactContainer  .ContactContent .ContactForm{
   display : flex ;
@@ -1180,8 +1259,9 @@ display: grid;
    font-size: 15px;
    min-height: 300px ;
 }
-/* 5G Data Plan Details */
 }
+/* 5G Data Plan Details */
+
 /* About us */
 .AboutContainer{
   width : 100% ;
@@ -1295,38 +1375,42 @@ margin-bottom: 100px ;
 .ProfileContainer{
  width: 100%;
  display: flex ;
- flex-direction: column;
+ flex-direction: row;
 padding : 30px ;
  box-sizing: border-box;
 justify-content: center;
+gap : 30px ;
+margin-bottom : 40px ;
 }
 .ProfileContainer .MainInformation{
- width : 100% ;
- height : 320px ;
- background-color: rgb(66, 66, 66) ;
+ width : 40% ;
+
  display: flex;
- flex-direction: row ;
- justify-content: space-between ;
+ flex-direction: column ;
+ align-items: center;
 box-sizing: border-box;
-border-radius: 300px;
 gap : 20px ;
+padding : 0 0 ;
 }
 .ProfileContainer .MainInformation img{
-width: auto ;
-height : 100%;
+width: 30% ;
+height : auto;
 object-fit: contain;
 border-radius: 300px;
-border: 5px solid rgb(36, 36, 36);
+border: 3px inset rgb(36, 36, 36);
 box-sizing: border-box;
 }
+.ProfileContainer .MainInformation h2{
+ margin: 0 ;
 
+}
 .ProfileContainer .MainInformation .BasicInfos{
-background-color: rgb(236, 236, 236);
-width : 75% ;
-border-radius: 30px 200px 200px 30px;
+background-color: rgb(235, 237, 239);
+width : 100% ;
 box-sizing: border-box;
 padding: 20px 40px;
-border: 5px solid rgb(36, 36, 36);
+border: 2px solid rgb(36, 36, 36);
+border-radius: 20px ;
 }
 .ProfileContainer .MainInformation .BasicInfos .Lineeach{
  display: flex;
@@ -1338,22 +1422,17 @@ border: 5px solid rgb(36, 36, 36);
  font-size: 18px;
 }
 
-.ProfileContainer .MainInformation .BasicInfos .Lineeach:first-child{
-    font-weight: bold ;
-    font-size: 20px;
-  margin-bottom : 5px ;
-}
+
 .ProfileContainer .AccountsInfo{
-  margin-top: 60px ;
   display: flex ;
   flex-direction: column;
-  width : 100%;
+  width : 55%;
   border : 2px solid black ;
   align-items: center;
   box-sizing: border-box;
-  justify-content: center;
-padding : 20px ;
+padding : 20px 0px;
 border-radius: 20px ;
+background-color: rgb(235, 237, 239);
 }
 
 .ProfileContainer .AccountsInfo .Balances{
@@ -1380,209 +1459,78 @@ justify-content: center;
   margin : 0;
 }
 .ProfileContainer .AccountsInfo .HistoryList{
- width: 100%;
+  margin-top: 10px ;
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+   box-sizing: border-box;
+}
+.ProfileContainer .AccountsInfo .HistoryList td,
+.ProfileContainer .AccountsInfo .HistoryList th{
+ box-sizing: border-box;
+   padding: 12px;
+  border: 1px solid #8b8b8b;
+  text-align: center;
+  width: 20%; 
+  background-color: rgb(240, 243, 246);
+}
+
+.ProfileContainer .AccountsInfo .Pagination{
+ background-color: rgb(239, 242, 241);
+ margin-top: 20px ;
+  height : 40px ;
+  width : 80px ;
  display: flex;
- flex-direction: column;
- align-items: center;
-}
-.ProfileContainer .AccountsInfo .HistoryList .HistoryBox{
- width : 90% ;
- display: flex ;
  flex-direction: row;
- justify-content: space-between;
- align-items: center;
-background-color: rgb(185, 124, 124);
-box-sizing: border-box;
-padding :0 100px ;
+align-items: center;
+justify-content: center;
+ box-sizing: border-box;
+ border-radius: 15px ;
+ border : 1px solid black ;
 }
-.ProfileContainer .AccountsInfo .HistoryList .HistoryBox:first-child{
- background-color: rgb(86, 243, 146);
-  
-
+.ProfileContainer .AccountsInfo .Pagination .Left{
+ width : 25%;
+ position: relative;
+ height : 100% ;
+ padding : 5px ;
+  box-sizing: border-box;
+  display : flex ;
+align-items: center;
+text-align: center;
+transform:  rotate(180deg);
+ cursor:  pointer ;
 }
-
-.ProfileContainer .AccountsInfo .Bot{
-font-size: 16px;
-margin: 0;
-margin-bottom: 5px;
+.ProfileContainer .AccountsInfo .Pagination .Page{
+width : 50%;
+position: relative;
+display : flex ;
+align-items: center;
+text-align: center;
+justify-content: center;
+ height : 100% ;
+ padding : 5px ;
+ box-sizing: border-box;
+}
+.ProfileContainer .AccountsInfo .Pagination .Right{
+width : 25%;
+position: relative;
+ height : 100% ;
+ padding : 5px ;
+  box-sizing: border-box;
+  display : flex ;
+align-items: center;
+text-align: center;
+  cursor:  pointer ;
+}
+.ProfileContainer .AccountsInfo .Pagination .Left img{
+ object-fit: contain;
+ width: 100% ;
+ height: auto;
+}
+.ProfileContainer .AccountsInfo .Pagination .Right img{
+object-fit: contain;
+width: 100% ;
+height: auto;
 }
 /* Profile */
 
-
-
-
-
-
-
-
-/* Admin Dashboard */
-
-/* Main Sheet of dashboard */
-.DashboardContainer{
- width : 100% ;
- display : flex ;
- flex-direction: row ;
-
-
-}
-.DashboardContainer .DashboardSidebar{
- display: flex;
- flex-direction : column ;
- width : 15% ;
- border-right: 1px solid rgb(176, 176, 176)  ;
-align-items: center;
-
-}
-
-.DashboardContainer .DashboardSidebar .DashboardChoices{
- width : 100% ;
- font-size: 18px ;
- text-align: center;
- box-sizing: border-box;
-
- padding: 15px ;
-}
-/* Main Sheet of dashboard */
-
-/* Finance */
-.DashboardContainer .DashboardMainContent{
- width : 85% ;
-  display: flex;
-  flex-direction: column;
-  
-  gap : 10px ;
-}
-.DashboardContainer .DashboardMainContent .FinanceLine1{
-  width : 100% ;
-
- display: flex;
- flex-direction: row;
-  box-sizing: border-box;
-}
-
-.DashboardContainer .DashboardMainContent .FinanceLine1  .GridFinance{
-  display: flex ;
- flex-direction: column ;
-width : 40% ;
-gap : 20px ;
-padding : 20px ;
- box-sizing: border-box;
-}
-.DashboardContainer .DashboardMainContent .FinanceLine1  .GridFinance .GridLine1{
- display: flex;
- flex-direction: row  ;
- 
- align-items: center;
- gap : 20px  ;
- justify-content: center;
- width : 100% ;
- box-sizing: border-box;
-}
-.DashboardContainer .DashboardMainContent .FinanceLine1  .GridFinance .GridLine2{
- display: flex;
- flex-direction: row  ;
-
- align-items: center;
-  justify-content: center;
- width : 100% ;
-  gap : 20px  ;
- box-sizing: border-box;
-}
-
-.DashboardContainer .DashboardMainContent .FinanceLine1 .GridFinance .GridLine1 .Gridbox{
-  width : 40% ;
-  height : 180px ;
-  background-color: rgb(255, 255, 255);
-   box-sizing: border-box;
-   border-radius: 20px ;
-   border : 2px solid rgba(71, 71, 71, 0.6) 
-}
-
-.DashboardContainer .DashboardMainContent .FinanceLine1 .GridFinance .GridLine2 .Gridbox{
-  width : 40% ;
-  height :180px ;
-  background-color: rgb(255, 255, 255);
-   box-sizing: border-box;
-    border-radius: 20px ;
-    border : 2px solid rgba(71, 71, 71, 0.6) 
-}
-.DashboardContainer .DashboardMainContent .FinanceLine1 .MonthFinance{
-  width : 60% ;
- 
-  padding : 20px ;
-  box-sizing: border-box;
-}
-.DashboardContainer .DashboardMainContent .FinanceLine1 .MonthFinance .Charter{
- width : 100% ;
- background-color: white ;
- height: 100% ;
- padding : 20px ;
-   box-sizing: border-box;
-     border-radius: 20px ;
-     border : 2px solid rgba(71, 71, 71, 0.6) 
-}
-
-.DashboardContainer .DashboardMainContent .FinanceLine2{
-  width : 100% ;
-
- display: flex;
- flex-direction: row;
-}
-.DashboardContainer .DashboardMainContent .FinanceLine2 .CircleChart{
-  width : 40% ;
- 
-  height : 500px ;
-  box-sizing: border-box;
-  padding : 20px 70px ;
-}
-.DashboardContainer .DashboardMainContent .FinanceLine2 .CountryBarChart{
- width : 60% ;
-
-  box-sizing: border-box ;
-  padding : 20px ;
-}
-.DashboardContainer .DashboardMainContent .FinanceLine2 .CircleChart .ChartContainer{
-  width : 100% ;
-  height: 100% ;
-  background-color : white ;
-  box-sizing: border-box;
-  padding : 10px ;
-    border-radius: 20px ;
-    border : 2px solid rgba(71, 71, 71, 0.6) 
-}
-.DashboardContainer .DashboardMainContent .FinanceLine2 .CountryBarChart .CountryContainer{
- width : 100% ;
-  background-color :white ;
-  box-sizing: border-box ;
-  padding : 20px ;
-  height : 100% ;
-    border-radius: 20px ;
-    border : 2px solid rgba(71, 71, 71, 0.6) 
-}
-.DashboardContainer .DashboardMainContent .FinanceLine2 .CircleChart .ChartContainer .PieLegend{
-   display : flex ;
-   flex-direction: column ;
-  align-items: center;
-  padding : 30px 0px  ;
-  gap :20px ;
-  justify-content: center;
-
-}
-
-.DashboardContainer .DashboardMainContent .FinanceLine2 .CircleChart .ChartContainer .PieLegend .LegendItem {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 18px;
-}
-
-.DashboardContainer .DashboardMainContent .FinanceLine2 .CircleChart .ChartContainer .PieLegend .LegendColor {
-  width: 18px;
-  height: 18px;
-  border-radius: 6px;
-  
-}
-
-/* Finance */
-
-/* Admin Dashboard */

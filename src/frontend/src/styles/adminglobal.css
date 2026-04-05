@@ -1,0 +1,1129 @@
+.Clickablewords{
+  cursor: pointer;
+}
+
+
+/* Admin Sidebar */
+.AdminPanelButton{
+left : 20px  ;
+top : 50% ;
+transform: translate(-50%, 0%);
+width : 30px  ;
+height : auto ;
+position: fixed;
+cursor: pointer;
+transition: transform 0.3s ease;
+}
+.AdminPanelButton.open{
+left : 270px  ;
+top : 50% ;
+transform: translate(-50%, 0%) rotate(180deg);
+
+width : 30px  ;
+height : auto ;
+position: fixed;
+cursor: pointer;
+z-index:  1 ;
+
+}
+.AdminBar{
+ position: fixed ;
+ left : 0 ;
+ background-color: rgb(220, 227, 229);
+ width : 250px ;
+ height : 100vh ;
+ top : 0 ;
+ display: flex;
+ flex-direction: column;
+ padding-top : 80px;
+ z-index: 1 ;
+ box-sizing: border-box;
+ border: 1px solid black ;
+}
+.AdminBar button{
+  background-color: #f3f4f7;
+   box-sizing: border-box;
+ width : 100% ;
+ height : 40px ;
+font-size: 18px ;
+border-right : none ;
+border-left : none ;
+border-bottom : none ;
+cursor: pointer;
+}
+.AdminBar button:hover{
+   background-color: #d9dbe1;
+}
+.AdminBar button:active{
+background-color: #cdcfd5;
+cursor: grabbing;
+}
+
+.AdminBar button:last-child{
+
+border-bottom: 1px solid black ;
+
+}
+
+/* Admin Sidebar */
+
+/* Admin Dashboard */
+
+/* Main Sheet of dashboard */
+.DashboardContainer{
+ width : 100% ;
+ display : flex ;
+ flex-direction: row ;
+
+
+}
+.DashboardContainer .DashboardSidebar{
+ display: flex;
+ flex-direction : column ;
+ width : 15% ;
+ border-right: 1px solid rgb(176, 176, 176)  ;
+align-items: center;
+
+}
+
+.DashboardContainer .DashboardSidebar .DashboardChoices{
+ width : 100% ;
+ font-size: 18px ;
+ text-align: center;
+ box-sizing: border-box;
+
+ padding: 15px ;
+}
+/* Main Sheet of dashboard */
+
+/* Finance */
+.DashboardContainer .DashboardMainContent{
+ width : 85% ;
+  display: flex;
+  flex-direction: column;
+  
+  gap : 10px ;
+}
+.DashboardContainer .DashboardMainContent .FinanceLine1{
+  width : 100% ;
+
+ display: flex;
+ flex-direction: row;
+  box-sizing: border-box;
+}
+
+.DashboardContainer .DashboardMainContent .FinanceLine1  .GridFinance{
+  display: flex ;
+ flex-direction: column ;
+width : 40% ;
+gap : 20px ;
+padding : 20px ;
+ box-sizing: border-box;
+}
+.DashboardContainer .DashboardMainContent .FinanceLine1  .GridFinance .GridLine1{
+ display: flex;
+ flex-direction: row  ;
+ 
+ align-items: center;
+ gap : 20px  ;
+ justify-content: center;
+ width : 100% ;
+ box-sizing: border-box;
+}
+.DashboardContainer .DashboardMainContent .FinanceLine1  .GridFinance .GridLine2{
+ display: flex;
+ flex-direction: row  ;
+
+ align-items: center;
+  justify-content: center;
+ width : 100% ;
+  gap : 20px  ;
+ box-sizing: border-box;
+}
+
+.DashboardContainer .DashboardMainContent .FinanceLine1 .GridFinance .GridLine1 .Gridbox{
+  width : 40% ;
+  height : 180px ;
+  background-color: rgb(255, 255, 255);
+   box-sizing: border-box;
+   border-radius: 20px ;
+   border : 2px solid rgba(71, 71, 71, 0.6) ;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   
+}
+.DashboardContainer .DashboardMainContent .FinanceLine1 .GridFinance .GridLine1 .Gridbox span{
+ font-size: 35px;
+margin-top : 10px ;
+}
+.DashboardContainer .DashboardMainContent .FinanceLine1 .GridFinance .GridLine1 .Gridbox p{
+ font-size : 16px ; 
+ margin : 0 ;
+ margin: 30px ;
+}
+.DashboardContainer .DashboardMainContent .FinanceLine1 .GridFinance .GridLine2 .Gridbox{
+  width : 40% ;
+  height :180px ;
+  background-color: rgb(255, 255, 255);
+   box-sizing: border-box;
+    border-radius: 20px ;
+    border : 2px solid rgba(71, 71, 71, 0.6) ;
+     display: flex;
+   flex-direction: column;
+   align-items: center;
+}
+.DashboardContainer .DashboardMainContent .FinanceLine1 .GridFinance .GridLine2 .Gridbox span{
+ font-size: 35px;
+margin-top : 10px ;
+}
+.DashboardContainer .DashboardMainContent .FinanceLine1 .GridFinance .GridLine2 .Gridbox p{
+ font-size : 16px ; 
+ margin : 0 ;
+ margin: 30px ;
+}
+.DashboardContainer .DashboardMainContent .FinanceLine1 .MonthFinance{
+  width : 60% ;
+ 
+  padding : 20px ;
+  box-sizing: border-box;
+}
+.DashboardContainer .DashboardMainContent .FinanceLine1 .MonthFinance .Charter{
+ width : 100% ;
+ background-color: white ;
+ height: 100% ;
+ padding : 20px ;
+   box-sizing: border-box;
+     border-radius: 20px ;
+     border : 2px solid rgba(71, 71, 71, 0.6) 
+}
+
+.DashboardContainer .DashboardMainContent .FinanceLine2{
+  width : 100% ;
+
+ display: flex;
+ flex-direction: row;
+}
+.DashboardContainer .DashboardMainContent .FinanceLine2 .CircleChart{
+  width : 40% ;
+ 
+  height : 500px ;
+  box-sizing: border-box;
+  padding : 20px 70px ;
+}
+.DashboardContainer .DashboardMainContent .FinanceLine2 .CountryBarChart{
+ width : 60% ;
+
+  box-sizing: border-box ;
+  padding : 20px ;
+}
+.DashboardContainer .DashboardMainContent .FinanceLine2 .CircleChart .ChartContainer{
+  width : 100% ;
+  height: 100% ;
+  background-color : white ;
+  box-sizing: border-box;
+  padding : 10px ;
+    border-radius: 20px ;
+    border : 2px solid rgba(71, 71, 71, 0.6) 
+}
+.DashboardContainer .DashboardMainContent .FinanceLine2 .CountryBarChart .CountryContainer{
+ width : 100% ;
+  background-color :white ;
+  box-sizing: border-box ;
+  padding : 20px ;
+  height : 100% ;
+    border-radius: 20px ;
+    border : 2px solid rgba(71, 71, 71, 0.6) 
+}
+.DashboardContainer .DashboardMainContent .FinanceLine2 .CircleChart .ChartContainer .PieLegend{
+   display : flex ;
+   flex-direction: column ;
+  align-items: center;
+  padding : 30px 0px  ;
+  gap :20px ;
+  justify-content: center;
+
+}
+
+.DashboardContainer .DashboardMainContent .FinanceLine2 .CircleChart .ChartContainer .PieLegend .LegendItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+}
+
+.DashboardContainer .DashboardMainContent .FinanceLine2 .CircleChart .ChartContainer .PieLegend .LegendColor {
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  
+}
+
+/* Finance */
+
+/* Admin Dashboard */
+
+
+/* Admin Feedbacks*/
+.AdminFeedbacksContainer{
+width : 100% ;
+display :  flex ;
+flex-direction: column;
+align-items: center;
+gap : 20px ;
+margin-bottom : 30px ;
+box-sizing: border-box;
+}
+.AdminFeedbacksContainer .TotalStarContainer{
+    width : 65% ;
+    height : 350px ;
+    display: flex ;
+    flex-direction: column;
+    align-items: center;
+    border: 2px solid black ;
+    padding : 20px ;
+    border-radius: 15px; 
+    background-color: rgb(235, 238, 240);
+    box-sizing: border-box;
+}
+.AdminFeedbacksContainer .TotalStarContainer h2{
+   margin : 5px;
+
+}
+
+.AdminFeedbacksContainer .FeedbackListContainer{
+ width : 90% ;
+display: flex;
+flex-direction: column;
+align-items: center;
+box-sizing: border-box;
+}
+.AdminFeedbacksContainer .FeedbackListContainer .OptionsBox{
+ width : 100% ;
+ padding : 20px ;
+ display : flex ;
+ flex-direction : row ;
+ gap : 20px;
+ align-items: center ;
+ justify-content: center;
+ box-sizing: border-box;
+}
+.AdminFeedbacksContainer .FeedbackListContainer .OptionsBox .Searchbar{
+    width : 400px ;
+    background-color: rgb(48, 147, 234);
+    height : 50px ;
+    display: flex;
+    flex-direction: row;
+    box-sizing: border-box;
+    border-radius: 20px ;
+    border : 2px solid black ;
+    align-items: center;
+}
+.AdminFeedbacksContainer .FeedbackListContainer .OptionsBox .Searchbar .SearchImg{
+height : auto ;
+width : 15% ;
+box-sizing: border-box;
+border-radius: 5px ;
+border : none ;
+padding: 18px ;
+
+}
+.AdminFeedbacksContainer .FeedbackListContainer .OptionsBox .Searchbar .SearchInput{
+width : 85% ;
+height : 46px ;
+box-sizing: border-box;
+border-radius: 17px ;
+border : none ;
+border-left : 2px solid black  ;
+font-size: 18px ;
+padding : 0px 10px ;
+}
+.AdminFeedbacksContainer .FeedbackListContainer .OptionsBox .StarAmount{
+    width : 40px ;
+    height : 50px ;
+  border : 2px solid black ;
+  border-radius: 20px ;
+  padding : 0 5px 0 10px ;
+  font-size: 18px ;
+}
+.AdminFeedbacksContainer .FeedbackListContainer .Pagination{
+ background-color: rgb(239, 242, 241);
+ margin-top: 20px ;
+  height : 40px ;
+  width : 80px ;
+ display: flex;
+ flex-direction: row;
+align-items: center;
+justify-content: center;
+ box-sizing: border-box;
+ border-radius: 15px ;
+ border : 1px solid black ;
+
+}
+.AdminFeedbacksContainer .FeedbackListContainer .Pagination .Left{
+ width : 25%;
+ position: relative;
+ height : 100% ;
+ padding : 5px ;
+  box-sizing: border-box;
+  display : flex ;
+align-items: center;
+text-align: center;
+transform:  rotate(180deg);
+ cursor:  pointer ;
+}
+.AdminFeedbacksContainer .FeedbackListContainer .Pagination .Page{
+width : 50%;
+position: relative;
+display : flex ;
+align-items: center;
+text-align: center;
+justify-content: center;
+ height : 100% ;
+ padding : 5px ;
+ box-sizing: border-box;
+}
+.AdminFeedbacksContainer .FeedbackListContainer .Pagination .Right{
+width : 25%;
+position: relative;
+ height : 100% ;
+ padding : 5px ;
+  box-sizing: border-box;
+  display : flex ;
+align-items: center;
+text-align: center;
+  cursor:  pointer ;
+}
+.AdminFeedbacksContainer .FeedbackListContainer .Pagination .Left img{
+ object-fit: contain;
+ width: 100% ;
+ height: auto;
+}
+.AdminFeedbacksContainer .FeedbackListContainer .Pagination .Right img{
+object-fit: contain;
+width: 100% ;
+height: auto;
+}
+.AdminFeedbacksContainer .FeedbackListContainer .Listing{
+ width : 100% ;
+
+ display : grid ;
+   grid-template-columns: repeat(3, auto); 
+   gap : 40px ;
+   padding : 20px ;
+box-sizing: border-box;
+align-items: center;
+justify-content: center;
+
+}
+.AdminFeedbacksContainer .FeedbackListContainer .Listing .FeedbackBox{
+    width : 340px ;
+    height : 130px ;
+    border-radius:  13px ;
+    border : 2px solid grey;
+    cursor:  pointer ;
+}
+.AdminFeedbacksContainer .FeedbackListContainer .Listing .FeedbackBox .Email{
+ width : 100% ;
+ height : 50% ;
+ background-color: rgb(122, 179, 255);
+ border-radius: 10px 10px 0 0;
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ justify-content: center;
+ padding : 0 20px ;
+ box-sizing: border-box;
+ font-size: 18;
+}
+.AdminFeedbacksContainer .FeedbackListContainer .Listing .FeedbackBox .AmountStars{
+ width : 100% ;
+ height : 50% ;
+ background-color : white ;
+  box-sizing: border-box;
+ border-radius: 0 0 10px 10px ;
+ display: flex;
+ flex-direction: row ;
+ align-items: center;
+ justify-content: center;
+ gap : 10px ;
+}
+.AdminFeedbacksContainer .FeedbackListContainer .Listing .FeedbackBox .AmountStars img{
+ width : auto ;
+ height : 30px ;
+}
+/* Admin Feedbacks*/
+
+/* Admin Feedbacks Details */
+
+.AdminFeedDetailsContainer{
+ width : 100% ;
+ display: flex;
+ flex-direction: column ;
+align-items: center;
+}
+.AdminFeedDetailsContainer .StarsRated{
+ width: 80% ;
+ display: flex;
+ flex-direction: row;
+ align-items: center;
+ justify-content: center;
+ padding : 10px ;
+ gap : 15px ;
+}
+.AdminFeedDetailsContainer .StarsRated img{
+  width : 50px ;
+  height : auto ;
+
+}
+.AdminFeedDetailsContainer .Nameplace{
+  width : 70% ;
+  font-size: 22px ;
+  display: flex;
+  flex-direction: column;
+  gap : 10px ;
+}
+.AdminFeedDetailsContainer .DisplayContent{
+margin-top : 30px ;
+width : 70%;
+border-radius : 20px ;
+border : 2px solid black ;
+align-items: center;
+padding :  20px 40px ; 
+display: flex;
+flex-direction: column;
+gap : 10px ;
+background-color: white ;
+margin-bottom: 30px;
+}
+.AdminFeedDetailsContainer .DisplayContent h2{
+  margin: 0;
+}
+.AdminFeedDetailsContainer .DisplayContent span{
+ font-size: 21px ;
+
+}
+/* Admin Feedbacks Details */
+
+/* Admin Transactions */
+
+.TransactionsContainer{
+   width : 100% ;
+   display: flex;
+   flex-direction: column;
+   align-items: center ;
+   margin-bottom: 30px ;
+   
+}
+.TransactionsContainer .SearchTools{
+display: flex;
+flex-direction: row;
+align-items: center;
+gap : 10px ;
+justify-content: center;
+margin : 30px 0 ;
+
+}
+.TransactionsContainer .SearchTools .Statusdropdown{
+        height : 50px ;
+        width : 200px ;
+       border-radius: 20px ;
+        border: 2px solid black ;
+        box-sizing: border-box;
+        padding : 0 10px ;
+        font-size: 18px;
+         cursor: pointer;
+}
+.TransactionsContainer .SearchTools .Search{
+      height : 50px ;
+        width : 500px ;
+      border-radius: 20px ;
+        border: 2px solid black ;
+        box-sizing: border-box;
+         padding : 0 10px ;
+         font-size: 19px;
+}
+.TransactionsContainer .ChooseButtons{
+  width : 90% ;
+  display: flex;
+  flex-direction: row;
+  gap : 10px ;
+  margin-top: 10px ;
+}
+.TransactionsContainer .ChooseButtons button{
+     width : 17% ;
+    height : 50px ;
+    border-radius: 10px 10px 0 0;
+        border: 3px solid black ;
+    border-bottom : none ;
+   background-color: rgb(228, 235, 243);
+   cursor: pointer;
+
+}
+.TransactionsContainer .TableList{
+   width : 90% ;
+  
+
+}
+.TransactionsContainer .TableList table{
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  border: 3px solid black;
+
+}
+.TransactionsContainer .TableList  table td,
+.TransactionsContainer .TableList table th{
+    width : 15% ;
+    height : 50px ;
+    text-align: center;
+    border : 1px solid rgb(125, 125, 125) ;
+}
+
+
+
+.TransactionsContainer .Pagination{
+ background-color: rgb(239, 242, 241);
+ margin-top: 20px ;
+  height : 40px ;
+  width : 80px ;
+ display: flex;
+ flex-direction: row;
+align-items: center;
+justify-content: center;
+ box-sizing: border-box;
+ border-radius: 15px ;
+ border : 1px solid black ;
+
+}
+.TransactionsContainer .Pagination .Left{
+ width : 25%;
+ position: relative;
+ height : 100% ;
+ padding : 5px ;
+  box-sizing: border-box;
+  display : flex ;
+align-items: center;
+text-align: center;
+transform:  rotate(180deg);
+ cursor:  pointer ;
+}
+.TransactionsContainer .Pagination .Page{
+width : 50%;
+position: relative;
+display : flex ;
+align-items: center;
+text-align: center;
+justify-content: center;
+ height : 100% ;
+ padding : 5px ;
+ box-sizing: border-box;
+}
+.TransactionsContainer .Pagination .Right{
+width : 25%;
+position: relative;
+ height : 100% ;
+ padding : 5px ;
+  box-sizing: border-box;
+  display : flex ;
+align-items: center;
+text-align: center;
+  cursor:  pointer ;
+}
+.TransactionsContainer .Pagination .Left img{
+ object-fit: contain;
+ width: 100% ;
+ height: auto;
+}
+.TransactionsContainer .Pagination .Right img{
+object-fit: contain;
+width: 100% ;
+height: auto;
+}
+
+
+/* Admin Transactions */
+
+
+/* Admin Transactions Details*/
+
+.TransactionsDetailsContainer{
+  width : 100% ;
+   display: flex ;
+   flex-direction: column;
+   align-items: center;
+}
+.TransactionsDetailsContainer .TransactionsBox{
+ width : 60% ;
+ padding : 20px 20px 0px 20px;
+ background-color: rgb(215, 222, 227);
+ display: flex ;
+ flex-direction: column ;
+ align-items: center ;
+ border-radius: 20px ;
+ border : 2px solid black ;
+}
+.TransactionsDetailsContainer .TransactionsBox .EachLine{
+ width : 100% ;
+ padding : 20px ;
+ font-size: 18px ;
+ display: flex;
+ flex-direction: row;
+ align-items: center;
+ justify-content: space-between;
+border-bottom: 0.5px solid black ;
+}
+
+.TransactionsDetailsContainer .TransactionsBox .EachLine:last-child{
+  border-bottom: none;
+
+}
+.TransactionsDetailsContainer .Optionsbuttons{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+margin-bottom: 30px ;
+width : 80% ;
+padding : 20px ;
+}
+.TransactionsDetailsContainer .Optionsbuttons button{
+   width : 200px ;
+   height : 50px ;
+  border-radius: 10px ;
+  cursor: pointer;
+}
+
+/* Admin Transactions Details*/
+
+
+/*Admin Packages */
+
+.PackagesContainer{
+   width : 100% ;
+   display: flex;
+   flex-direction: column;
+   align-items: center ;
+   margin-bottom: 30px ;
+   
+}
+.PackagesContainer .SearchTools{
+display: flex;
+flex-direction: row;
+align-items: center;
+gap : 10px ;
+justify-content: center;
+margin : 30px 0 ;
+
+}
+.PackagesContainer .SearchTools .AddPack{
+    height : 50px ;
+        width : 180px ;
+       border-radius: 20px ;
+        border: 2px solid black ;
+        box-sizing: border-box;
+        padding : 0 10px ;
+        font-size: 18px;
+        cursor: pointer;
+
+}
+.PackagesContainer .SearchTools .Statusdropdown{
+        height : 50px ;
+        width : 200px ;
+       border-radius: 20px ;
+        border: 2px solid black ;
+        box-sizing: border-box;
+        padding : 0 10px ;
+        font-size: 18px;
+}
+.PackagesContainer .SearchTools .Search{
+      height : 50px ;
+        width : 500px ;
+      border-radius: 20px ;
+        border: 2px solid black ;
+        box-sizing: border-box;
+         padding : 0 10px ;
+         font-size: 19px;
+}
+.PackagesContainer .ChooseButtons{
+  width : 90% ;
+  display: flex;
+  flex-direction: row;
+  gap : 10px ;
+  margin-top: 10px ;
+}
+.PackagesContainer .ChooseButtons button{
+     width : 17% ;
+    height : 50px ;
+    border-radius: 10px 10px 0 0;
+        border: 3px solid black ;
+    border-bottom : none ;
+   background-color: rgb(228, 235, 243);
+   cursor: pointer;
+
+}
+.PackagesContainer .TableList{
+   width : 90% ;
+  
+
+}
+.PackagesContainer .TableList table{
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  border: 3px solid black;
+
+}
+.PackagesContainer .TableList  table td,
+.PackagesContainer .TableList table th{
+    width : 15% ;
+    height : 50px ;
+    text-align: center;
+    border : 1px solid rgb(125, 125, 125) ;
+}
+
+
+
+.PackagesContainer .Pagination{
+ background-color: rgb(239, 242, 241);
+ margin-top: 20px ;
+  height : 40px ;
+  width : 80px ;
+ display: flex;
+ flex-direction: row;
+align-items: center;
+justify-content: center;
+ box-sizing: border-box;
+ border-radius: 15px ;
+ border : 1px solid black ;
+
+}
+.PackagesContainer .Pagination .Left{
+ width : 25%;
+ position: relative;
+ height : 100% ;
+ padding : 5px ;
+  box-sizing: border-box;
+  display : flex ;
+align-items: center;
+text-align: center;
+transform:  rotate(180deg);
+ cursor:  pointer ;
+}
+.PackagesContainer .Pagination .Page{
+width : 50%;
+position: relative;
+display : flex ;
+align-items: center;
+text-align: center;
+justify-content: center;
+ height : 100% ;
+ padding : 5px ;
+ box-sizing: border-box;
+}
+.PackagesContainer .Pagination .Right{
+width : 25%;
+position: relative;
+ height : 100% ;
+ padding : 5px ;
+  box-sizing: border-box;
+  display : flex ;
+align-items: center;
+text-align: center;
+  cursor:  pointer ;
+}
+.PackagesContainer .Pagination .Left img{
+ object-fit: contain;
+ width: 100% ;
+ height: auto;
+}
+.PackagesContainer .Pagination .Right img{
+object-fit: contain;
+width: 100% ;
+height: auto;
+}
+
+
+
+/*Admin Packages */
+
+
+/*Admin 5G Data Plan Details */
+.AdminTotality {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.AdminTotality  .DpDetailsContainer{
+  width: 100% ;
+  padding : 0px clamp(10px ,11vw,200px) ;
+
+display : flex ;
+flex-direction: row;
+box-sizing: border-box;
+justify-content: space-between;
+}
+.AdminTotality .DpDetailsContainer .MainInfos{
+width : 25% ;
+align-items: center;
+justify-content: center;
+display: flex;
+flex-direction: column;
+padding : 20px 0px ;
+gap : 30px ;
+ box-sizing: border-box;
+}
+.AdminTotality  .DpDetailsContainer .MainInfos .Infobox{
+background-color: rgb(255, 255, 255);
+   width : 95% ;
+   padding : 10px 20px ;
+   box-sizing: border-box;
+   border-radius: 10px ;
+   border : 2px solid rgb(188, 188, 188,0.5);
+  gap : 3px ;
+  align-items: center;
+display: flex;
+flex-direction: row;
+}
+.AdminTotality .DpDetailsContainer .MainInfos .Infobox img{
+  width : auto ;
+  height : 35px ;
+  margin-right: 10px ;
+}
+.AdminTotality  .DpDetailsContainer .MainInfos .Infobox .Infotexts{
+display: flex;
+flex-direction: column;
+}
+.AdminTotality  .DpDetailsContainer .MainInfos .Infobox .Infotexts p{
+ margin : 0 ;
+
+}
+.AdminTotality  .DpDetailsContainer .MainInfos .Infobox .Infotexts p:first-child{
+  font-size: 14px ;
+}
+.AdminTotality  .DpDetailsContainer .MainInfos .Infobox .Infotexts p:last-child{
+  font-size : 18px ;
+  font-weight: bold ;
+}
+.AdminTotality  .DpDetailsContainer .Descriptions{
+  width : 70% ;
+   box-sizing: border-box;
+   padding : 20px ;
+}
+.AdminTotality  .DpDetailsContainer .Descriptions .Descriptioncontent{
+ background-color: rgb(255, 255, 255);
+   width : 100% ;
+   height : 100% ;
+   box-sizing: border-box;
+   border-radius: 10px ;
+   border : 2px solid rgb(188, 188, 188,0.5);
+   padding : 10px 30px  ;
+   font-size: 18px ;
+}
+.AdminTotality  .ChoiceButtons{
+  padding : 30px 10px ;
+  margin-bottom: 30px ;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap : 20px ;
+}
+.AdminTotality  .ChoiceButtons button{
+ width : 180px ;
+ height : 50px ;
+ background-color: rgb(192, 215, 255);
+ border-radius: 10px  ;
+ border : 2px solid rgb(117, 117, 117,0.5);
+ font-size: large;
+ font-weight: bold;
+}
+.AdminTotality  .ChoiceButtons button:hover{
+background-color: rgb(166, 190, 232);
+cursor : pointer;
+}
+.AdminTotality  .ChoiceButtons button:aCtive{
+background-color: rgb(138, 167, 215);
+cursor : grabbing ;
+}
+@media(max-width : 1000px ) {
+  .AdminTotality  .DpDetailsContainer{
+    gap: 40px ;
+  width: 100% ;
+  padding : 0px clamp(2px ,8vw,100px) ;
+display : flex ;
+flex-direction: column;
+box-sizing: border-box;
+}
+.AdminTotality  .DpDetailsContainer .MainInfos{
+width : 100% ;
+display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); 
+ box-sizing: border-box;
+ padding : 0px;
+}
+.AdminTotality  .DpDetailsContainer .Descriptions{
+  width : 100% ;
+   box-sizing: border-box;
+   padding : 0px;
+}
+.AdminTotality  .DpDetailsContainer .Descriptions .Descriptioncontent{
+   font-size: 15px;
+   min-height: 300px ;
+}
+}
+/* Admin 5G Data Plan Details */
+
+
+
+/*Admin Accounts*/
+
+.AccountsContainer{
+   width : 100% ;
+   display: flex;
+   flex-direction: column;
+   align-items: center ;
+   margin-bottom: 30px ;
+   
+}
+.AccountsContainer .SearchTools{
+display: flex;
+flex-direction: row;
+align-items: center;
+gap : 10px ;
+justify-content: center;
+margin : 30px 0 ;
+
+}
+.AccountsContainer .SearchTools .AddPack{
+    height : 50px ;
+        width : 180px ;
+       border-radius: 20px ;
+        border: 2px solid black ;
+        box-sizing: border-box;
+        padding : 0 10px ;
+        font-size: 18px;
+        cursor: pointer;
+
+}
+.AccountsContainer .SearchTools .Statusdropdown{
+        height : 50px ;
+        width : 200px ;
+       border-radius: 20px ;
+        border: 2px solid black ;
+        box-sizing: border-box;
+        padding : 0 10px ;
+        font-size: 18px;
+}
+.AccountsContainer .SearchTools .Search{
+      height : 50px ;
+        width : 500px ;
+      border-radius: 20px ;
+        border: 2px solid black ;
+        box-sizing: border-box;
+         padding : 0 10px ;
+         font-size: 19px;
+}
+.AccountsContainer .ChooseButtons{
+  width : 90% ;
+  display: flex;
+  flex-direction: row;
+  gap : 10px ;
+  margin-top: 10px ;
+}
+.AccountsContainer .ChooseButtons button{
+     width : 17% ;
+    height : 50px ;
+    border-radius: 10px 10px 0 0;
+        border: 3px solid black ;
+    border-bottom : none ;
+   background-color: rgb(228, 235, 243);
+   cursor: pointer;
+
+}
+.AccountsContainer .TableList{
+   width : 90% ;
+  
+
+}
+.AccountsContainer .TableList table{
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  border: 3px solid black;
+
+}
+.AccountsContainer .TableList  table td,
+.AccountsContainer .TableList table th{
+    width : 15% ;
+    height : 50px ;
+    text-align: center;
+    border : 1px solid rgb(125, 125, 125) ;
+}
+
+
+
+.AccountsContainer .Pagination{
+ background-color: rgb(239, 242, 241);
+ margin-top: 20px ;
+  height : 40px ;
+  width : 80px ;
+ display: flex;
+ flex-direction: row;
+align-items: center;
+justify-content: center;
+ box-sizing: border-box;
+ border-radius: 15px ;
+ border : 1px solid black ;
+
+}
+.AccountsContainer .Pagination .Left{
+ width : 25%;
+ position: relative;
+ height : 100% ;
+ padding : 5px ;
+  box-sizing: border-box;
+  display : flex ;
+align-items: center;
+text-align: center;
+transform:  rotate(180deg);
+ cursor:  pointer ;
+}
+.AccountsContainer .Pagination .Page{
+width : 50%;
+position: relative;
+display : flex ;
+align-items: center;
+text-align: center;
+justify-content: center;
+ height : 100% ;
+ padding : 5px ;
+ box-sizing: border-box;
+}
+.AccountsContainer .Pagination .Right{
+width : 25%;
+position: relative;
+ height : 100% ;
+ padding : 5px ;
+  box-sizing: border-box;
+  display : flex ;
+align-items: center;
+text-align: center;
+  cursor:  pointer ;
+}
+.AccountsContainer .Pagination .Left img{
+ object-fit: contain;
+ width: 100% ;
+ height: auto;
+}
+.AccountsContainer .Pagination .Right img{
+object-fit: contain;
+width: 100% ;
+height: auto;
+}
+
+
+
+/*Admin Accounts*/
+
+

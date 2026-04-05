@@ -1,7 +1,12 @@
+"use client"
+
 import { ContactForm } from "@/components/ui/Form/contact-form";
 import Image from "next/image";
+import { useState } from "react";
 
 import Phone from "../../styles/images/phonecall.png";
+import Starrate from "../../styles/images/Starating.png"
+import Starrateyes from "../../styles/images/StarratingYes.png"
 
 import Location2 from "../../styles/images/location2.png";
 
@@ -9,6 +14,9 @@ import Gmail from "../../styles/images/gmail.png"
 
 
 export default function ContactPage() {
+  const [hovered, setHovered] = useState(0);
+  const [rating, setRating] = useState(0);
+
   return (
     <div className="ContactContainer">
           <h1>Contact Us</h1>
@@ -17,11 +25,16 @@ export default function ContactPage() {
       
              <h3>How would you rate your experience?</h3>
            <div className="Starsrating"> 
-            <span>⭐</span>
-            <span>⭐</span>
-            <span>⭐</span>
-            <span>⭐</span>
-            <span>⭐</span> 
+             {[1, 2, 3, 4, 5].map((star) => (
+        <Image
+          key={star}
+          src={star <= (hovered || rating) ? Starrateyes :Starrate}
+          alt=""
+          onClick={() => setRating(star)}
+          onMouseEnter={() => setHovered(star)}
+          onMouseLeave={() => setHovered(0)}
+        />
+      ))}
            </div>
            <h3>Any suggestions for improvement? Send us a message!</h3>
  

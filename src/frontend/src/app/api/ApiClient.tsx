@@ -14,7 +14,7 @@ class ApiClient {
     private isRefreshing = false;
     private refreshPromise: Promise<string | null> | null = null;
     constructor(endpoint: string) {
-        this.baseUrl = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1'}${endpoint}`;
+        this.baseUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api'}${endpoint}`;
     }
 
     //ham setToken de authContext day token vao day
@@ -22,42 +22,67 @@ class ApiClient {
         this.token = newToken;
     }
 
+
+
+   private generateSessionId(): string {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return `sess_${crypto.randomUUID()}`;
+  }
+
+  // fallback (older browsers / environments)
+  return `sess_${Math.random().toString(36).substring(2)}_${Date.now()}`;
+}
+
+
+    
     //ham lay ra session id
-    private getOrCreateSessionId(): string {
-        let sessionId = sessionStorage.getItem('sessionId'); //dung sessionStorage thay vi local de session-based
-        if (!sessionId) {
-            sessionId = `sess_${crypto.randomUUID()}`;
-            sessionStorage.setItem('sessionId', sessionId);
-        }
-        return sessionId;
-    }
+   private getOrCreateSessionId(): string {
+  let sessionId = sessionStorage.getItem('sessionId');
+
+  if (!sessionId) {
+    sessionId = this.generateSessionId(); 
+    sessionStorage.setItem('sessionId', sessionId);
+  }
+
+  return sessionId;
+}
 
     //dung url voi params
-    private buildApiUrl(endpoint: string, additionalParams: Record<string, any> = {}): string {
-        const params = new URLSearchParams(additionalParams);
-        return `${this.baseUrl}${endpoint}?${params.toString()}`;
+    private buildApiUrl(
+  endpoint: string,
+  additionalParams: Record<string, any> = {}
+): string {
+  const params = new URLSearchParams(additionalParams);
+  const queryString = params.toString();
+
+  return queryString
+    ? `${this.baseUrl}${endpoint}?${queryString}`
+    : `${this.baseUrl}${endpoint}`; 
+}
+private async refreshToken(): Promise<string | null> {
+    try {
+       
+        const base = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1';
+
+        const response = await fetch(`${base}/auth/refresh-token`, {
+            method: 'POST',
+            credentials: 'include',
+        });
+
+        if (!response.ok) throw new Error('Failed to refresh token');
+
+        const data = await response.json();
+        return data.accessToken;
+    } catch (error) {
+        console.error('Failed to refresh token:', error);
+        return null;
     }
-
-    private async refreshToken(): Promise<string | null> {
-        try {
-            const response = await fetch(`${this.baseUrl}/auth/refresh-token`, {
-                method: 'POST',
-                credentials: 'include',
-            });
-
-            if (!response.ok) throw new Error('Failed to refresh token');
-
-            const data = await response.json();
-            return data.accessToken;
-        } catch (error) {
-            console.error('Failed to refresh token:', error);
-            return null;
-        }
-    }
+}
 
     //wrapper cho fetch, xu ly header va error
     private async apiCall<T>(url: string, options: RequestInit = {}, retry = true): Promise<ApiResponse<T>> {
         try {
+            
             const response = await fetch(url, {
                 ...options,
                             //them credentials de su dung httpOnly cookie
@@ -72,7 +97,7 @@ class ApiClient {
             });
 
             //auto refresh token neu 401 va retry = true
-            if (response.status === 401 && retry) {
+            if (response.status === 401 && retry && this.token) {
                 if (!this.isRefreshing) {
                     this.isRefreshing = true;
                     this.refreshPromise = this.refreshToken();
@@ -91,11 +116,21 @@ class ApiClient {
                 return this.apiCall<T>(url, options, false);
             }
 
-            const data: ApiResponse<T> = await response.json();
+            let data: ApiResponse<T>;
 
-            if (!response.ok || data.code >= 400) {
-                throw new Error(data.message || 'API call failed');
-            }
+try {
+    const text = await response.text();
+    data = text ? JSON.parse(text) : {} as ApiResponse<T>;
+} catch {
+    data = {} as ApiResponse<T>;
+}
+            
+            console.log("URL:", url);
+console.log("Status:", response.status);
+console.log("Response:", data);
+
+            if (!response.ok) {
+        throw new Error(data.message || "Request failed");}      
 
             return data;
         } catch (error: any) {
