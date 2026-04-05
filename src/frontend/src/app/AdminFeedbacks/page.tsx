@@ -3,6 +3,8 @@
 import {    BarChart,Bar, XAxis, YAxis,Tooltip, ResponsiveContainer} from "recharts";
 import Image from "next/image";
 
+import { useEffect, useState } from "react";
+import { globalApiClient } from "@/app/api/ApiClient";
 
 import { useRouter } from "next/navigation";
 import Way from "../../styles/images/Way.png"
@@ -12,6 +14,10 @@ import search from "../../styles/images/search.png"
 export default function AdminFeedbacks() {
 
 const router = useRouter()
+
+
+const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
+
 const data = [
   { star: "5", total: 30 },
   { star: "4", total: 10 },
@@ -20,7 +26,33 @@ const data = [
   { star: "1", total: 5 },
 ];
 
+type Feedback = {
+  id: number;
+  subject: string;
+  rating: number;
+};
 
+useEffect(() => {
+  const fetchFeedbacks = async () => {
+    try {
+         const token = localStorage.getItem("accessToken");
+        globalApiClient.setToken(token);
+        
+      const res = await globalApiClient.get("/Feedbacks");
+
+      console.log("DATA:", res.data);
+
+      setFeedbacks(Array.isArray(res.data) ? res.data : []);
+
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  fetchFeedbacks();
+}, []);
+
+  
   return ( 
   <>
   <div className="AdminFeedbacksContainer"> 
@@ -106,6 +138,31 @@ const data = [
           </div>
         
           */}
+
+  {feedbacks.map((fb) => (
+              <div
+                key={fb.id}
+                className="FeedbackBox"
+                onClick={() =>
+                  router.push(`/AdminFeedbacks/FeedbackDetails/${fb.id}`)
+                }
+              >
+                {/* 🔄 REPLACED: email → subject */}
+                <div className="Subject">{fb.subject}</div>
+
+                <div className="AmountStars">
+                 {[...Array(fb.rating)].map((_, i) => (
+          <Image
+             key={i}
+              src={Star}
+             alt=""
+             />
+                ))}
+                </div>
+              </div>
+            ))}
+
+
 
         </div>
 

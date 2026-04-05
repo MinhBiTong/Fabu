@@ -59,15 +59,15 @@ export default function AdminDashboard() {
                       <p>increased 30%</p>
                  </div>
                      <div className="Gridbox">
-                       <h2>Total Money</h2>
-                      <span>9844$</span>
+                       <h2>Total Orders</h2>
+                      <span>98</span>
                       <p>increased 30%</p>
                      </div>
             </div>
 
             <div className="GridLine2">
                     <div className="Gridbox">
-                         <h2>Total Money</h2>
+                         <h2>This Month</h2>
                       <span>9844$</span>
                       <p>increased 30%</p>
                     </div>
