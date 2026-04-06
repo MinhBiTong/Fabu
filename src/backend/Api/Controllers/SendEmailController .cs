@@ -2,7 +2,7 @@
 using Hangfire;
 using Microsoft.AspNetCore.Mvc;
 
-namespace greenginger.Controllers
+namespace Api.Controllers
 {
     [ApiController]
     [Route("api/v{version:apiVersion}/[controller]")]

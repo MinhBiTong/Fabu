@@ -12,40 +12,27 @@ namespace Application.DTOs.Responses.PaymentResponse
 {
     public class PaymentResponse
     {
-        public long? TransactionId { get; set; }
-        [ForeignKey("TransactionId")]
-        public virtual Transaction Transaction { get; set; }
-
-        public long? BillId { get; set; }
-        [ForeignKey("BillId")]
-        public virtual PostpaidBill PostpaidBill { get; set; }
-
-        [Required]
+        public long PaymentId { get; set; }
+        public string PaymentRef { get; set; } = string.Empty;
         public decimal Amount { get; set; }
+        public string Status { get; set; } = string.Empty;
+        public string PaymentMethod { get; set; } = string.Empty;
+        public DateTime PaymentDate { get; set; }
+        public string? PaymentUrl { get; set; }           // URL chuyển hướng đến gateway
+        public string? Message { get; set; }
 
-        public DateTime PaymentDate { get; set; } = DateTime.UtcNow;
-
-        [StringLength(50)]
-        public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.Stripe;
-
-        [StringLength(100)]
-        public string PaymentRef { get; set; }
-
-        [StringLength(20)]
-        public StatusPayment Status { get; set; } = StatusPayment.Pending;
-
-        public static PaymentResponse FromEntity(Payment entity)
+        public static PaymentResponse FromEntity(Payment payment, string? paymentUrl = null)
         {
-            if (entity == null) return null;
             return new PaymentResponse
             {
-                TransactionId = entity.Transactions?.FirstOrDefault()?.Id,
-                BillId = entity.BillId,
-                Amount = entity.Amount,
-                PaymentDate = entity.PaymentDate,
-                PaymentMethod = entity.PaymentMethod,
-                PaymentRef = entity.PaymentRef,
-                Status = entity.Status
+                PaymentId = payment.Id,
+                PaymentRef = payment.PaymentRef,
+                Amount = payment.Amount,
+                Status = payment.Status.ToString(),
+                PaymentMethod = payment.PaymentMethod.ToString(),
+                PaymentDate = payment.PaymentDate,
+                PaymentUrl = paymentUrl,
+                Message = payment.Status == StatusPayment.Completed ? "Payment Successfully" : "The payment is pending"
             };
         }
     }

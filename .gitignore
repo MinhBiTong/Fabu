@@ -24,6 +24,7 @@ BundleArtifacts/
 [Dd]ebug/
 [Rr]elease/
 appsettings.Development.json
+appsettings.Production.json
 
 # --- OS / SYSTEM ---
 .DS_Store

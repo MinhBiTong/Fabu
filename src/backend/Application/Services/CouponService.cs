@@ -1,4 +1,5 @@
-﻿using Application.Interfaces;
+﻿using Application.DTOs.Responses.CouponResponse;
+using Application.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,11 @@ namespace Application.Services
 {
     public class CouponService : ICouponService
     {
+        public Task<CouponApplyResult> ApplyCouponAsync(string couponCode, long customerId, decimal originalAmount, string transactionType)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task ConsumeCouponAsync(string couponCode, int userId)
         {
             throw new NotImplementedException();

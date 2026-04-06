@@ -4,7 +4,7 @@ import { toastError } from "../../services/ToastService";
 interface ApiResponse<T> {
     code: number;
     message: string;
-    data: { accessToken: string } & T;
+    Data: { accessToken: string } & T;
     //data?: T;
 }
 
@@ -14,15 +14,13 @@ class ApiClient {
     private isRefreshing = false;
     private refreshPromise: Promise<string | null> | null = null;
     constructor(endpoint: string) {
-        this.baseUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api'}${endpoint}`;
+        this.baseUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/'}${endpoint}`;
     }
 
     //ham setToken de authContext day token vao day
     public setToken(newToken: string | null) {
         this.token = newToken;
     }
-
-
 
    private generateSessionId(): string {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {

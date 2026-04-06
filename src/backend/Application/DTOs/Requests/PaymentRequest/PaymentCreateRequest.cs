@@ -12,14 +12,6 @@ namespace Application.DTOs.Requests.PaymentRequest
 {
     public class PaymentCreateRequest
     {
-        public long? TransactionId { get; set; }
-        [ForeignKey("TransactionId")]
-        public virtual Transaction Transaction { get; set; }
-
-        public long? BillId { get; set; }
-        [ForeignKey("BillId")]
-        public virtual PostpaidBill PostpaidBill { get; set; }
-
         [Required]
         public decimal Amount { get; set; }
 
@@ -29,9 +21,15 @@ namespace Application.DTOs.Requests.PaymentRequest
         public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.Stripe;
 
         [StringLength(100)]
-        public string PaymentRef { get; set; }
+        public string? TransactionRef { get; set; }
 
-        [StringLength(20)]
-        public StatusPayment Status { get; set; } = StatusPayment.Pending;
+        public long? BillId { get; set; }               // Nếu thanh toán hóa đơn postpaid
+
+        public long? CustomerId { get; set; }           // Dùng khi guest thanh toán
+
+        public string? IpAddress { get; set; }
+
+        public string? OrderInfo { get; set; }
+        public string? CouponCode { get; set; }
     }
 }

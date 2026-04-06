@@ -16,5 +16,7 @@ namespace Application.Interfaces
         Task RemoveCacheResponseAsync(string pattern);
         Task RemoveCacheResponseByGroupAsync(string pattern);
         Task AddToGroupAsync(string groupKey, string value);
+        Task SetRawStringAsync(string key, string value, TimeSpan expiry);
+        Task<string?> GetRawStringAsync(string key);
     }
 }

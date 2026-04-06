@@ -1,6 +1,6 @@
 import ApiClient, { globalApiClient } from './ApiClient';
 
-const authClient = new ApiClient('/Auth');
+const authClient = new ApiClient('/Auth');     //http://localhost:5000/api/v1/Auth/login
 
 export const LoginApi = {
   login: async (email: string, password: string) => {

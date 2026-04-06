@@ -46,7 +46,7 @@ const handleLogin = async () => {
   try {
     const res = await LoginApi.login(email, password);
 
-    const token = res.data.accessToken;
+    const token = res.Result.AccessToken;
 
     localStorage.setItem("accessToken", token);
     globalApiClient.setToken(token);
