@@ -19,5 +19,6 @@ namespace Domain.Abstractions.Repositories
         void Delete(T entity);
         Task<bool> ExistsAsync(TKey id);
         Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null);
+        Task<List<T>> FindAsync(Expression<Func<T, bool>> predicate);
     }
 }

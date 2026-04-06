@@ -21,6 +21,7 @@ namespace greenginger.Controllers
         {
             try
             {
+                //Không cho user truyền UserId
                 var userId = User.FindFirst("sub")?.Value;
 
                 if (string.IsNullOrEmpty(userId))
@@ -54,11 +55,11 @@ namespace greenginger.Controllers
         }
 
         [HttpGet("user/{userId}")]
-        public async Task<IActionResult> GetByUser(int userId)
+        public async Task<IActionResult> GetByUser(int? userId)
         {
             try
             {
-                var result = await _auditLogService.GetCurrentUserLogAsync(userId);
+                var result = await _auditLogService.GetCurrentUserLogAsync();
                 return Ok(result);
             }
             catch (Exception ex)

@@ -13,6 +13,6 @@ namespace Application.DTOs.Requests.RoleRequest
         public string Name { get; set; }
         public string Description { get; set; } = string.Empty;
         [Required]
-        public HashSet<string> Permissions;
+        public HashSet<int> PermissionIds { get; set; } = new();
     }
 }

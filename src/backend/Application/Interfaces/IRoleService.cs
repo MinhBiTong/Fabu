@@ -12,8 +12,8 @@ namespace Application.Interfaces
     {
         Task<RoleResponse> CreateRoleAsync(RoleCreateRequest request);
         Task DeleteRoleAsync(int id);
-        Task<RoleResponse> UpdateRoleAsync(int id, RoleUpdateRequest request);
-        Task GetAllPoleAsync();
-
+        Task<RoleResponse> UpdateRoleAsync(long id, RoleUpdateRequest request);
+        Task<List<RoleResponse>> GetAllRoleAsync();
+        Task<RoleResponse> GetRoleByNameAsync(string name);
     }
 }

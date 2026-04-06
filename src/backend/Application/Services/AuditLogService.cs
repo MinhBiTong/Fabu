@@ -10,75 +10,97 @@ namespace Application.Services
 {
     public class AuditLogService : IAuditLogService
     {
-        //inject
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly IResponseCacheService? _responseCacheService;
-        //private readonly IUserContext _userContext;
+        private readonly IUserContext _userContext;
+        private readonly IResponseCacheService _cache;
         private readonly ILogger<AuditLogService> _logger;
 
         public AuditLogService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            //IUserContext userContext,
+            IUserContext userContext,
+            IResponseCacheService cache,
             ILogger<AuditLogService> logger)
-            //IResponseCacheService? responseCacheService = null)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            //_responseCacheService = responseCacheService;
-            //_userContext = userContext;
+            _userContext = userContext;
+            _cache = cache;
             _logger = logger;
         }
 
         public async Task<AuditLogResponse> CreateLogAsync(AuditLogCreateRequest request)
         {
-            try
+            var log = _mapper.Map<AuditLog>(request);
+
+            // nếu không truyền UserId → lấy từ token
+            if (log.UserId == null && int.TryParse(_userContext.UserId, out var userId))
             {
-                //validate
-                //var existing = await _unitOfWork.AuditLogs.GetByUserAsync(request.UserId);
-                //if (existing != null) throw new InvalidOperationException("Customer Log");
-                var log = _mapper.Map<AuditLog>(request);
-
-                //them vao Repository - luc nay chua luu xuong db
-                await _unitOfWork.AuditLogs.AddAsync(log);
-
-                //cuoi cung moi bam nut luu xuong db, neu bat ky dong nao o tren loi, DB se ko bi rac
-                await _unitOfWork.SaveChangesAsync();
-
-                return _mapper.Map<AuditLogResponse>(log);
+                log.UserId = userId;
             }
-            catch (Exception ex) 
-            {
-                _logger.LogError(ex, "Error while creating audit log");
-                throw;
-            }
+
+            log.CreatedAt = DateTime.UtcNow;
+
+            await _unitOfWork.AuditLogs.AddAsync(log);
+            await _unitOfWork.SaveChangesAsync();
+
+            // clear cache liên quan
+            await _cache.RemoveCacheResponseByGroupAsync("auditlogs");
+
+            return _mapper.Map<AuditLogResponse>(log);
         }
 
         public async Task DeleteLogAsync(int id)
         {
             var log = await _unitOfWork.AuditLogs.GetByIdAsync(id);
             if (log == null)
-            {
-                throw new KeyNotFoundException("Log not found");
-            }
+                throw new Exception("Log not exsited");
+
             _unitOfWork.AuditLogs.Delete(log);
             await _unitOfWork.SaveChangesAsync();
+
+            await _cache.RemoveCacheResponseByGroupAsync("auditlogs");
         }
 
-        public async Task<List<AuditLogResponse>> GetCurrentUserLogAsync(int UserId)
+        public async Task<List<AuditLogResponse>> GetCurrentUserLogAsync()
         {
-            var log = await _unitOfWork.AuditLogs.GetByUserAsync(UserId);
-            return _mapper.Map<List<AuditLogResponse>>(log);
+            if (!int.TryParse(_userContext.UserId, out var userId))
+                throw new Exception("User not found");
+
+            string cacheKey = $"auditlogs:user:{userId}";
+
+            var cached = await _cache.GetCachedResponseAsync<List<AuditLogResponse>>(cacheKey);
+            if (cached != null) return cached;
+
+            var logs = await _unitOfWork.AuditLogs
+                .FindAsync(x => x.UserId == userId);
+
+            var result = _mapper.Map<List<AuditLogResponse>>(logs);
+
+            await _cache.SetCacheResponseByGroupAsync(cacheKey, result, TimeSpan.FromMinutes(5));
+
+            return result;
         }
 
         public async Task<List<AuditLogResponse>> GetAllLogPagedAsync(int page, int pageSize, CancellationToken cancellationToken = default)
         {
             try
             {
+                string cacheKey = $"auditlogs:page:{page}:{pageSize}";
+
+                var cached = await _cache.GetCachedResponseAsync<List<AuditLogResponse>>(cacheKey);
+                if (cached != null) return cached;
+
                 int skip = (page - 1) * pageSize;
+
                 var logs = await _unitOfWork.AuditLogs.GetAllPagedAsync(skip, pageSize);
-                return _mapper.Map<List<AuditLogResponse>>(logs);
+
+                var result = _mapper.Map<List<AuditLogResponse>>(logs);
+
+                await _cache.SetCacheResponseByGroupAsync(cacheKey, result, TimeSpan.FromMinutes(5));
+
+                return result;
             }
             catch (Exception ex)
             {
