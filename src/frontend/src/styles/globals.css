@@ -420,6 +420,7 @@ background-color: white ;
   border: 1px solid rgba(0, 92, 185, 0.3) ;
   cursor: pointer;
   z-index: 1;
+  display: none;
 }
 .BotCircle:Hover{
   background-color: rgb(226, 226, 226) ;
@@ -439,7 +440,6 @@ z-index: 1;
 display : flex ;
 flex-direction: column;
 box-shadow: 0 3px 4px  rgb(122, 122, 122,0.5) ;
-
 }
 .ChatContainer .ChatTopbar{
  background-color: rgb(218, 226, 231) ;
