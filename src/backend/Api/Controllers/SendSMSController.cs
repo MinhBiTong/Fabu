@@ -24,6 +24,7 @@ namespace greenginger.Controllers
             var message = $"Welcome to you! We're Fabu, your OTP code: {otp}";
             var result = await _sms.SendSmsAsync(phone, message);
 
+            //var message = "Cam on quy khach da su dung dich vu cua chung toi. Chuc quy khach mot ngay tot lanh!";
             return Ok(result);
         }
     }

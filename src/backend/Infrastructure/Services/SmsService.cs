@@ -23,7 +23,9 @@ namespace Infrastructure.Services
                 SecretKey = "AAE0E51F1C8271841419198BFE91C4", //mat khau
                 Phone = phone, //dien thoai nguoi nhan
                 Content = message, //noi dung tin nhan
-                SmsType = 1 // 2 = CSKH/OTP
+                SmsType = 8 // 2 = CSKH/OTP
+                //SmsType = 2,
+                //Brandname = "Baotrixemay"
             };
 
             var json_body = JsonSerializer.Serialize(body);

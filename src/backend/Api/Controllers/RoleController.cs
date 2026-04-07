@@ -1,7 +1,5 @@
-﻿using Application.DTOs.Requests.AuditLogRequest;
-using Application.DTOs.Requests.RoleRequest;
+﻿using Application.DTOs.Requests.RoleRequest;
 using Application.Interfaces;
-using Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace greenginger.Controllers

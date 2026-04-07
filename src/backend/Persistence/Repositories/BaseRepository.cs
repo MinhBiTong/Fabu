@@ -88,5 +88,10 @@ namespace Persistence.Repositories
             }
             return await _dbSet.CountAsync(predicate);
         }
+
+        public async Task<List<T>> FindAsync(Expression<Func<T, bool>> predicate)
+        {
+            return await _dbSet.Where(predicate).ToListAsync();
+        }
     }
 }

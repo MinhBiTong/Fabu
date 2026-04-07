@@ -1,6 +1,10 @@
-﻿namespace greenginger.Controllers
+﻿using Microsoft.AspNetCore.Mvc;
+
+namespace greenginger.Controllers
 {
-    public class CouponUsageController
+    [ApiController]
+    [Route("api/v{version:apiVersion}/[controller]")]
+    public class CouponUsageController : ControllerBase
     {
     }
 }
