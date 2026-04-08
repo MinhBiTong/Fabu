@@ -31,15 +31,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 //api goi refresh token
                 const response = await LoginApi.refreshToken();
                 const newToken = response.Data.AccessToken;
-                // const response = await fetch('/api/v1/Auth/refresh-token', {
-                //     method: 'POST',
-                //     credentials: 'include', //gui cookie len server
-                // });
+            
+                const data = newToken ? { AccessToken : newToken } : null;
 
-                // const data = await response.json();
-                const data = newToken ? { accessToken: newToken } : null;
-
-                dispatch({ type: 'SET_ACCESS_TOKEN', payload: data?.accessToken || null });
+                dispatch({ type: 'SET_ACCESS_TOKEN', payload: data?.AccessToken || null });
             } catch {
                 dispatch({ type: 'SET_ACCESS_TOKEN', payload: null });
             } finally {

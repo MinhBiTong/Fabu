@@ -30,9 +30,9 @@ export default function FeedbackDetails() {
 
         const res = await globalApiClient.get<Feedback>(`/Feedbacks/${id}`);
 
-        console.log("DETAIL DATA:", res.data);
+        console.log("DETAIL DATA:", res.Data);
 
-     setFeedback(res.data);
+     setFeedback(res.Data);
       } catch (err) {
         console.error("DETAIL ERROR:", err);
       }
@@ -47,7 +47,7 @@ export default function FeedbackDetails() {
   return (
     <div className="AdminFeedDetailsContainer">
 
-      <h1>{feedback.customerName || "Anonymous"}'s Feedback</h1>
+      <h1>{feedback.customerName || "Anonymous"} &apos;s Feedback</h1>
 
       {/* ⭐ Stars */}
       <div className="StarsRated">
