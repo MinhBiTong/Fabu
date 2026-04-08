@@ -33,9 +33,9 @@ useEffect(() => {
 
       const res = await globalApiClient.get("/Service");
 
-      console.log("DATA:", res.data);
+      console.log("DATA:", res.Data);
 
-      setPackages(Array.isArray(res.data) ? res.data : []);
+      setPackages(Array.isArray(res.Data) ? res.Data : []);
 
     } catch (err) {
       console.error(err);

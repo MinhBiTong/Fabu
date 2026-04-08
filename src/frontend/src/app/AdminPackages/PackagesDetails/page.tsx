@@ -36,9 +36,9 @@ const { id } = useParams(); // 🔥 GET ID FROM URL
 
         const res = await globalApiClient.get<Package>(`/Service/${id}`);
 
-        console.log("DETAIL DATA:", res.data);
+        console.log("DETAIL DATA:", res.Data);
 
-        setPkg(res.data); 
+        setPkg(res.Data); 
 
       } catch (err) {
         console.error("DETAIL ERROR:", err);

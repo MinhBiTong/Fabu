@@ -1,14 +1,15 @@
 import { toastError, toastSuccess } from "../services/ToastService";
 import { LoginApi } from "../app/api/authApi";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/use-auth";
 import { useForm } from "react-hook-form";
-import { loginSchema, type LoginFormData } from "../validators/ValidateFormLogin";
+import { loginSchema, type LoginFormData } from "../core/validations/LoginSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
+// import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 export const useLogin = () => {
-  const { setAccessToken } = useAuth();
-  const navigate = useNavigate();
+  const { setToken } = useAuth();
+  const router = useRouter();
   const {
     register, //ham register cua react hook form tra ve 1 object chua name, onBlur, onChange, ref
     handleSubmit, //ham handleSubmit de wrap ham onSubmit, tu dong preventDefault va lay data
@@ -34,18 +35,25 @@ export const useLogin = () => {
       
       if (result.code === 200) {
         toastSuccess(result.message);
-        setAccessToken(result.data.accessToken);
+        setToken(result.Data.AccessToken); //luu token vao context
         
         //redirect
-        navigate("/");
+        router.push("/");
+        //router.refresh();
       } else {
-        toastError(result.message);
+        toastError(result.message  || "Login failed. Please try again.");
       }
     } catch (error: any) {
         const errorMessage = error.response?.data?.message || error.message || "An unexpected error occurred from the server.";
         toastError("Login failed. Please try again." + errorMessage);
     } 
   };
+
+  const handleGoogleLogin = () => {
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+    // Điều hướng trình duyệt trực tiếp đến Endpoint của Backend
+    window.location.href = `${backendUrl}/api/v1/auth/external-login?provider=Google`;
+  }
 
   const handleClick = () => {
     alert("This is a demo button click handler.");
@@ -57,6 +65,7 @@ export const useLogin = () => {
     errors,
     isSubmitting,
     onLoginSubmit, 
-    handleClick
+    handleClick, 
+    handleGoogleLogin
   };
 };
