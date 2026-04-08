@@ -1,7 +1,8 @@
 import { useEffect, useReducer } from "react";
 import { AuthContext } from "./AuthContext";
-import { globalApiClient } from "../../api/ApiClient";
-import { authReducer, initialAuthState } from "./reducer";
+import { globalApiClient } from "../../app/api/ApiClient";
+import { authReducer, initialAuthState } from "../auth/reduce";
+import { LoginApi } from "@/app/api/authApi";
 
 //logic refresh token + apiClient
 type AuthProviderProps = {
@@ -15,8 +16,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     //moi khi accessToken thay doi, cap nhat lai globalApiClient (apiclient)
     useEffect(() => {
-        globalApiClient.setToken(state.accessToken);
-    }, [state.accessToken]);
+        globalApiClient.setToken(state.AccessToken);
+    }, [state.AccessToken]);
 
     useEffect(() => {
         //1, khi load trang, goi api /refresh-token len .NET
@@ -28,17 +29,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         const silentRefresh = async () => {
             try {
                 //api goi refresh token
-                const response = await fetch('/auth/refresh-token', {
-                    method: 'POST',
-                    credentials: 'include', //gui cookie len server
-                });
+                const response = await LoginApi.refreshToken();
+                const newToken = response.Data.AccessToken;
+                // const response = await fetch('/api/v1/Auth/refresh-token', {
+                //     method: 'POST',
+                //     credentials: 'include', //gui cookie len server
+                // });
 
-                if (!response.ok) throw new Error('Failed to refresh token');
+                // const data = await response.json();
+                const data = newToken ? { accessToken: newToken } : null;
 
-                const data = await response.json();
-                dispatch({ type: 'SET_ACCESS_TOKEN', payload: data.accessToken });
+                dispatch({ type: 'SET_ACCESS_TOKEN', payload: data?.accessToken || null });
             } catch {
-                dispatch({ type: 'SET_ACCESS_TOKEN', payload: null }    );
+                dispatch({ type: 'SET_ACCESS_TOKEN', payload: null });
             } finally {
                 dispatch({ type: "SET_LOADING", payload: false });
             }

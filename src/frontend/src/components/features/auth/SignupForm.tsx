@@ -44,7 +44,7 @@ function SignUpForm({ onClose }: Props) {
     try {
    
     const res = await globalApiClient.post<any>(
-      "/Auth/register", 
+      "v1/Auth/register", 
       {
         Email: form.Email,
         Username: form.Username,

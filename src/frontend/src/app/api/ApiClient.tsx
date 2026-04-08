@@ -4,7 +4,7 @@ import { toastError } from "../../services/ToastService";
 interface ApiResponse<T> {
     code: number;
     message: string;
-    Data: { accessToken: string } & T;
+    Data: { AccessToken: string } & T;
     //data?: T;
 }
 
