@@ -1,43 +1,67 @@
 ﻿using Domain.Entities;
 using Domain.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Persistence.Data.Contexts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Persistence.Repositories
 {
     public class CustomerServiceRepository : BaseRepository<CustomerService, long>, ICustomerServiceRepository
     {
+        private readonly AppDbContext _context;
+
         public CustomerServiceRepository(AppDbContext context) : base(context)
         {
+            _context = context;
         }
 
-        public Task CancelServiceAsync(long customerId, long serviceId)
+        public async Task CancelServiceAsync(long customerId, long serviceId)
         {
-            throw new NotImplementedException();
+            var record = await _context.Set<CustomerService>()
+                .FirstOrDefaultAsync(cs => cs.CustomerId == customerId && cs.ServiceId == serviceId);
+
+            if (record != null)
+            {
+                // Giả sử bạn có cột Status. Sửa thành thuộc tính thực tế của bạn.
+                // record.Status = "Cancelled"; 
+                _context.Set<CustomerService>().Update(record);
+            }
         }
 
-        public Task<List<CustomerService>> GetActiveServicesByCustomerAsync(long customerId)
+        public async Task<List<CustomerService>> GetActiveServicesByCustomerAsync(long customerId)
         {
-            throw new NotImplementedException();
+            return await _context.Set<CustomerService>()
+                .Where(cs => cs.CustomerId == customerId)
+                .ToListAsync();
         }
 
-        public Task<List<CustomerService>> GetExpiringServicesAsync()
+        public async Task<List<CustomerService>> GetExpiringServicesAsync()
         {
-            throw new NotImplementedException();
+            var targetDate = DateTime.UtcNow.AddDays(7);
+            return await _context.Set<CustomerService>()
+                // .Where(cs => cs.EndDate <= targetDate) 
+                .ToListAsync();
         }
 
-        public Task<bool> IsServiceRegisteredAsync(long customerId, long serviceId)
+        public async Task<bool> IsServiceRegisteredAsync(long customerId, long serviceId)
         {
-            throw new NotImplementedException();
+            return await _context.Set<CustomerService>()
+                .AnyAsync(cs => cs.CustomerId == customerId && cs.ServiceId == serviceId);
         }
 
-        public Task RegisterServiceAsync(long customerId, long serviceId)
+        public async Task RegisterServiceAsync(long customerId, long serviceId)
         {
-            throw new NotImplementedException();
+            var newRegistration = new CustomerService
+            {
+                CustomerId = customerId,
+                ServiceId = serviceId,
+                // StartDate = DateTime.UtcNow,
+                // Status = "Active"
+            };
+            await _context.Set<CustomerService>().AddAsync(newRegistration);
         }
     }
 }

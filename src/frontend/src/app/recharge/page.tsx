@@ -38,7 +38,7 @@ const moneyList = [
     return "Unknown";
   };
 
-  const handleRecharge = () => {
+  const handleRecharge = async () => {
   const phoneRegex = /^(03|05|07|08|09)[0-9]{8}$/;
 
   if (!phone) return setError("Please enter your phone number");
@@ -48,15 +48,37 @@ const moneyList = [
   setError("");
   setLoading(true);
 
-  setTimeout(() => {
-    setLoading(false);
+  try {
+    const final = finalPrice || amount;
 
-    // 🔥 CHUYỂN TRANG SANG BILL
+    const res = await fetch("/api/recharge", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        phone,
+        amount: final,
+        coupon: selectedCoupon,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "Payment failed");
+    }
+
+    // 👉 chuyển sang trang bill
     router.push(
-      `/billpayment?phone=${phone}&amount=${finalPrice}&id=${Date.now()}`
+      `/billpayment?phone=${data.phone}&amount=${data.amount}&id=${data.transactionId}`
     );
 
-  }, 1200);
+  } catch (err: any) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
 };
 
   return (

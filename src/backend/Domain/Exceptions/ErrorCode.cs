@@ -14,7 +14,8 @@ namespace Domain.Exceptions
         UNAUTHENTICATED = 1006,
         UNAUTHORIZED = 1007,
         INVALID_DOB = 1008,
-        CUSTOMER_NOT_FOUND = 1009
+        CUSTOMER_NOT_FOUND = 1009,
+        PAYMENT_NOT_FOUND = 1010
     }
 
     public class ErrorDetails
@@ -48,6 +49,7 @@ namespace Domain.Exceptions
                 ErrorCode.UNAUTHORIZED => new ErrorDetails(1007, "You do not have permission", HttpStatusCode.Forbidden),
                 ErrorCode.INVALID_DOB => new ErrorDetails(1008, "Your age must be at least {min} years old", HttpStatusCode.BadRequest),
                 ErrorCode.CUSTOMER_NOT_FOUND => new ErrorDetails(1009, "Customer already existed", HttpStatusCode.BadRequest),
+                ErrorCode.PAYMENT_NOT_FOUND => new ErrorDetails(1010, "Payment not found", HttpStatusCode.NotFound),
                 _ => throw new ArgumentOutOfRangeException(nameof(errorCode), errorCode, null)
             };
         }

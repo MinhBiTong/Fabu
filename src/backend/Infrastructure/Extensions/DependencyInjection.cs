@@ -35,8 +35,8 @@ namespace Infrastructure.Extensions
             services.AddScoped<IAuditLogService, AuditLogService>();
             services.AddScoped<ICouponService, CouponService>();
             services.AddScoped<ICouponUsageService, CouponUsageService>();
-            services.AddScoped<ICustomerService, Application.Services.CustomerService>();
-            services.AddScoped<ICustomerServiceService, CustomerServiceService>();
+            services.AddScoped<ICustomerService, CustomerService>();
+            services.AddScoped<ICustomerServicesService, CustomerServicesService>();
             services.AddScoped<IFeedbackService, FeedbackService>();
             services.AddScoped<IPostpaidBillService, PostpaidBillService>();
             services.AddScoped<IRechargePlanService, RechargePlanService>();
@@ -54,3 +54,4 @@ namespace Infrastructure.Extensions
         }
     }
 }
+
