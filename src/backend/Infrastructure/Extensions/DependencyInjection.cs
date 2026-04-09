@@ -1,18 +1,18 @@
 ﻿using Application.Interfaces;
+using Application.Services;
 using Application.Validators.LoginValidator;
 using Application.Validators.UserValidator;
+using AutoMapper;
+using FluentValidation;
+using Infrastructure.Services;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AutoMapper;
-using FluentValidation;
-using Microsoft.Extensions.DependencyInjection;
-using Application.Services;
-using Infrastructure.Services;
-using Microsoft.Identity.Client;
 
 namespace Infrastructure.Extensions
 {
@@ -41,6 +41,9 @@ namespace Infrastructure.Extensions
             services.AddScoped<IPostpaidBillService, PostpaidBillService>();
             services.AddScoped<IRechargePlanService, RechargePlanService>();
             services.AddScoped<IServiceService, ServiceService>();
+            // Register Services
+            services.AddScoped<IPaymentService, PaymentService>();
+            services.AddScoped<ITransactionService, TransactionService>();
 
             // Đăng ký tất cả Validators từ Assembly này
             services.AddValidatorsFromAssembly(assembly);
