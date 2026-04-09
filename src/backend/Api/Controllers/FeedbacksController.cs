@@ -58,5 +58,14 @@ namespace Api.Controllers
             if (response.Code != 200) return BadRequest(response);
             return Ok(response);
         }
+
+        [HttpGet("pending")]
+        public async Task<IActionResult> GetPending() => Ok(await _feedbackService.GetAllPendingAsync());
+
+        [HttpPut("{id}/mark-read")]
+        public async Task<IActionResult> MarkAsRead(long id) => Ok(await _feedbackService.MarkAsReadAsync(id));
+
+        [HttpPut("{id}/reply")]
+        public async Task<IActionResult> MarkAsReplied(long id, [FromQuery] string replyNote) => Ok(await _feedbackService.MarkAsRepliedAsync(id, replyNote));
     }
 }

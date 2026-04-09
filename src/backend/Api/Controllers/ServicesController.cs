@@ -71,5 +71,20 @@ namespace Application.Services
             var result = _mapper.Map<CustomerResponse>(customer);
             return ApiResponse<CustomerResponse>.Success(result, "Customer created successfully.");
         }
+        [HttpGet("category/{category}/active")]
+        public async Task<IActionResult> GetActiveByCategory(string category) => Ok(await _serviceService.GetActiveServicesByCategoryAsync(category));
+
+        [HttpGet("popular/{top}")]
+        public async Task<IActionResult> GetPopular(int top) => Ok(await _serviceService.GetPopularServicesAsync(top));
+
+        [HttpGet("code/{code}")]
+        public async Task<IActionResult> GetByCode(string code) => Ok(await _serviceService.GetByCodeAsync(code));
+
+        [HttpGet("{id}/is-active")]
+        public async Task<IActionResult> IsActive(long id) => Ok(await _serviceService.IsServiceActiveAsync(id));
+
+        [HttpGet("search")]
+        public async Task<IActionResult> Search([FromQuery] string keyword) => Ok(await _serviceService.SearchServicesAsync(keyword));
+
     }
 }
