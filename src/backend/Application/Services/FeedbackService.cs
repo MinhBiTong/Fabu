@@ -63,5 +63,25 @@ namespace Application.Services
             await _unitOfWork.SaveChangesAsync();
             return ApiResponse<bool>.Success(true, "Feedback deleted.");
         }
+
+        public async Task<ApiResponse<List<FeedbackResponse>>> GetAllPendingAsync()
+        {
+            var feedbacks = await _unitOfWork.Feedbacks.GetAllPendingAsync();
+            return ApiResponse<List<FeedbackResponse>>.Success(_mapper.Map<List<FeedbackResponse>>(feedbacks));
+        }
+
+        public async Task<ApiResponse<bool>> MarkAsReadAsync(long feedbackId)
+        {
+            await _unitOfWork.Feedbacks.MarkAsReadAsync(feedbackId);
+            await _unitOfWork.SaveChangesAsync();
+            return ApiResponse<bool>.Success(true, "Đã đánh dấu đọc.");
+        }
+
+        public async Task<ApiResponse<bool>> MarkAsRepliedAsync(long feedbackId, string replyNote)
+        {
+            await _unitOfWork.Feedbacks.MarkAsRepliedAsync(feedbackId, replyNote);
+            await _unitOfWork.SaveChangesAsync();
+            return ApiResponse<bool>.Success(true, "Đã trả lời phản hồi.");
+        }
     }
 }

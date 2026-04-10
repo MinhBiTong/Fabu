@@ -55,5 +55,23 @@ namespace Api.Controllers
             if (response.Code != 200) return BadRequest(response);
             return Ok(response);
         }
+
+        [HttpGet("active")]
+        public async Task<IActionResult> GetActive() => Ok(await _rechargePlanService.GetActivePlansAsync());
+
+        [HttpGet("amount/{amount}")]
+        public async Task<IActionResult> GetByAmount(decimal amount) => Ok(await _rechargePlanService.GetByAmountAsync(amount));
+
+        [HttpGet("price-range")]
+        public async Task<IActionResult> GetByPriceRange([FromQuery] decimal min, [FromQuery] decimal max) => Ok(await _rechargePlanService.GetPlansByPriceRangeAsync(min, max));
+
+        [HttpGet("popular/{top}")]
+        public async Task<IActionResult> GetPopular(int top) => Ok(await _rechargePlanService.GetPopularPlansAsync(top));
+
+        [HttpGet("provider/{provider}")]
+        public async Task<IActionResult> GetByProvider(string provider) => Ok(await _rechargePlanService.GetPlansByProviderAsync(provider));
+
+        [HttpGet("{id}/is-active")]
+        public async Task<IActionResult> IsActive(long id) => Ok(await _rechargePlanService.IsPlanActiveAsync(id));
     }
 }
