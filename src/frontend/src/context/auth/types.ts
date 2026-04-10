@@ -1,5 +1,5 @@
 export type AuthState = {
-    accessToken: string | null;
+    AccessToken: string | null;
     isLoading: boolean;
 }
 

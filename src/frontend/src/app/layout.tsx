@@ -11,6 +11,7 @@ import "../styles/globals.css";
 import "../styles/adminglobal.css";
 import "../styles/themes/dark.css";
 import "../styles/themes/light.css";
+import { AuthProvider } from "@/context/auth/AuthProvider";
 
 export default function RootLayout({
     children,
@@ -20,12 +21,14 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body>
-                <Header />
-                <Chatbot />
-                <AdminSidebar />
-                <main>{children}</main>
-                 <ToastContainer />
-                <Footer />
+                <AuthProvider>
+                    <Header />
+                    <Chatbot />
+                    <AdminSidebar />
+                    <main>{children}</main>
+                    <ToastContainer />
+                    <Footer />
+                </AuthProvider>
             </body>
         </html>
     )

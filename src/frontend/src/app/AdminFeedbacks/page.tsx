@@ -40,9 +40,9 @@ useEffect(() => {
         
       const res = await globalApiClient.get("/Feedbacks");
 
-      console.log("DATA:", res.data);
+      console.log("DATA:", res.Data);
 
-      setFeedbacks(Array.isArray(res.data) ? res.data : []);
+      setFeedbacks(Array.isArray(res.Data) ? res.Data : []);
 
     } catch (err) {
       console.error(err);
