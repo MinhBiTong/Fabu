@@ -1,16 +1,22 @@
 import ApiClient, { globalApiClient } from './ApiClient';
 
-const authClient = new ApiClient('/auth');
+const authClient = new ApiClient('/Auth');     //http://localhost:5000/api/v1/Auth/login
 
 export const LoginApi = {
   login: async (email: string, password: string) => {
-    //endpoint: baseUrl + /auth + /login
-    //globalApiClient se tu dong them sessionId va Authorization header neu co token
-    return globalApiClient.post('/auth/login', {email, password});
+    return globalApiClient.post('v1/auth/login', {
+      Email: email,
+      Password: password
+    });
   },
+
   register: async (email: string, password: string) => {
-    return authClient.post<any>('/register', {email, password});
+    return authClient.post<any>('v1/register', {
+      Email: email,
+      Password: password
+    });
   },
+
   refreshToken: async () => {
     return authClient.post<any>('/refresh-token', {});
   }

@@ -1,11 +1,7 @@
 ﻿using Domain.Entities;
 using Domain.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Persistence.Data.Contexts;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Persistence.Repositories
 {
@@ -13,39 +9,106 @@ namespace Persistence.Repositories
     {
         public CouponRepository(AppDbContext context) : base(context) {}
 
-        public Task DecreaseUsageAsync(long couponId)
+        public async Task DecreaseUsageAsync(long couponId)
         {
-            throw new NotImplementedException();
+            var coupon = await _dbSet
+                .Include(x => x.CouponUsages)
+                .FirstOrDefaultAsync(x => x.Id == couponId);
+
+            if (coupon == null)
+                throw new Exception("Coupon not found");
+
+            if (coupon.CouponUsages.Count >= coupon.UsageLimitTotal)
+                throw new Exception("Coupon hết lượt sử dụng");
+
+            // Khong can giam gi → vi usage duoc tinh bang COUNT
         }
 
-        public Task<List<Coupon>> GetActiveCouponAsync()
+        public async Task<List<Coupon>> GetActiveCouponAsync()
         {
-            throw new NotImplementedException();
+            var now = DateTime.UtcNow;
+            return await _dbSet
+                .Where(x => x.IsActive && x.ValidFrom <= now && x.ValidTo >= now)
+                .ToListAsync();
         }
 
-        public Task<List<Coupon>> GetCouponsByCustomerIdAsync(long customerId)
+        public async Task<List<Coupon>> GetCouponsByCustomerIdAsync(long customerId)
         {
-            throw new NotImplementedException();
+            return await _dbSet
+                .Include(x => x.CouponUsages)
+                .ThenInclude(u => u.Transaction)
+                .Where(x => x.CouponUsages.Any(u =>
+                    u.Transaction != null &&
+                    u.Transaction.CustomerId == customerId
+                )).ToListAsync();
         }
 
-        public Task<List<Coupon>> GetExpiredCouponAsync()
+        public async Task<List<Coupon>> GetExpiredCouponAsync()
         {
-            throw new NotImplementedException();
+            var now = DateTime.UtcNow;
+            return await _dbSet
+                .Where(x => x.ValidTo < now || !x.IsActive)
+                .ToListAsync();
         }
 
-        public Task<Coupon?> GetValidCouponByCodeAsync(string code, DateTime currentTime)
+        public async Task<Coupon?> GetValidCouponByCodeAsync(string code, DateTime currentTime)
         {
-            throw new NotImplementedException();
+            return await _dbSet
+                .Include(x => x.CouponUsages)
+                .FirstOrDefaultAsync(x =>
+                    x.Code == code &&
+                    x.IsActive &&
+                    x.ValidFrom <= currentTime &&
+                    x.ValidTo >= currentTime &&
+                    x.UsageLimitTotal > x.CouponUsages.Count
+                );
         }
 
-        public Task<bool> HasCustomerUsedCouponAsync(long couponId, long customerId)
+        public async Task<bool> HasCustomerUsedCouponAsync(long couponId, long customerId)
         {
-            throw new NotImplementedException();
+            return await _context.Set<CouponUsage>()
+                .Include(x => x.Transaction)
+                .AnyAsync(x =>
+                    x.CouponId == couponId &&
+                    x.Transaction != null &&
+                    x.Transaction.CustomerId == customerId &&
+                    x.Status == "Success"
+                );
         }
 
-        public Task<bool> IsCouponStillValidAsync(long couponId, long customerId)
+        public async Task<bool> IsCouponStillValidAsync(long couponId, long customerId)
         {
-            throw new NotImplementedException();
+            var coupon = await _dbSet
+                .Include(x => x.CouponUsages)
+                .ThenInclude(u => u.Transaction)
+                .FirstOrDefaultAsync(x => x.Id == couponId);
+
+            if (coupon == null) return false;
+
+            var now = DateTime.UtcNow;
+
+            //kiem tra thoi gian + active
+            if (!coupon.IsActive || now < coupon.ValidFrom || now > coupon.ValidTo)
+                return false;
+
+            //kiem tra tong usage (chi success)
+            var totalUsed = coupon.CouponUsages.Count(x => x.Status == "Success");
+
+            if (totalUsed >= coupon.UsageLimitTotal)
+                return false;
+
+            //kiem tra per user
+            var userUsage = coupon.CouponUsages
+                .Count(x =>
+                    x.Status == "Success" &&
+                    x.Transaction != null &&
+                    x.Transaction.CustomerId == customerId
+                );
+
+            if (userUsage >= coupon.UsageLimitPerUser)
+                return false;
+
+            return true;
         }
     }
 }

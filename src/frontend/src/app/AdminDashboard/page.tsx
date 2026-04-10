@@ -42,10 +42,9 @@ export default function AdminDashboard() {
   <div className="DashboardContainer"> 
     <div className="DashboardSidebar">
        <div className="DashboardChoices">Finance</div>
-       <div className="DashboardChoices">Idontfuckinknow</div>
-       <div className="DashboardChoices">Salesofsomething</div>
-        <div className="DashboardChoices">Idontfuckinknow</div>
-       <div className="DashboardChoices">Salesofsomething</div>
+       <div className="DashboardChoices">Recharges</div>
+       <div className="DashboardChoices">Data plan</div>
+
     </div>
 
 
@@ -54,13 +53,29 @@ export default function AdminDashboard() {
         <div className="GridFinance">
 
             <div className="GridLine1">
-                 <div className="Gridbox"></div>
-                     <div className="Gridbox"></div>
+                 <div className="Gridbox">
+                      <h2>Total Money</h2>
+                      <span>9844$</span>
+                      <p>increased 30%</p>
+                 </div>
+                     <div className="Gridbox">
+                       <h2>Total Orders</h2>
+                      <span>98</span>
+                      <p>increased 30%</p>
+                     </div>
             </div>
 
             <div className="GridLine2">
-                    <div className="Gridbox"></div>
-                        <div className="Gridbox"></div>
+                    <div className="Gridbox">
+                         <h2>This Month</h2>
+                      <span>9844$</span>
+                      <p>increased 30%</p>
+                    </div>
+                        <div className="Gridbox">
+                          <h2>Total Money</h2>
+                         <span>9844$</span>
+                         <p>increased 30%</p>
+                        </div>
             </div>
 
         </div>

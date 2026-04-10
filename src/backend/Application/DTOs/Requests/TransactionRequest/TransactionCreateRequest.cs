@@ -35,5 +35,11 @@ namespace Application.DTOs.Requests.TransactionRequest
         public DateTime? CompletedAt { get; set; }
 
         public virtual ICollection<CouponUsage> CouponUsages { get; set; }
+
+        [StringLength(50)]
+        public string? CouponCode { get; set; }
+
+        [StringLength(50)]
+        public string? MobileNumber { get; set; }
     }
 }

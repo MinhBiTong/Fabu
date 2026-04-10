@@ -1,17 +1,18 @@
-using Microsoft.Extensions.Caching.Memory;
 using Api.Extensions;
 using Api.Extensions.ContextExtensions;
 using Api.Middleware;
-using Infrastructure.Extensions;
 using Application.Interfaces;
 using Application.Services;
 using Domain.Abstractions;
 using Domain.Configurations;
 using Domain.Entities;
+using Domain.Options;
+using Infrastructure.Extensions;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Persistence.Data.Configurations;
@@ -21,15 +22,13 @@ using Serilog;
 using System.Text;
 using System.Text.Json.Serialization;
 using Hangfire;
-using Hangfire.MemoryStorage;
+//using Hangfire.MemoryStorage;
 
 var builder = WebApplication.CreateBuilder(args);
 
 //DI tu dong redis, mail, payment
 builder.Services.InstallerServicesInAssembly(builder.Configuration);
-builder.Services.AddScoped<IResponseCacheService, ResponseCacheService>();
 builder.Services.AddHttpContextAccessor(); //httpContextAccessor cho claims
-builder.Services.AddDistributedMemoryCache();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
 builder.Services.AddReverseProxy().LoadFromConfig(builder.Configuration.GetSection("ReverseProxy")); //cau hinh reverse proxy tu appsettings.json
@@ -40,6 +39,12 @@ builder.Services.Configure<MailConfiguration>(builder.Configuration.GetSection("
 builder.Services.Configure<RateLimiterConfiguration>(builder.Configuration.GetSection("RateLimiting"));
 builder.Services.Configure<JwtConfiguration>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddScoped<Domain.Abstractions.IUserContext, UserContext>();
+//builder.Services.Configure<VNPayConfiguration>(builder.Configuration.GetSection("VNPay"));
+builder.Services.AddOptions<VNPayConfiguration>()
+        .Bind(builder.Configuration.GetSection("VNPay"))
+        .ValidateDataAnnotations()
+        .ValidateOnStart();
+builder.Services.AddScoped<IPaymentGateway, VNPayService>();
 
 //builder.Logging.ClearProviders(); 
 builder.Host.UseSerilog((ctx, lc) => lc
@@ -50,8 +55,8 @@ builder.Host.UseSerilog((ctx, lc) => lc
 builder.Services.AddScoped<ISmsService, SmsService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 //Queue + Retry Email
-builder.Services.AddHangfire(config => config.UseMemoryStorage());
-builder.Services.AddHangfireServer();
+//builder.Services.AddHangfire(config => config.UseMemoryStorage());
+//builder.Services.AddHangfireServer();
 
 var app = builder.Build();
 app.UseMiddleware<GlobalException>();
@@ -85,8 +90,8 @@ app.UseStaticFiles();
 app.UseCors("AllowReactApp");
 app.UseRouting();
 app.UseRateLimiter();
-app.UseHangfireDashboard(); //hien them
-app.MapReverseProxy();
+//app.UseHangfireDashboard(); //hien them
+//app.MapReverseProxy();
 app.UseAuthentication();
 app.UseMiddleware<TokenBlacklistMiddleware>();
 app.UseMiddleware<GlobalException>();
@@ -96,3 +101,4 @@ app.UseSerilogRequestLogging();
 app.MapReverseProxy();
 
 app.Run();
+

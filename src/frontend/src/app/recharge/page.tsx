@@ -2,6 +2,7 @@
 import { useState } from "react";
 import "../../styles/css/recharge.css";
 import Payment from "./Payment";
+import { useRouter } from "next/navigation";
 
 export default function Recharge() {
   const [phone, setPhone] = useState("");
@@ -12,6 +13,7 @@ export default function Recharge() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [finalPrice, setFinalPrice] = useState(0);
+  const router = useRouter();
 
 const moneyList = [
   { value: 10000, discount: 0.05 },
@@ -37,26 +39,25 @@ const moneyList = [
   };
 
   const handleRecharge = () => {
-    const phoneRegex = /^(03|05|07|08|09)[0-9]{8}$/;
+  const phoneRegex = /^(03|05|07|08|09)[0-9]{8}$/;
 
-    if (!phone) return setError("Please enter your phone number");
-    if (!phoneRegex.test(phone)) return setError("Invalid phone number");
-    if (!amount) return setError("Please select an amount");
+  if (!phone) return setError("Please enter your phone number");
+  if (!phoneRegex.test(phone)) return setError("Invalid phone number");
+  if (!amount) return setError("Please select an amount");
 
-    setError("");
-    setLoading(true);
+  setError("");
+  setLoading(true);
 
-    setTimeout(() => {
-      setLoading(false);
-      setSuccess(
-        `Recharge ${amount.toLocaleString("vi-VN")} VND successfully!`
-      );
-      setPhone("");
-      setAmount(null);
-      setCustomAmount("");
-      setSelectedCoupon("");
-    }, 1500);
-  };
+  setTimeout(() => {
+    setLoading(false);
+
+    // 🔥 CHUYỂN TRANG SANG BILL
+    router.push(
+      `/billpayment?phone=${phone}&amount=${finalPrice}&id=${Date.now()}`
+    );
+
+  }, 1200);
+};
 
   return (
     <div className="nap-wrapper">

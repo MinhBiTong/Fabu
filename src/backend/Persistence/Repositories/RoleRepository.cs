@@ -12,9 +12,7 @@ namespace Persistence.Repositories
 {
     public class RoleRepository : BaseRepository<Role, long>, IRoleRepository
     {
-        public RoleRepository(AppDbContext context) : base(context)
-        {
-        }
+        public RoleRepository(AppDbContext context) : base(context) {}
 
         public async Task<Role?> GetByNameAsync(string name)
         {

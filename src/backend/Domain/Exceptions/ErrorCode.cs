@@ -15,7 +15,12 @@ namespace Domain.Exceptions
         UNAUTHORIZED = 1007,
         INVALID_DOB = 1008,
         CUSTOMER_NOT_FOUND = 1009,
-        PAYMENT_NOT_FOUND = 1010
+        PAYMENT_NOT_FOUND = 1010, 
+        PAYMENT_PROVIDER_NOT_SUPPORTED = 1011,
+        INVALID_AMOUNT = 1012,
+        TRANSACTION_NOT_FOUND = 1013,
+         SERVICE_NOT_FOUND = 1014,
+         RECHARGE_PLAN_NOT_FOUND = 1015
     }
 
     public class ErrorDetails
@@ -50,6 +55,11 @@ namespace Domain.Exceptions
                 ErrorCode.INVALID_DOB => new ErrorDetails(1008, "Your age must be at least {min} years old", HttpStatusCode.BadRequest),
                 ErrorCode.CUSTOMER_NOT_FOUND => new ErrorDetails(1009, "Customer already existed", HttpStatusCode.BadRequest),
                 ErrorCode.PAYMENT_NOT_FOUND => new ErrorDetails(1010, "Payment not found", HttpStatusCode.NotFound),
+                ErrorCode.PAYMENT_PROVIDER_NOT_SUPPORTED => new ErrorDetails(1011, "Payment provider not supported", HttpStatusCode.BadRequest),
+                ErrorCode.INVALID_AMOUNT => new ErrorDetails(1012, "Amount must be greater than 0", HttpStatusCode.BadRequest),
+                ErrorCode.TRANSACTION_NOT_FOUND => new ErrorDetails(1013, "Transaction not found", HttpStatusCode.NotFound),
+                ErrorCode.SERVICE_NOT_FOUND => new ErrorDetails(1014, "Service not found", HttpStatusCode.NotFound),
+                ErrorCode.RECHARGE_PLAN_NOT_FOUND => new ErrorDetails(1015, "Recharge plan not found", HttpStatusCode.NotFound),
                 _ => throw new ArgumentOutOfRangeException(nameof(errorCode), errorCode, null)
             };
         }

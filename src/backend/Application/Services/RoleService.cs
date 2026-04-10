@@ -16,7 +16,7 @@ namespace Application.Services
         private readonly IMapper _mapper;
         private readonly IUserContext _userContext;
         private readonly IResponseCacheService _cache;
-        private readonly ILogger<AuditLogService> _logger;
+        private readonly ILogger<RoleService> _logger;
         private readonly AppDbContext _context;
 
         public RoleService(
@@ -24,7 +24,7 @@ namespace Application.Services
             IMapper mapper,
             IUserContext userContext,
             IResponseCacheService cache,
-            ILogger<AuditLogService> logger,
+            ILogger<RoleService> logger,
             AppDbContext context)
         {
             _unitOfWork = unitOfWork;
@@ -58,7 +58,7 @@ namespace Application.Services
             }
         }
 
-        public async Task DeleteRoleAsync(int id)
+        public async Task DeleteRoleAsync(long id)
         {
             var role = await _unitOfWork.Roles.GetByIdAsync(id);
             if (role == null)
@@ -110,7 +110,7 @@ namespace Application.Services
                 .FirstOrDefaultAsync(r => r.Id == id);
 
             if (role == null)
-                throw new Exception("Role không tồn tại");
+                throw new Exception("Role not found");
 
             var validPermissions = await _context.Permissions
                 .Where(p => request.PermissionIds.Contains(p.Id))
@@ -119,7 +119,7 @@ namespace Application.Services
 
             if (validPermissions.Count != request.PermissionIds.Count)
             {
-                throw new Exception("Permission không hợp lệ");
+                throw new Exception("Permission unvail");
             }
 
             // 2. Update basic info

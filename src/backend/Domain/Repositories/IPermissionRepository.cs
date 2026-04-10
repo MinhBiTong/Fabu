@@ -11,6 +11,6 @@ namespace Domain.Repositories
 {
     public interface IPermissionRepository : IRepositoryBase<Permission, int>
     {
-
+        Task<Permission?> GetByPermissionNameAsync(string name);
     }
 }

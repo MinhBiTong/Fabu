@@ -9,6 +9,8 @@ namespace Domain.ValueObjects
     public enum PaymentMethod
     {
         Stripe,
-        Cash
+        Cash,
+        VNPay, 
+        PayPal,
     }
 }
