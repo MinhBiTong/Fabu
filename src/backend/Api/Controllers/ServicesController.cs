@@ -16,7 +16,7 @@ namespace Api.Controllers
 
         public ServiceController(IServiceService serviceService)
         {
-            serviceService = _serviceService;
+            _serviceService = serviceService;
         }
 
         [HttpGet]
@@ -46,14 +46,22 @@ namespace Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(long id, [FromBody] ServiceCreateRequest request)
         {
-            
-            return null;
-        }
+            var response = await _serviceService.UpdateAsync(id, request);
 
+            if (response.Code != 200)
+                return BadRequest(response);
+
+            return Ok(response);
+        }
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(long id)
         {
-            return null;
+            var response = await _serviceService.DeleteAsync(id);
+
+            if (response.Code != 200)
+                return BadRequest(response);
+
+            return Ok(response);
         }
     }
 }

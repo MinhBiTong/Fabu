@@ -47,5 +47,39 @@ namespace Application.Services
             var result = _mapper.Map<ServiceResponse>(service);
             return ApiResponse<ServiceResponse>.Success(result, "Service created successfully.");
         }
+
+
+        public async Task<ApiResponse<ServiceResponse>> UpdateAsync(long id, ServiceCreateRequest request)
+        {
+            var service = await _unitOfWork.Services.GetByIdAsync(id);
+
+            if (service == null)
+                return ApiResponse<ServiceResponse>.Fail(404, "Service not found.");
+
+            _mapper.Map(request, service);
+
+            _unitOfWork.Services.Update(service);
+            await _unitOfWork.SaveChangesAsync();
+
+            var result = _mapper.Map<ServiceResponse>(service);
+
+            return ApiResponse<ServiceResponse>.Success(result, "Service updated successfully.");
+        }
+
+        public async Task<ApiResponse<bool>> DeleteAsync(long id)
+        {
+            var service = await _unitOfWork.Services.GetByIdAsync(id);
+
+            if (service == null)
+                return ApiResponse<bool>.Fail(404, "Service not found.");
+
+            _unitOfWork.Services.Remove(service);
+            await _unitOfWork.SaveChangesAsync();
+
+            return ApiResponse<bool>.Success(true, "Service deleted successfully.");
+        }
+
     }
+
+
 }

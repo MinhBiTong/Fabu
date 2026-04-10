@@ -15,5 +15,6 @@ namespace Domain.Repositories
         Task<Service?> GetByCodeAsync(string code);
         Task<bool> IsServiceActiveAsync(long serviceId);
         Task<List<Service>> SearchServicesAsync(string keyword);
+        void Remove(Service service);
     }
 }

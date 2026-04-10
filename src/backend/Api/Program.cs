@@ -20,6 +20,7 @@ using Persistence.Data.Contexts;
 using Persistence.Repositories;
 using Serilog;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,6 +33,7 @@ builder.Services.AddApplication();
 builder.Services.AddReverseProxy().LoadFromConfig(builder.Configuration.GetSection("ReverseProxy")); //cau hinh reverse proxy tu appsettings.json
 builder.Services.Configure<UserConfiguration>(builder.Configuration.GetSection("UserSettings"));
 builder.Services.Configure<RoleConfiguration>(builder.Configuration.GetSection("RoleSettings"));
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.Configure<PermissionConfiguration>(builder.Configuration.GetSection("PermissionSettings"));
 builder.Services.Configure<MailConfiguration>(builder.Configuration.GetSection("MailSettings"));
 builder.Services.Configure<RateLimiterConfiguration>(builder.Configuration.GetSection("RateLimiting"));
@@ -52,9 +54,15 @@ builder.Host.UseSerilog((ctx, lc) => lc
 
 builder.Services.AddScoped<ISmsService, SmsService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+
 //Queue + Retry Email
 //builder.Services.AddHangfireServer();
-
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    });
 var app = builder.Build();
 app.UseMiddleware<GlobalException>();
 

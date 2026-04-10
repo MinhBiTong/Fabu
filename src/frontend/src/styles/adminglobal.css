@@ -745,6 +745,16 @@ margin : 30px 0 ;
          padding : 0 10px ;
          font-size: 19px;
 }
+.PackagesContainer .SearchTools select{
+        height : 50px ;
+        width : 200px ;
+       border-radius: 20px ;
+        border: 2px solid black ;
+        box-sizing: border-box;
+        padding : 0 10px ;
+        font-size: 18px;
+         cursor: pointer;
+}
 .PackagesContainer .ChooseButtons{
   width : 90% ;
   display: flex;
@@ -973,6 +983,63 @@ display: grid;
 }
 }
 /* Admin 5G Data Plan Details */
+
+/*Admin Services Add */
+
+ .AddServForm{
+  width : 100%  ;
+
+  background-color: white ;
+  border-radius: 20px ;
+  padding : 20px ;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+   gap : 20px 
+}
+ .AddServForm .Formitself{
+  width : 100% ;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+ }
+ .AddServForm .Formitself input{
+  width : 70% ;
+  height : 50px ;
+  border-radius: 20px ;
+  border : 2px solid black ;
+  box-sizing: border-box;
+  padding : 0 10px ;
+  font-size: 18px ;
+ margin-top: 15px ;
+ margin-bottom: 5px ;
+}
+.AddServForm .Formitself select{
+  width : 70% ;
+  height : 50px ;
+  border-radius: 20px ;
+  border : 2px solid black ;
+  box-sizing: border-box;
+  padding : 0 10px ;
+  font-size: 18px ;
+
+}
+.AddServForm .Formitself span{
+  color: red;
+}
+.AddServForm .SubmitAdd{
+  width : 200px ;
+  height : 50px ;
+  border-radius: 10px ;
+  background-color: rgb(224, 224, 224);
+  border : 2px solid rgb(117, 117, 117,0.5);
+  font-size: large;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/*Admin Services Add */
 
 
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Star from "../../../styles/images/StarratingYes.png";
+import Star from "../../../../styles/images/StarratingYes.png";
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
@@ -18,21 +18,32 @@ type Feedback = {
 };
 
 export default function FeedbackDetails() {
+ type Feedback = {
+    id: number;
+    email: string;
+    rating: number;
+    subject: string;
+    message: string;
+    status: number; // 0 = unread, 1 = read
+  };
 
-  const { id } = useParams(); // 🔥 GET ID FROM URL
   const [feedback, setFeedback] = useState<Feedback | null>(null);
 
+  const params = useParams();
+  const id = Array.isArray(params.id) ? params.id[0] : params.id;
+
+  // ✅ FETCH ONLY
   useEffect(() => {
     const fetchFeedback = async () => {
       try {
         const token = localStorage.getItem("accessToken");
         globalApiClient.setToken(token);
 
-        const res = await globalApiClient.get<Feedback>(`/Feedbacks/${id}`);
+        const res = await globalApiClient.get<Feedback>(`Feedbacks/${id}`);
 
-        console.log("DETAIL DATA:", res.Data);
+     
+        setFeedback(res.data);
 
-     setFeedback(res.Data);
       } catch (err) {
         console.error("DETAIL ERROR:", err);
       }
@@ -41,13 +52,13 @@ export default function FeedbackDetails() {
     if (id) fetchFeedback();
   }, [id]);
 
+  if (!feedback) return <div>Loading...</div>;
 
-  if (!feedback) return <p>Loading...</p>;
 
   return (
     <div className="AdminFeedDetailsContainer">
 
-      <h1>{feedback.customerName || "Anonymous"} &apos;s Feedback</h1>
+      <h1>{feedback.customerName || "Anonymous"}'s Feedback</h1>
 
       {/* ⭐ Stars */}
       <div className="StarsRated">

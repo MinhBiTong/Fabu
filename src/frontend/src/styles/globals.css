@@ -669,7 +669,7 @@ display: flex;
 flex-direction: column ;
 padding : 3px 15px ;
 width : 80% ;
-gap : 5px ;
+gap : 0px ;
 }
 .FullScreenup .SignupOverlay .SignupContain .Signupform .CorrectLine p{
  margin : 0 ;
@@ -684,33 +684,10 @@ font-size: 16px ;
   box-sizing: border-box;
   border : 1px solid black ;
 }
-.FullScreenup .SignupOverlay .SignupContain .Signupform .JoinLine .CorrectLine{
-display: flex;
-flex-direction: column ;
-padding : 3px 15px ;
-width : 80% ;
-gap : 5px ;
-}
-.FullScreenup .SignupOverlay .SignupContain .Signupform .JoinLine{
- display: flex;
- flex-direction: row ;
- width : 85% ;
-box-sizing: border-box;
-padding: 0 ;
-}
-.FullScreenup .SignupOverlay .SignupContain .Signupform .JoinLine .CorrectLine input{
-  height : 35px ;
-  border : none ;
-  font-size: 18px ;
- padding : 0px 10px ;
-  border-radius: 10px ;
-  box-sizing: border-box;
-  border : 1px solid black ;
-}
-
-.FullScreenup .SignupOverlay .SignupContain .Signupform .JoinLine .CorrectLine p{
- margin : 0 ;
-font-size: 16px ;
+.FullScreenup .SignupOverlay .SignupContain .Signupform .CorrectLine .error{
+  font-size: 12px ;
+  color: red ;
+  margin : 0 ;
 }
 .FullScreenup .SignupOverlay .SignupContain .Signupform .ToS{
 display: flex; 
@@ -1000,7 +977,7 @@ box-sizing: border-box;
 .p5GContainer .PackageContain .PackageandViewAll{
   width : 100% ;
  box-sizing: border-box;
- padding : 5px clamp(30px , 10vw , 150px) ;
+ padding : 5px clamp(10px , 8vw , 20px) ;
  display: flex;
  flex-direction: row ;
  justify-content: space-between;

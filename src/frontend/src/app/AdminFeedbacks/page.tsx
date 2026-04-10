@@ -18,31 +18,51 @@ const router = useRouter()
 
 const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
 
-const data = [
-  { star: "5", total: 30 },
-  { star: "4", total: 10 },
-  { star: "3", total: 5 },
-  { star: "2", total: 12 },
-  { star: "1", total: 5 },
-];
+const [chartData, setChartData] = useState([
+  { star: "5", total: 0 },
+  { star: "4", total: 0 },
+  { star: "3", total: 0 },
+  { star: "2", total: 0 },
+  { star: "1", total: 0 },
+]);
+
+const [selectedStar, setSelectedStar] = useState<number | null>(null);
 
 type Feedback = {
   id: number;
-  subject: string;
+  email: string;
   rating: number;
 };
 
 useEffect(() => {
   const fetchFeedbacks = async () => {
     try {
-         const token = localStorage.getItem("accessToken");
-        globalApiClient.setToken(token);
-        
-      const res = await globalApiClient.get("/Feedbacks");
+      const token = localStorage.getItem("accessToken");
+      globalApiClient.setToken(token);
 
-      console.log("DATA:", res.Data);
+      const res = await globalApiClient.get<Feedback[]>("Feedbacks");
 
-      setFeedbacks(Array.isArray(res.Data) ? res.Data : []);
+      const feedbackArray = Array.isArray(res.data) ? res.data : [];
+      setFeedbacks(feedbackArray);
+
+  
+      const counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+      feedbackArray.forEach((fb) => {
+        if (fb.rating >= 1 && fb.rating <= 5) {
+          counts[fb.rating as 1 | 2 | 3 | 4 | 5]++;
+        }
+      });
+
+      const formatted = [
+        { star: "5", total: counts[5] },
+        { star: "4", total: counts[4] },
+        { star: "3", total: counts[3] },
+        { star: "2", total: counts[2] },
+        { star: "1", total: counts[1] },
+      ];
+
+      setChartData(formatted);
 
     } catch (err) {
       console.error(err);
@@ -60,7 +80,7 @@ useEffect(() => {
     <h2>Stars Chart</h2>
     <ResponsiveContainer>
         <BarChart
-          data={data}
+          data={chartData}
           layout="vertical"  
           margin={{ top: 10, right: 80, left: 40, bottom: 0 }}
           barCategoryGap="85%" 
@@ -82,51 +102,19 @@ useEffect(() => {
                   <input className="SearchInput" type="text"></input>            
             </div>
           
-             <input className="StarAmount" type="number"></input>
+             <input  className="StarAmount"
+  type="number"
+  min={1}
+  max={5}
+  onChange={(e) => {
+    const value = Number(e.target.value);
+    setSelectedStar(value >= 1 && value <= 5 ? value : null);
+  }}></input>
         </div>
 
 
         <div className="Listing">
-          <div className="FeedbackBox" onClick={() => router.push("/AdminFeedbacks/FeedbackDetails")}>
-          <div className="Email">Email123456789@gmail.com</div>
-          <div className="AmountStars">
-             <Image src={Star} alt=""></Image>
-            <Image src={Star} alt=""></Image>
-            <Image src={Star} alt=""></Image>
-            <Image src={Star} alt=""></Image>
-            <Image src={Star} alt=""></Image>
-          </div>
-          </div>
-
-          <div className="FeedbackBox"  onClick={() => router.push("/AdminFeedbacks/FeedbackDetails")}>
-          <div className="Email">Email123456789@gmail.com</div>
-          <div className="AmountStars">
-            <Image src={Star} alt=""></Image>
-            <Image src={Star} alt=""></Image>
-            <Image src={Star} alt=""></Image>
-            <Image src={Star} alt=""></Image>
-
-
-
-          </div>
-          </div>
-
-         <div className="FeedbackBox"  onClick={() => router.push("/AdminFeedbacks/FeedbackDetails")}>
-          <div className="Email">Email123456789@gmail.com</div>
-          <div className="AmountStars">
-            <Image src={Star} alt=""></Image>
-            <Image src={Star} alt=""></Image>
-          </div>
-          </div>
-        
-
-           <div className="FeedbackBox"  onClick={() => router.push("/AdminFeedbacks/FeedbackDetails")}>
-          <div className="Email">Email123456789@gmail.com</div>
-          <div className="AmountStars">
-                    <Image src={Star} alt=""></Image>
-          </div>
-          </div>
-        
+       
           {/* 
              Each box
 
@@ -139,7 +127,12 @@ useEffect(() => {
         
           */}
 
-  {feedbacks.map((fb) => (
+  {feedbacks
+  .filter((fb) => {
+    if (!selectedStar) return true;
+    return fb.rating === selectedStar;
+  })
+  .map((fb) => (
               <div
                 key={fb.id}
                 className="FeedbackBox"
@@ -147,8 +140,8 @@ useEffect(() => {
                   router.push(`/AdminFeedbacks/FeedbackDetails/${fb.id}`)
                 }
               >
-                {/* 🔄 REPLACED: email → subject */}
-                <div className="Subject">{fb.subject}</div>
+             
+                <div className="Email">{fb.email?.trim() ? fb.email : "Anonymous"}</div>
 
                 <div className="AmountStars">
                  {[...Array(fb.rating)].map((_, i) => (

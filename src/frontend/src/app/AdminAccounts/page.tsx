@@ -30,11 +30,11 @@ export default function AdminAccounts() {
         globalApiClient.setToken(token);
 
        
-        const res = await globalApiClient.get("/Users");
+        const res = await globalApiClient.get<User[]>("Users");
 
         console.log("ACCOUNTS:", res.data);
 
-        setAccounts(Array.isArray(res.data) ? res.data : []);
+        setAccounts(res.data);
       } catch (err) {
         console.error(err);
       }
