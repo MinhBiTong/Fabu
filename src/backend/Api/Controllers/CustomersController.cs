@@ -58,5 +58,28 @@ namespace Api.Controllers
             if (response.Code != 200) return BadRequest(response);
             return Ok(response);
         }
+        [HttpGet("mobile/{mobile}")]
+        public async Task<IActionResult> GetByMobile(string mobile) => Ok(await _customerService.GetByMobileNumberAsync(mobile));
+
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetByUserId(long userId) => Ok(await _customerService.GetByUserIdAsync(userId));
+
+        [HttpPost("{customerId}/link-user/{userId}")]
+        public async Task<IActionResult> LinkUser(long customerId, long userId) => Ok(await _customerService.LinkUserToCustomerAsync(customerId, userId));
+
+        [HttpGet("exists-mobile/{mobile}")]
+        public async Task<IActionResult> ExistsByMobile(string mobile) => Ok(await _customerService.ExistsByMobileAsync(mobile));
+
+        [HttpGet("active")]
+        public async Task<IActionResult> GetActive() => Ok(await _customerService.GetActiveCustomersAsync());
+
+        [HttpGet("{id}/with-account")]
+        public async Task<IActionResult> GetWithAccount(long id) => Ok(await _customerService.GetWithAccountAsync(id));
+
+        [HttpGet("top-spending/{top}")]
+        public async Task<IActionResult> GetTopSpending(int top) => Ok(await _customerService.GetTopCustomersBySpendingAsync(top));
+
+        [HttpGet("unpaid-bills")]
+        public async Task<IActionResult> GetUnpaidBills() => Ok(await _customerService.GetCustomersWithUnpaidBillsAsync());
     }
 }

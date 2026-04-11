@@ -1,8 +1,9 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "../../styles/css/recharge.css";
 import Payment from "./Payment";
 import { useRouter } from "next/navigation";
+import { getPackages, rechargeApi } from "../../services/recharge-service";
 
 export default function Recharge() {
   const [phone, setPhone] = useState("");
@@ -11,23 +12,29 @@ export default function Recharge() {
   const [selectedCoupon, setSelectedCoupon] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState("");
   const [finalPrice, setFinalPrice] = useState(0);
+  const [moneyList, setMoneyList] = useState<any[]>([]);
+
   const router = useRouter();
 
-const moneyList = [
-  { value: 10000, discount: 0.05 },
-  { value: 20000, discount: 0.05 },
-  { value: 50000, discount: 0.1 },
-  { value: 100000, discount: 0.1 },
-  { value: 200000, discount: 0.15 },
-  { value: 500000, discount: 0.2 },
-];
-  
   const coupons = [
     { code: "SALE10", discount: 0.1 },
     { code: "SALE5", discount: 0.05 },
   ];
+
+  // 🔥 CALL API LẤY GÓI TIỀN
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        const res = await getPackages();
+        setMoneyList(res.Data || []);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchPackages();
+  }, []);
 
   const getCarrier = (phone: string) => {
     if (phone.startsWith("03")) return "Viettel";
@@ -38,26 +45,38 @@ const moneyList = [
     return "Unknown";
   };
 
-  const handleRecharge = () => {
-  const phoneRegex = /^(03|05|07|08|09)[0-9]{8}$/;
+  // 🔥 CALL API THANH TOÁN
+  const handleRecharge = async () => {
+    const phoneRegex = /^(03|05|07|08|09)[0-9]{8}$/;
 
-  if (!phone) return setError("Please enter your phone number");
-  if (!phoneRegex.test(phone)) return setError("Invalid phone number");
-  if (!amount) return setError("Please select an amount");
+    if (!phone) return setError("Please enter your phone number");
+    if (!phoneRegex.test(phone)) return setError("Invalid phone number");
+    if (!amount) return setError("Please select an amount");
 
-  setError("");
-  setLoading(true);
+    setError("");
+    setLoading(true);
 
-  setTimeout(() => {
-    setLoading(false);
+    try {
+      const final = finalPrice || amount;
 
-    // 🔥 CHUYỂN TRANG SANG BILL
-    router.push(
-      `/billpayment?phone=${phone}&amount=${finalPrice}&id=${Date.now()}`
-    );
+      const res = await rechargeApi({
+        phone,
+        amount: final,
+        coupon: selectedCoupon,
+      });
 
-  }, 1200);
-};
+      const data = res.Data;
+
+      // 👉 chuyển sang bill
+      router.push(
+        `/billpayment?phone=${data.phone}&amount=${data.amount}&id=${data.transactionId}`
+      );
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="nap-wrapper">
@@ -79,7 +98,6 @@ const moneyList = [
           )}
 
           {error && <p className="input-error">{error}</p>}
-          {success && <p className="success-text">{success}</p>}
 
           <input
             type="number"
@@ -102,8 +120,9 @@ const moneyList = [
                     setAmount(item.value);
                     setCustomAmount("");
                   }}
-                  className={`money-btn ${amount === item.value ? "active" : ""
-                    }`}
+                  className={`money-btn ${
+                    amount === item.value ? "active" : ""
+                  }`}
                 >
                   <span className="money-btn__value">
                     {item.value.toLocaleString("vi-VN")} VND
@@ -118,7 +137,6 @@ const moneyList = [
               </div>
             ))}
           </div>
-
         </div>
 
         {/* RIGHT */}

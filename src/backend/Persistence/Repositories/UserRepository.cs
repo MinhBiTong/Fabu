@@ -26,5 +26,12 @@ namespace Persistence.Repositories
             return await _dbSet
                 .FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
         }
+
+        public async Task<User?> GetByMobileNumberAsync(string phoneNumber)
+        {
+            return await _dbSet
+                .Include(u => u.PhoneNumber)
+                .FirstOrDefaultAsync(u => u.PhoneNumber == phoneNumber && !u.IsDeleted);
+        }
     }
 }
