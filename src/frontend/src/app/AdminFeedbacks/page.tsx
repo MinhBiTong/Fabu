@@ -18,6 +18,25 @@ const router = useRouter()
 
 const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
 
+const [selectedStar, setSelectedStar] = useState<number | null>(null);
+
+
+const [currentPage, setCurrentPage] = useState(1);
+const itemsPerPage = 12;
+
+const filteredFeedbacks = feedbacks.filter((fb) => {
+  if (!selectedStar) return true;
+  return fb.rating === selectedStar;
+});
+
+
+const totalPages = Math.ceil(filteredFeedbacks.length / itemsPerPage);
+
+const paginatedFeedbacks = filteredFeedbacks.slice(
+  (currentPage - 1) * itemsPerPage,
+  currentPage * itemsPerPage
+);
+
 const [chartData, setChartData] = useState([
   { star: "5", total: 0 },
   { star: "4", total: 0 },
@@ -25,8 +44,6 @@ const [chartData, setChartData] = useState([
   { star: "2", total: 0 },
   { star: "1", total: 0 },
 ]);
-
-const [selectedStar, setSelectedStar] = useState<number | null>(null);
 
 type Feedback = {
   id: number;
@@ -72,6 +89,9 @@ useEffect(() => {
   fetchFeedbacks();
 }, []);
 
+useEffect(() => {
+  setCurrentPage(1);
+}, [selectedStar]);
   
   return ( 
   <>
@@ -127,50 +147,50 @@ useEffect(() => {
         
           */}
 
-  {feedbacks
-  .filter((fb) => {
-    if (!selectedStar) return true;
-    return fb.rating === selectedStar;
-  })
-  .map((fb) => (
-              <div
-                key={fb.id}
-                className="FeedbackBox"
-                onClick={() =>
-                  router.push(`/AdminFeedbacks/FeedbackDetails/${fb.id}`)
-                }
-              >
-             
-                <div className="Email">{fb.email?.trim() ? fb.email : "Anonymous"}</div>
+  {paginatedFeedbacks.map((fb) => (
+  <div
+    key={fb.id}
+    className="FeedbackBox"
+    onClick={() =>
+      router.push(`/AdminFeedbacks/FeedbackDetails/${fb.id}`)
+    }
+  >
+    <div className="Email">
+      {fb.email?.trim() ? fb.email : "Anonymous"}
+    </div>
 
-                <div className="AmountStars">
-                 {[...Array(fb.rating)].map((_, i) => (
-          <Image
-             key={i}
-              src={Star}
-             alt=""
-             />
-                ))}
-                </div>
-              </div>
-            ))}
-
+    <div className="AmountStars">
+      {[...Array(fb.rating)].map((_, i) => (
+        <Image key={i} src={Star} alt="" />
+      ))}
+    </div>
+  </div>
+))}
 
 
         </div>
 
-        <div className="Pagination">
-              <div className="Left">
-        <Image src={Way} alt=""></Image>
-         </div>
-         <div className="Page">
-             <span>3</span>
-         </div>
-         <div className="Right">
-       <Image src={Way} alt=""></Image>
-        </div> 
-    </div>
+       <div className="Pagination">
+  <div
+    className="Left"
+    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+  >
+    <Image src={Way} alt="" />
+  </div>
 
+  <div className="Page">
+    <span>{currentPage}</span>
+  </div>
+
+  <div
+    className="Right"
+    onClick={() =>
+      setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+    }
+  >
+    <Image src={Way} alt="" />
+  </div>
+</div>
 
        </div>
 
