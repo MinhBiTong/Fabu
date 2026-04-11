@@ -88,15 +88,15 @@ namespace Api.Extensions
                             }
                         };
                     }
-                })
-                .AddGoogle(options =>
-                {
-                    options.SignInScheme = "Cookies";
-
-                    options.ClientId = configuration["Authentication:Google:ClientId"];
-                    options.ClientSecret = configuration["Authentication:Google:ClientSecret"];
-                    options.SaveTokens = true;
                 });
+              //  .AddGoogle(options =>
+              //  {
+             //       options.SignInScheme = "Cookies";
+
+              //      options.ClientId = configuration["Authentication:Google:ClientId"];
+              //      options.ClientSecret = configuration["Authentication:Google:ClientSecret"];
+              ////      options.SaveTokens = true;
+              //  });
               //ROLE_ADMIN
               //├─ user.create
               //├─ user.delete

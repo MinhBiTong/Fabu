@@ -3,8 +3,47 @@
 import Image from "next/image";
 import Way from "../../styles/images/Way.png"
 
+import { useEffect, useState } from "react";
+import { globalApiClient } from "@/app/api/ApiClient";
+import { useRouter } from "next/navigation";
+
+
 export default function AdminAccounts() {
 
+ const router = useRouter();
+
+  const [accounts, setAccounts] = useState<User[]>([]);
+
+  type User = {
+    id: number;
+    email: string;
+    userName: string;
+    fullName: string;
+    role: string;
+    dateOfBirth: string;
+  };
+
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        globalApiClient.setToken(token);
+
+       
+        const res = await globalApiClient.get<User[]>("Users");
+
+        console.log("ACCOUNTS:", res.data);
+
+        setAccounts(res.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchAccounts();
+  }, []);
+
+  
 
   return ( 
   <>
@@ -54,6 +93,29 @@ export default function AdminAccounts() {
                <td>Details</td>
 
             </tr>
+
+       {accounts.map((acc) => (
+                <tr key={acc.id}>
+                  <td>{acc.email}</td>
+                  <td>{acc.userName}</td>
+                  <td>{acc.fullName}</td>
+                  <td>{acc.role}</td>
+                  <td>
+                    {new Date(acc.dateOfBirth).toLocaleDateString()}
+                  </td>
+                  <td>
+                    <span
+                      className="Clickablewords"
+                      onClick={() =>
+                        router.push(`/AdminAccounts/${acc.id}`)
+                      }
+                    >
+                      Details
+                    </span>
+                  </td>
+                </tr>
+              ))}
+
 
 
          </tbody>
