@@ -1,4 +1,5 @@
 ﻿using Application.DTOs.Requests.LoginRequest;
+using Application.DTOs.Responses;
 using Application.DTOs.Responses.LoginResponse;
 using Application.Interfaces;
 using Domain.Abstractions;
@@ -8,6 +9,7 @@ using Domain.Exceptions;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -21,6 +23,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.WebRequestMethods;
 
 namespace Application.Services
 {
@@ -33,6 +36,7 @@ namespace Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidator<LoginRequest> _validator;
         private readonly ILogger<AuthService> _logger;
+        private readonly ICustomerService _customerService;
 
         public AuthService(
             IConfiguration configuration,
@@ -40,6 +44,7 @@ namespace Application.Services
             IOptions<JwtConfiguration> jwtOptions,
             IUnitOfWork unitOfWork,
             ILogger<AuthService> logger,
+            ICustomerService customerService,
             IResponseCacheService? responseCache = null)
         {
             _configuration = configuration;
@@ -48,14 +53,18 @@ namespace Application.Services
             _unitOfWork = unitOfWork;
             _validator = validator;
             _logger = logger;
+            _customerService = customerService;
         }
 
-        public async Task<bool> RegisterAsync(RegisterRequest request)
+        public async Task<RegisterResponse> RegisterAsync(RegisterRequest request)
         {
 
             //check email ton tai
             var existingUser = await _unitOfWork.Users.GetByEmailAsync(request.Email);
-            if (existingUser != null) throw new Exception("Email really exists");
+            if (existingUser != null) throw new AppException(ErrorCode.EMAIL_ALREADY_EXISTS, "Email already exists");
+            var existingCustomer = await _unitOfWork.Customers.GetByMobileNumberAsync(request.PhoneNumber);
+            if (existingCustomer != null)
+                throw new AppException(ErrorCode.PHONE_ALREADY_EXISTS, "Phone number already exists");
             // get Role "Customer" from database
             var customerRole = await _unitOfWork.Roles.GetByNameAsync("Customer");
             if (customerRole == null) throw new Exception("The system not config Role Customer yet");
@@ -72,7 +81,7 @@ namespace Application.Services
                 PhoneNumber = request.PhoneNumber,
                 PasswordHash = passwordHash,
                 CreatedDate = DateTime.UtcNow,
-                IsActive = true,
+                IsActive = false,
                 IsDeleted = false,
                 UserRoles = new List<UserRole>
                 {
@@ -83,11 +92,104 @@ namespace Application.Services
                 }
             };
 
+            _logger.LogInformation("User registered successfully. UserId: {UserId}, Email: {Email}", newUser.Id, newUser.Email);
             //4. luu vao db thong qua repo va uow
             await _unitOfWork.Users.AddAsync(newUser);
             var result = await _unitOfWork.CommitAsync();
 
-            return result > 0;
+            await SendOtpAsync(newUser.Id, newUser.PhoneNumber);
+
+            _logger.LogInformation("User created (inactive). UserId: {UserId}", newUser.Id);
+
+            return new RegisterResponse
+            {
+                UserId = newUser.Id,
+                Email = newUser.Email,
+                PhoneNumber = newUser.PhoneNumber,
+                Message = "Registration successful. Please check the OTP sent to your phone number.",
+                RequiresOtpVerification = true
+            };
+        }
+
+        public async Task<VerifyOtpResponse> VerifyOtpAsync(VerifyOtpRequest request)
+        {
+            // Giả sử OTP đã được validate ở middleware hoặc service riêng (OTPService)
+            // Ở đây chúng ta chỉ xử lý business sau khi OTP đúng
+
+            var user = await _unitOfWork.Users.GetByIdAsync(request.UserId);
+            if (user == null)
+                throw new AppException(ErrorCode.USER_NOT_EXISTED);
+
+            if (user.IsActive)
+                return new VerifyOtpResponse { Success = true, Message = "The account was previously activated." };
+
+            // Gọi business tạo Customer + Account
+            var customerResult = await _customerService.VerifyOtpAndCreateCustomerAsync(user.Id, request.Otp);
+
+            //if (!customerResult.IsSuccess)
+            //    throw new AppException(ErrorCode.CUSTOMER_CREATION_FAILED, customerResult.Message);
+
+            // Cập nhật User.IsActive = true
+            user.IsActive = true;
+            _unitOfWork.Users.Update(user);
+            await _unitOfWork.SaveChangesAsync();
+
+            _logger.LogInformation("User {UserId} verified OTP successfully and customer account created.", user.Id);
+
+            //xoa OTP trong Redis sau khi verify thanh cong - clean up
+            if (_responseCache != null)
+            {
+                var key = $"otp:verify:{user.Id}";
+                await _responseCache.RemoveCacheResponseAsync(key);
+            }
+
+            return new VerifyOtpResponse
+            {
+                Success = true,
+                Message = "OTP verification successful. Account has been activated.",
+                CustomerId = customerResult.Result?.Id
+            };
+        }
+
+        // ====================== Helper Methods ======================
+        private async Task SendOtpAsync(long userId, string phoneNumber)
+        {
+            // TODO: Tích hợp SMS gateway thực tế (SpeedSMS, Twilio, ...)
+            // Hiện tại mock OTP
+            var otp = new Random().Next(100000, 999999).ToString();
+            var cacheOptions = new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            };
+
+            var key = $"otp:verify:{userId}";
+            await _responseCache.SetCacheResponseAsync(key, otp, TimeSpan.FromMinutes(5));
+
+            _logger.LogInformation("OTP sent to phone {Phone} for user {UserId}. OTP: {Otp} (mock)", phoneNumber, userId, otp);
+        }
+
+        public async Task<ApiResponse<bool>> ResendOtpAsync(ResendOtpRequest request)
+        {
+            // 1. Tìm User theo số điện thoại hoặc UserId
+            var user = await _unitOfWork.Users.GetByMobileNumberAsync(request.PhoneNumber);
+            if (user == null) return ApiResponse<bool>.Fail(404, "Phone number hasn't been register");
+
+            // 2. Nếu tài khoản đã active rồi thì không gửi lại làm gì
+            if (user.IsActive) return ApiResponse<bool>.Fail(400, "The account was previously activated.");
+
+            // 3. (Optional) Check Rate Limit - Tránh spam SMS tốn tiền
+            var rateLimitKey = $"otp:limit:{user.Id}";
+            var isWaiting = await _responseCache.GetCachedResponseAsync<string>(rateLimitKey);
+            if (!string.IsNullOrEmpty(isWaiting))
+                return ApiResponse<bool>.Fail(429, "Please wait 60s before request new OTP.");
+
+            // 4. Gửi OTP mới
+            await SendOtpAsync(user.Id, user.PhoneNumber);
+
+            // 5. Đặt rate limit 60 giây
+            await _responseCache.SetCacheResponseAsync(rateLimitKey, "true", TimeSpan.FromSeconds(60));
+
+            return ApiResponse<bool>.Success(true, "New OTP sent successfully.");
         }
 
         //chain sub-method
@@ -131,17 +233,6 @@ namespace Application.Services
             var validationResult = await _validator.ValidateAsync(request);
             if (!validationResult.IsValid) throw new AppException(ErrorCode.UNAUTHENTICATED); //400 request
         }
-
-        //validate user/password identity
-        //private async Task<User?> ValidateUserCredentialsAsync(string email, string password)
-        //{
-        //    var roles = user.UserRoles?.Select(ur => ur.Role?.Name).Where(role => role != null).ToList() ?? new List<string>();
-        //    if (user == null || !await _userManager.CheckPasswordAsync(user, password))
-        //    {
-        //        return null;
-        //    }
-        //    return user;
-        //}
 
         //genrate claims - base + role
         private async Task<List<Claim>> GenerateClaimsAsync(User user)

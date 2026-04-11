@@ -84,5 +84,42 @@ namespace Application.Services
             await _unitOfWork.CommitAsync();
             return ApiResponse<bool>.Success(true, "Deleted successfully.");
         }
+
+        public async Task<ApiResponse<List<RechargePlanResponse>>> GetActivePlansAsync()
+        {
+            var plans = await _unitOfWork.RechargePlans.GetActivePlansAsync();
+            return ApiResponse<List<RechargePlanResponse>>.Success(_mapper.Map<List<RechargePlanResponse>>(plans));
+        }
+
+        public async Task<ApiResponse<RechargePlanResponse>> GetByAmountAsync(decimal amount)
+        {
+            var plan = await _unitOfWork.RechargePlans.GetByAmountAsync(amount);
+            if (plan == null) return ApiResponse<RechargePlanResponse>.Fail(404, "Không tìm thấy.");
+            return ApiResponse<RechargePlanResponse>.Success(_mapper.Map<RechargePlanResponse>(plan));
+        }
+
+        public async Task<ApiResponse<List<RechargePlanResponse>>> GetPlansByPriceRangeAsync(decimal min, decimal max)
+        {
+            var plans = await _unitOfWork.RechargePlans.GetPlansByPriceRangeAsync(min, max);
+            return ApiResponse<List<RechargePlanResponse>>.Success(_mapper.Map<List<RechargePlanResponse>>(plans));
+        }
+
+        public async Task<ApiResponse<List<RechargePlanResponse>>> GetPopularPlansAsync(int top)
+        {
+            var plans = await _unitOfWork.RechargePlans.GetPopularPlansAsync(top);
+            return ApiResponse<List<RechargePlanResponse>>.Success(_mapper.Map<List<RechargePlanResponse>>(plans));
+        }
+
+        public async Task<ApiResponse<List<RechargePlanResponse>>> GetPlansByProviderAsync(string provider)
+        {
+            var plans = await _unitOfWork.RechargePlans.GetPlansByProviderAsync(provider);
+            return ApiResponse<List<RechargePlanResponse>>.Success(_mapper.Map<List<RechargePlanResponse>>(plans));
+        }
+
+        public async Task<ApiResponse<bool>> IsPlanActiveAsync(long planId)
+        {
+            var isActive = await _unitOfWork.RechargePlans.IsPlanActiveAsync(planId);
+            return ApiResponse<bool>.Success(isActive);
+        }
     }
 }

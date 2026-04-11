@@ -31,26 +31,26 @@ export default function Payment({
   };
 
   useEffect(() => {
-    if (!amount) {
-      setDiscount(0);
-      setFinal(0);
-      onFinalChange(0);
-      return;
-    }
+  if (!amount) {
+    setDiscount(0);
+    setFinal(0);
+    onFinalChange(0);
+    return;
+  }
 
-    const methodDiscount =
-      methods.find((m) => m.id === method)?.discount || 0;
+  const methodDiscount =
+    methods.find((m) => m.id === method)?.discount || 0;
 
-    const couponDiscount = couponMap[selectedCoupon] || 0;
+  const couponDiscount = couponMap[selectedCoupon] || 0;
 
-    const totalDiscount = amount * (methodDiscount + couponDiscount);
-    const finalValue = amount - totalDiscount;
+  const totalDiscount = amount * (methodDiscount + couponDiscount);
+  const finalValue = amount - totalDiscount;
 
-    setDiscount(totalDiscount);
-    setFinal(finalValue);
+  setDiscount(totalDiscount);
+  setFinal(finalValue);
 
-    onFinalChange(finalValue);
-  }, [amount, method, selectedCoupon]);
+  onFinalChange(finalValue);
+}, [amount, method, selectedCoupon]);
 
   return (
     <div className="payment-container">

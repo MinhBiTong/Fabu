@@ -1,6 +1,8 @@
 ﻿
 using Domain.Entities;
 using Domain.Repositories;
+using Domain.ValueObjects;
+using Microsoft.EntityFrameworkCore;
 using Persistence.Data.Contexts;
 using System;
 using System.Collections.Generic;
@@ -16,44 +18,81 @@ namespace Persistence.Repositories
         {
         }
 
-        public Task<bool> ExistsByMobileAsync(string mobile)
+        public async Task<bool> ExistsByMobileAsync(string mobile)
         {
-            throw new NotImplementedException();
+            return await _dbSet.AnyAsync(c => c.MobileNumber == mobile && !c.IsDeleted);
         }
 
-        public Task<List<Customer>> GetActiveCustomersAsync()
+        public async Task<List<Customer>> GetActiveCustomersAsync()
         {
-            throw new NotImplementedException();
+            return await _dbSet
+                .Include(c => c.Account)
+                .Where(c => !c.IsDeleted && c.Account != null && c.Account.Status == StatusAccount.Active)
+                .OrderBy(c => c.FullName)
+                .ToListAsync();
         }
 
-        public Task<Customer?> GetByMobileNumberAsync(string mobileNumber)
+        public async Task<Customer?> GetByMobileNumberAsync(string mobileNumber)
         {
-            throw new NotImplementedException();
+            return await _dbSet
+                .Include(c => c.Account)
+                .Include(c => c.User)
+                .FirstOrDefaultAsync(c => c.MobileNumber == mobileNumber && !c.IsDeleted);
         }
 
-        public Task<IEnumerable<Customer>> GetByUserIdAsync(long userId)
+        public async Task<IEnumerable<Customer>> GetByUserIdAsync(long userId)
         {
-            throw new NotImplementedException();
+            return await _dbSet
+                .Include(c => c.Account)
+                .Where(c => c.UserId == userId && !c.IsDeleted)
+                .ToListAsync();
         }
 
-        public Task<List<Customer>> GetCustomersWithUnpaidBillsAsync()
+        public async Task<List<Customer>> GetCustomersWithUnpaidBillsAsync()
         {
-            throw new NotImplementedException();
+            return await _dbSet
+                .Include(c => c.PostpaidBills)
+                .Where(c => !c.IsDeleted &&
+                           c.PostpaidBills.Any(b => b.Status == StatusPostpaid.Unpaid ||
+                                                   b.Status == StatusPostpaid.Overdue))
+                .OrderByDescending(c => c.CreatedDate)
+                .ToListAsync();
         }
 
-        public Task<List<Customer>> GetTopCustomersBySpendingAsync(int top)
+        public async Task<List<Customer>> GetTopCustomersBySpendingAsync(int top)
         {
-            throw new NotImplementedException();
+            return await _dbSet
+                .Include(c => c.Transactions)
+                .Where(c => !c.IsDeleted)
+                .Select(c => new
+                {
+                    Customer = c,
+                    TotalSpent = c.Transactions
+                        .Where(t => t.Status == StatusTransaction.Success)
+                        .Sum(t => t.Amount)
+                })
+                .OrderByDescending(x => x.TotalSpent)
+                .Take(top)
+                .Select(x => x.Customer)
+                .ToListAsync();
         }
 
-        public Task<Customer?> GetWithAccountAsync(long customerId)
+        public async Task<Customer?> GetWithAccountAsync(long customerId)
         {
-            throw new NotImplementedException();
+            return await _dbSet
+                .Include(c => c.Account)
+                .Include(c => c.User)
+                .FirstOrDefaultAsync(c => c.Id == customerId && !c.IsDeleted);
         }
 
-        public Task LinkUserToCustomerAsync(long customerId, long userId)
+        public async Task LinkUserToCustomerAsync(long customerId, long userId)
         {
-            throw new NotImplementedException();
+            var customer = await _dbSet.FindAsync(customerId);
+            if (customer == null)
+                throw new Exception("Customer not found");
+
+            customer.UserId = userId;
+            _dbSet.Update(customer);
         }
     }
 }

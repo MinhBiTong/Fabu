@@ -18,5 +18,6 @@ namespace Application.Interfaces
         Task AddToGroupAsync(string groupKey, string value);
         Task SetRawStringAsync(string key, string value, TimeSpan expiry);
         Task<string?> GetRawStringAsync(string key);
+        Task SetCacheResponseAsync(string cacheKey, object response, TimeSpan timeToLive);
     }
 }
