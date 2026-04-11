@@ -42,7 +42,6 @@ builder.Services.AddOptions<VNPayConfiguration>()
         .Bind(builder.Configuration.GetSection("VNPay"))
         .ValidateDataAnnotations()
         .ValidateOnStart();
-builder.Services.AddScoped<IPaymentGateway, VNPayService>();
 
 //builder.Logging.ClearProviders(); 
 builder.Host.UseSerilog((ctx, lc) => lc
@@ -50,21 +49,11 @@ builder.Host.UseSerilog((ctx, lc) => lc
     .WriteTo.Console()
     .Enrich.FromLogContext());
 
-builder.Services.AddScoped<ISmsService, SmsService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
 //Queue + Retry Email
 //builder.Services.AddHangfireServer();
 
 var app = builder.Build();
 app.UseMiddleware<GlobalException>();
-
-// Bật Swagger
-app.UseSwagger();
-app.UseSwaggerUI(c =>
-{
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Fabu v1");
-    c.RoutePrefix = string.Empty;
-});
 
 if (app.Environment.IsDevelopment())
 {
@@ -89,7 +78,6 @@ app.UseRouting();
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseMiddleware<TokenBlacklistMiddleware>();
-app.UseMiddleware<GlobalException>();
 app.UseAuthorization();
 app.MapControllers();
 app.UseSerilogRequestLogging();

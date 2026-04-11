@@ -22,5 +22,6 @@ namespace Application.Interfaces
         Task<ApiResponse<CustomerResponse>> GetWithAccountAsync(long customerId);
         Task<ApiResponse<List<CustomerResponse>>> GetTopCustomersBySpendingAsync(int top);
         Task<ApiResponse<List<CustomerResponse>>> GetCustomersWithUnpaidBillsAsync();
+        Task<ApiResponse<CustomerResponse>> VerifyOtpAndCreateCustomerAsync(long userId, string otp);
     }
 }

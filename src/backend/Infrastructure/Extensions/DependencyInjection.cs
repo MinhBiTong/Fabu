@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces;
+using Application.Mapper;
 using Application.Services;
 using Application.Validators.LoginValidator;
 using Application.Validators.UserValidator;
@@ -41,10 +42,11 @@ namespace Infrastructure.Extensions
             services.AddScoped<IPostpaidBillService, PostpaidBillService>();
             services.AddScoped<IRechargePlanService, RechargePlanService>();
             services.AddScoped<IServiceService, ServiceService>();
-            // Register Services
             services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<ITransactionService, TransactionService>();
-
+            services.AddScoped<IPaymentGateway, VNPayService>();
+            services.AddScoped<ISmsService, SmsService>();
+            services.AddScoped<IEmailService, EmailService>();
             // Đăng ký tất cả Validators từ Assembly này
             services.AddValidatorsFromAssembly(assembly);
             services.AddValidatorsFromAssemblyContaining<CreateUserRequestValidator>();
@@ -52,7 +54,7 @@ namespace Infrastructure.Extensions
 
             // Đăng ký AutoMapper từ Assembly này
             services.AddAutoMapper(assembly);
-
+            services.AddAutoMapper(typeof(MappingProfile).Assembly);
             return services;
         }
     }
