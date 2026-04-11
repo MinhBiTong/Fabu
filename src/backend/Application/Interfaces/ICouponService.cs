@@ -10,9 +10,13 @@ namespace Application.Interfaces
         Task<bool> ValidateCouponAsync(string couponCode, int userId);
         Task ConsumeCouponAsync(string couponCode, int userId);
 
-        //Task<CouponResponse> CreateCouponAsync(CouponCreateRequest request);
-        //Task<CouponResponse> UpdateCouponAsync(long id, CouponUpdateRequest request);
-        //Task DeleteCouponAsync(long id);
-
+        Task<CouponResponse> CreateCouponAsync(CouponCreateRequest request);
+        Task<CouponResponse> UpdateCouponAsync(long id, CouponUpdateRequest request);
+        Task DeleteCouponAsync(long id);
+        Task<List<CouponResponse>> GetAllCouponAsync();
+        Task<CouponResponse> GetByCouponIdAsync(long id);
+        Task<List<CouponResponse>> GetActiveCouponAsync();
+        Task<List<CouponResponse>> GetCouponsByCustomerIdAsync(long customerId);
+        Task<List<CouponResponse>> GetExpiredCouponAsync();
     }
 }

@@ -28,7 +28,7 @@ namespace Application.DTOs.Requests.FeedbackRequest
         [Range(1, 5)]
         public byte Rating { get; set; }
 
-        [StringLength(20)]
-        public StatusFeedback Status { get; set; } = StatusFeedback.New; // New, Read, Replied
+
+        public int Status { get; set; }// New, Read, Replied
     }
 }

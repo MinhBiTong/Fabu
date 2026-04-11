@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Responses.CouponResponse;
+﻿using Application.DTOs.Requests.CouponRequest;
+using Application.DTOs.Responses.CouponResponse;
 using Application.Interfaces;
 using AutoMapper;
 using Domain.Abstractions;
@@ -148,18 +149,18 @@ namespace Application.Services
 
         public async Task<string> GenerateCouponAsync(int userId, decimal discountAmount, DateTime expiryDate)
         {
-            var code = $"CPN-{Guid.NewGuid().ToString()[..8].ToUpper()}";
+            var code_gen = $"CPN-{Guid.NewGuid().ToString()[..8].ToUpper()}";
 
             var coupon = new Coupon
             {
-                Code = code,
+                Code = code_gen,
                 Name = "Auto Generated",
                 DiscountType = DiscountType.FixedAmount,
                 DiscountValue = discountAmount,
                 ValidFrom = DateTime.UtcNow,
                 ValidTo = expiryDate,
                 UsageLimitPerUser = 1,
-                UsageLimitTotal = 1,
+                UsageLimitTotal = 1000,
                 CreatedByUserId = userId,
                 IsActive = true
             };
@@ -167,7 +168,7 @@ namespace Application.Services
             await _unitOfWork.Coupons.AddAsync(coupon);
             await _unitOfWork.SaveChangesAsync();
 
-            return code;
+            return code_gen;
         }
 
         public async Task<bool> ValidateCouponAsync(string couponCode, int userId)
@@ -198,6 +199,180 @@ namespace Application.Services
                 return false;
 
             return true;
+        }
+
+        public async Task<CouponResponse> CreateCouponAsync(CouponCreateRequest request)
+        {
+            try
+            {
+                var coupon = new Coupon
+                {
+                    Code = request.Code,
+                    Name = request.Name,
+                    DiscountType = Enum.Parse<DiscountType>(request.DiscountType),
+                    DiscountValue = request.DiscountValue,
+                    MinRechargeAmount = request.MinRechargeAmount,
+                    MaxDiscount = request.MaxDiscount ?? 0,
+                    ValidFrom = request.ValidFrom,
+                    ValidTo = request.ValidTo,
+                    UsageLimitPerUser = request.UsageLimitPerUser,
+                    UsageLimitTotal = request.UsageLimitTotal ?? 1000,
+                    IsActive = true
+                };
+
+                var existing = await _unitOfWork.Coupons
+                    .FindAsync(x => x.Code == coupon.Code);
+
+                if (existing.Any())
+                    throw new Exception("This Coupon Code already exist");
+
+                return _mapper.Map<CouponResponse>(coupon);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while creating new coupon");
+                throw;
+            }
+        }
+
+        public async Task<CouponResponse> UpdateCouponAsync(long id, CouponUpdateRequest request)
+        {
+            try 
+            {
+                var coupon = await _unitOfWork.Coupons.GetByIdAsync(id);
+                if (coupon == null)
+                    throw new Exception("Coupon not found");
+
+                coupon.Name = request.Name;
+                coupon.DiscountType = Enum.Parse<DiscountType>(request.DiscountType);
+                coupon.DiscountValue = request.DiscountValue;
+                coupon.MinRechargeAmount = request.MinRechargeAmount;
+                coupon.MaxDiscount = request.MaxDiscount ?? 0;
+                coupon.ValidFrom = request.ValidFrom;
+                coupon.ValidTo = request.ValidTo;
+                coupon.UsageLimitPerUser = request.UsageLimitPerUser;
+                coupon.UsageLimitTotal = request.UsageLimitTotal ?? 1000;
+                coupon.IsActive = request.IsActive;
+
+                _unitOfWork.Coupons.Update(coupon);
+                await _unitOfWork.SaveChangesAsync();
+
+                return _mapper.Map<CouponResponse>(coupon);
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while updating new permission");
+                throw;
+            }
+
+        }
+
+        public async Task DeleteCouponAsync(long id)
+        {
+            var coupon = await _unitOfWork.Coupons.GetByIdAsync(id);
+
+            if (coupon == null)
+                throw new Exception("Coupon not exsited");
+
+            _unitOfWork.Coupons.Delete(coupon);
+            await _unitOfWork.SaveChangesAsync();
+
+            await _cache.RemoveCacheResponseByGroupAsync("CouponGroup");
+        }
+
+        public async Task<List<CouponResponse>> GetAllCouponAsync()
+        {
+            string cacheKey = "coupon:all";
+
+            var cached = await _cache.GetCachedResponseAsync<List<CouponResponse>>(cacheKey);
+            if (cached != null) return cached;
+
+            var coupons = await _unitOfWork.Coupons.GetAllAsync();
+
+            var result = _mapper.Map<List<CouponResponse>>(coupons);
+
+            await _cache.SetCacheResponseByGroupAsync(cacheKey, result, TimeSpan.FromMinutes(5));
+
+            return result;
+        }
+
+        public async Task<CouponResponse> GetByCouponIdAsync(long id)
+        {
+            string cacheKey = $"coupon:{id}";
+
+            if (_cache != null)
+            {
+                var cached = await _cache.GetCachedResponseAsync<CouponResponse>(cacheKey);
+                if (cached != null) return cached;
+            }
+
+            var coupon = await _unitOfWork.Coupons.GetByIdAsync(id);
+
+            if (coupon == null)
+                throw new Exception("Coupon not found");
+
+            var result = _mapper.Map<CouponResponse>(coupon);
+
+            if (_cache != null)
+                await _cache.SetCacheResponseByGroupAsync(cacheKey, result, TimeSpan.FromMinutes(5));
+
+            return result;
+        }
+
+        public async Task<List<CouponResponse>> GetActiveCouponAsync()
+        {
+            string cacheKey = $"coupon:active";
+
+            if (_cache != null)
+            {
+                var cached = await _cache.GetCachedResponseAsync<List<CouponResponse>>(cacheKey);
+                if (cached != null) return cached;
+            }
+
+            var coupons = await _unitOfWork.Coupons.GetActiveCouponAsync();
+
+            var result = _mapper.Map<List<CouponResponse>>(coupons);
+
+            if (_cache != null)
+                await _cache.SetCacheResponseByGroupAsync(cacheKey, result, TimeSpan.FromMinutes(5));
+
+            return result;
+        }
+
+        public async Task<List<CouponResponse>> GetExpiredCouponAsync()
+        {
+            string cacheKey = $"coupon:expired";
+
+            var cached = await _cache.GetCachedResponseAsync<List<CouponResponse>>(cacheKey);
+            if (cached != null) return cached;
+
+            var coupon = await _unitOfWork.Coupons.GetExpiredCouponAsync();
+
+            var result = _mapper.Map<List<CouponResponse>>(coupon);
+
+            await _cache.SetCacheResponseByGroupAsync(cacheKey, result, TimeSpan.FromMinutes(5));
+
+            return result;
+        }
+
+        public async Task<List<CouponResponse>> GetCouponsByCustomerIdAsync(long customerId)
+        {
+            string cacheKey = $"coupon_by_customer:{customerId}";
+
+            if (_cache != null)
+            {
+                var cached = await _cache.GetCachedResponseAsync<List<CouponResponse>>(cacheKey);
+                if (cached != null) return cached;
+            }
+
+            var coupon = await _unitOfWork.Coupons.GetCouponsByCustomerIdAsync(customerId);
+
+            var result = _mapper.Map<List<CouponResponse>>(coupon);
+
+            await _cache.SetCacheResponseByGroupAsync(cacheKey, result, TimeSpan.FromMinutes(5));
+
+            return result;
         }
     }
 }

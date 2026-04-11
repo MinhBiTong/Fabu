@@ -128,7 +128,7 @@ namespace Application.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error while creating new permission");
+                _logger.LogError(ex, "Error while updating new permission");
                 throw;
             }
         }

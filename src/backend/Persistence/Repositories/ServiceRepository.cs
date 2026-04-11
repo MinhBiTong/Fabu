@@ -38,6 +38,11 @@ namespace Persistence.Repositories
             throw new NotImplementedException();
         }
 
+        public void Remove(Service service)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<List<Service>> SearchServicesAsync(string keyword)
         {
             throw new NotImplementedException();

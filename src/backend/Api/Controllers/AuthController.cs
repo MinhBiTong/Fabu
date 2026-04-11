@@ -37,9 +37,9 @@ namespace Api.Controllers
             try
             {
                 var result = await _authService.RegisterAsync(request);
-                if (result)
+                if (result != null && result is RegisterResponse registerResponse)
                 {
-                    return Ok(new { message = "Register successfully!" });
+                    return Ok(new { message = "Register successfully!", data = registerResponse });
                 }
                 return BadRequest(ApiResponse<LoginResponse>.Fail(400, "Register failed! Try again please!"));
             }
@@ -47,6 +47,16 @@ namespace Api.Controllers
             {
                 return StatusCode(500, new { message = "Internal server error" });
             }
+        }
+
+        [HttpPost("verify-otp")]
+        public async Task<ActionResult<ApiResponse<VerifyOtpResponse>>> VerifyOtp([FromBody] VerifyOtpRequest request)
+        {
+            // Gọi sang AuthService để xử lý logic
+            var result = await _authService.VerifyOtpAsync(request);
+
+            // Trả về kết quả cho Client
+            return Ok(new ApiResponse<VerifyOtpResponse>(result, "Validate OTP successfully."));
         }
 
         [HttpPost("login")]
