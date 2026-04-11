@@ -138,5 +138,22 @@ namespace Infrastructure.Services
         {
             return await _distributedCache.GetStringAsync(key);
         }
+
+        public async Task SetCacheResponseAsync(string cacheKey, object response, TimeSpan timeToLive)
+        {
+            if (response == null) return;
+
+            // Cấu hình thời gian sống cho Key
+            var options = new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = timeToLive
+            };
+
+            // Serialize object sang chuỗi Json
+            var serializedResponse = JsonConvert.SerializeObject(response);
+
+            // Lưu vào Redis
+            await _distributedCache.SetStringAsync(cacheKey, serializedResponse, options);
+        }
     }
 }

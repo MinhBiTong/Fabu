@@ -19,8 +19,15 @@ namespace Domain.Exceptions
         PAYMENT_PROVIDER_NOT_SUPPORTED = 1011,
         INVALID_AMOUNT = 1012,
         TRANSACTION_NOT_FOUND = 1013,
-         SERVICE_NOT_FOUND = 1014,
-         RECHARGE_PLAN_NOT_FOUND = 1015
+        SERVICE_NOT_FOUND = 1014,
+        RECHARGE_PLAN_NOT_FOUND = 1015,
+        PHONE_ALREADY_EXISTS = 1016,
+        EMAIL_ALREADY_EXISTS = 1017,
+        CUSTOMER_CREATION_FAILED = 1018,
+        INVALID_OTP = 1019,
+        OTP_EXPIRED = 1020,
+        OTP_ATTEMPTS_EXCEEDED = 1021,
+        OTP_SERVICE_UNAVAILABLE = 1022,
     }
 
     public class ErrorDetails
@@ -60,6 +67,14 @@ namespace Domain.Exceptions
                 ErrorCode.TRANSACTION_NOT_FOUND => new ErrorDetails(1013, "Transaction not found", HttpStatusCode.NotFound),
                 ErrorCode.SERVICE_NOT_FOUND => new ErrorDetails(1014, "Service not found", HttpStatusCode.NotFound),
                 ErrorCode.RECHARGE_PLAN_NOT_FOUND => new ErrorDetails(1015, "Recharge plan not found", HttpStatusCode.NotFound),
+                ErrorCode.PHONE_ALREADY_EXISTS => new ErrorDetails(1016, "Phone number already exists", HttpStatusCode.BadRequest),
+                ErrorCode.EMAIL_ALREADY_EXISTS => new ErrorDetails(1017, "Email already exists", HttpStatusCode.BadRequest),
+                ErrorCode.CUSTOMER_CREATION_FAILED => new ErrorDetails(1018, "Failed to create customer", HttpStatusCode.InternalServerError),
+                ErrorCode.INVALID_OTP => new ErrorDetails(1019, "Invalid OTP", HttpStatusCode.BadRequest),
+                ErrorCode.OTP_EXPIRED => new ErrorDetails(1020, "OTP expired", HttpStatusCode.BadRequest),
+                ErrorCode.OTP_ATTEMPTS_EXCEEDED => new ErrorDetails(1021, "OTP attempts exceeded", HttpStatusCode.BadRequest),
+                ErrorCode.OTP_SERVICE_UNAVAILABLE => new ErrorDetails(1022, "OTP service unavailable", HttpStatusCode.ServiceUnavailable),
+
                 _ => throw new ArgumentOutOfRangeException(nameof(errorCode), errorCode, null)
             };
         }

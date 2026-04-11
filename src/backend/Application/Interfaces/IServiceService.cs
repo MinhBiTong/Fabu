@@ -16,5 +16,10 @@ namespace Application.Interfaces
         Task<ApiResponse<ServiceResponse>> CreateAsync(ServiceCreateRequest request);
         Task<ApiResponse<ServiceResponse>> UpdateAsync(long id, ServiceCreateRequest request);
         Task<ApiResponse<bool>> DeleteAsync(long id);
+        Task<ApiResponse<List<ServiceResponse>>> GetActiveServicesByCategoryAsync(string category);
+        Task<ApiResponse<List<ServiceResponse>>> GetPopularServicesAsync(int top);
+        Task<ApiResponse<ServiceResponse>> GetByCodeAsync(string code);
+        Task<ApiResponse<bool>> IsServiceActiveAsync(long serviceId);
+        Task<ApiResponse<List<ServiceResponse>>> SearchServicesAsync(string keyword);
     }
 }

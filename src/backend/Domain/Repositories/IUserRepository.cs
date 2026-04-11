@@ -12,5 +12,6 @@ namespace Domain.Repositories
     {
         Task<User?> GetByEmailAsync(string email);
         Task<List<User>> GetActiveUserAsync();
+        Task<User?> GetByMobileNumberAsync(string phoneNumber);
     }
 }

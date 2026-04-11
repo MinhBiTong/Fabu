@@ -15,5 +15,8 @@ namespace Application.Interfaces
         Task<ApiResponse<FeedbackResponse>> CreateAsync(FeedbackCreateRequest request);
         Task<ApiResponse<bool>> UpdateAsync(long id, FeedbackUpdateRequest request);
         Task<ApiResponse<bool>> DeleteAsync(long id);
+        Task<ApiResponse<List<FeedbackResponse>>> GetAllPendingAsync();
+        Task<ApiResponse<bool>> MarkAsReadAsync(long feedbackId);
+        Task<ApiResponse<bool>> MarkAsRepliedAsync(long feedbackId, string replyNote);
     }
 }
