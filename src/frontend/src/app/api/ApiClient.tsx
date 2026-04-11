@@ -4,9 +4,10 @@ import { toastError } from "../../services/ToastService";
 interface ApiResponse<T> {
     code: number;
     message: string;
-    Data: { AccessToken: string } & T;
+    data: { AccessToken: string } & T;
     //data?: T;
 }
+
 
 class ApiClient {
     private baseUrl: string;

@@ -23,7 +23,7 @@ function SignUpForm({ onClose }: Props) {
   });
 
   const [errors, setErrors] = useState<any>({});
-
+const [showPassword, setShowPassword] = useState(false);
   const handleChange = (e: any) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -76,10 +76,12 @@ function SignUpForm({ onClose }: Props) {
       <div className="CorrectLine">
        <p>Email*</p>
       <input name="Email" type="email" placeholder="Enter Email" onChange={handleChange}></input>
+       {errors.Email && <span className="error">{errors.Email}</span>}
       </div>
      <div className="CorrectLine">
        <p>Username*</p>
       <input name="Username" type="text" placeholder="Enter Username" onChange={handleChange}></input>
+       {errors.Username && <span className="error">{errors.Username}</span>}
       </div>   
       <div className="CorrectLine">
   <p>Full Name</p>
@@ -89,20 +91,27 @@ function SignUpForm({ onClose }: Props) {
     placeholder="Enter Full Name"
     onChange={handleChange}
   />
+       {errors.FullName && <span className="error">{errors.FullName}</span>}
+
 </div>
      <div className="CorrectLine">
        <p>Phone Number</p>
       <input name="PhoneNumber" type="text" placeholder="Enter your number"onChange={handleChange}></input>
+       {errors.PhoneNumber && <span className="error">{errors.PhoneNumber}</span>}
       </div>
      
         <div className="CorrectLine">
        <p>Password*</p>
-      <input name="Password" type="password" placeholder="Enter Password" onChange={handleChange}></input>
+      <input name="Password" type={showPassword ? "text" : "password"} placeholder="Enter Password" onChange={handleChange}></input>
+       {errors.Password && <span className="error">{errors.Password}</span>}
       </div>
 
       <div className="CorrectLine">
        <p>Confirm Password*</p>
-      <input name="confirmPassword" type="password" placeholder="Confirm Password" onChange={handleChange}></input>
+      <input name="confirmPassword" type={showPassword ? "text" : "password"} placeholder="Confirm Password" onChange={handleChange}></input>
+        {errors.confirmPassword && (
+    <span className="error">{errors.confirmPassword}</span>
+  )}
       </div>
      
        <div className="ToS">

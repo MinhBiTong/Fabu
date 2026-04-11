@@ -47,36 +47,39 @@ namespace Application.Services
             var result = _mapper.Map<ServiceResponse>(service);
             return ApiResponse<ServiceResponse>.Success(result, "Service created successfully.");
         }
-        public async Task<ApiResponse<List<ServiceResponse>>> GetActiveServicesByCategoryAsync(string category)
+
+
+        public async Task<ApiResponse<ServiceResponse>> UpdateAsync(long id, ServiceCreateRequest request)
         {
-            var services = await _unitOfWork.Services.GetActiveServicesByCategoryAsync(category);
-            return ApiResponse<List<ServiceResponse>>.Success(_mapper.Map<List<ServiceResponse>>(services));
+            var service = await _unitOfWork.Services.GetByIdAsync(id);
+
+            if (service == null)
+                return ApiResponse<ServiceResponse>.Fail(404, "Service not found.");
+
+            _mapper.Map(request, service);
+
+            _unitOfWork.Services.Update(service);
+            await _unitOfWork.SaveChangesAsync();
+
+            var result = _mapper.Map<ServiceResponse>(service);
+
+            return ApiResponse<ServiceResponse>.Success(result, "Service updated successfully.");
         }
 
-        public async Task<ApiResponse<List<ServiceResponse>>> GetPopularServicesAsync(int top)
+        public async Task<ApiResponse<bool>> DeleteAsync(long id)
         {
-            var services = await _unitOfWork.Services.GetPopularServicesAsync(top);
-            return ApiResponse<List<ServiceResponse>>.Success(_mapper.Map<List<ServiceResponse>>(services));
-        }
+            var service = await _unitOfWork.Services.GetByIdAsync(id);
 
-        public async Task<ApiResponse<ServiceResponse>> GetByCodeAsync(string code)
-        {
-            var service = await _unitOfWork.Services.GetByCodeAsync(code);
-            if (service == null) return ApiResponse<ServiceResponse>.Fail(404, "Không tìm thấy.");
-            return ApiResponse<ServiceResponse>.Success(_mapper.Map<ServiceResponse>(service));
-        }
+            if (service == null)
+                return ApiResponse<bool>.Fail(404, "Service not found.");
 
-        public async Task<ApiResponse<bool>> IsServiceActiveAsync(long serviceId)
-        {
-            var isActive = await _unitOfWork.Services.IsServiceActiveAsync(serviceId);
-            return ApiResponse<bool>.Success(isActive);
-        }
+            _unitOfWork.Services.Remove(service);
+            await _unitOfWork.SaveChangesAsync();
 
-        public async Task<ApiResponse<List<ServiceResponse>>> SearchServicesAsync(string keyword)
-        {
-            var services = await _unitOfWork.Services.SearchServicesAsync(keyword);
-            return ApiResponse<List<ServiceResponse>>.Success(_mapper.Map<List<ServiceResponse>>(services));
+            return ApiResponse<bool>.Success(true, "Service deleted successfully.");
         }
 
     }
+
+
 }
