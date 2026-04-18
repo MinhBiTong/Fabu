@@ -33,12 +33,13 @@ export const useLogin = () => {
       ));
       console.log(result);
       
-      if (result.code === 200) {
+      if (result?.code === 200&& result?.data?.accessToken) {
         toastSuccess(result.message);
-        setToken(result.Data.AccessToken); //luu token vao context
+        setToken(result.data.accessToken); //luu token vao context
         
         //redirect
         router.push("/");
+        return { success: true };
         //router.refresh();
       } else {
         toastError(result.message  || "Login failed. Please try again.");

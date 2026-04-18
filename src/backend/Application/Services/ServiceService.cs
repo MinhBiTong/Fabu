@@ -48,7 +48,6 @@ namespace Application.Services
             return ApiResponse<ServiceResponse>.Success(result, "Service created successfully.");
         }
 
-
         public async Task<ApiResponse<ServiceResponse>> UpdateAsync(long id, ServiceCreateRequest request)
         {
             var service = await _unitOfWork.Services.GetByIdAsync(id);
@@ -79,7 +78,29 @@ namespace Application.Services
             return ApiResponse<bool>.Success(true, "Service deleted successfully.");
         }
 
+        public Task<ApiResponse<List<ServiceResponse>>> GetActiveServicesByCategoryAsync(string category)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ApiResponse<List<ServiceResponse>>> GetPopularServicesAsync(int top)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ApiResponse<ServiceResponse>> GetByCodeAsync(string code)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ApiResponse<bool>> IsServiceActiveAsync(long serviceId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ApiResponse<List<ServiceResponse>>> SearchServicesAsync(string keyword)
+        {
+            throw new NotImplementedException();
+        }
     }
-
-
 }

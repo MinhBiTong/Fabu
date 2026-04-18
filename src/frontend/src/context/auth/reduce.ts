@@ -1,7 +1,7 @@
 import type { AuthAction, AuthState } from "./types";
 
 export const initialAuthState: AuthState = {
-    AccessToken: null,
+    accessToken: null,
     isLoading: false
 }
 
@@ -13,7 +13,7 @@ export const authReducer = (
         case "SET_ACCESS_TOKEN":
             return {
                 ...state,
-                AccessToken: action.payload
+                accessToken: action.payload
             }
 
         case "SET_LOADING":
@@ -23,7 +23,7 @@ export const authReducer = (
             }
         case "LOGOUT":
             return {
-                AccessToken: null,
+                accessToken: null,
                 isLoading: false
             }
 

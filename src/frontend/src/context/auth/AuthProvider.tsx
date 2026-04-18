@@ -3,12 +3,13 @@ import { AuthContext } from "./AuthContext";
 import { globalApiClient } from "../../app/api/ApiClient";
 import { authReducer, initialAuthState } from "../auth/reduce";
 import { LoginApi } from "@/app/api/authApi";
-
+import { useRouter } from "next/navigation";
 //logic refresh token + apiClient
 type AuthProviderProps = {
     children: React.ReactNode;
 }
 export const AuthProvider = ({ children }: AuthProviderProps) => {
+    const router = useRouter();
     const [state, dispatch] = useReducer(
         authReducer,
         initialAuthState
@@ -16,8 +17,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     //moi khi accessToken thay doi, cap nhat lai globalApiClient (apiclient)
     useEffect(() => {
-        globalApiClient.setToken(state.AccessToken);
-    }, [state.AccessToken]);
+        globalApiClient.setToken(state.accessToken);
+    }, [state.accessToken]);
 
     useEffect(() => {
         //1, khi load trang, goi api /refresh-token len .NET
@@ -28,17 +29,30 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         //logic refresh token, silent refresh khi load app
         const silentRefresh = async () => {
             try {
-                //api goi refresh token
+                //api goi refresh token, truyen refresh token tu cookie len server, neu hop le se tra ve access token moi
                 const response = await LoginApi.refreshToken();
-                const newToken = response.Data.AccessToken;
-            
-                const data = newToken ? { AccessToken : newToken } : null;
-
-                dispatch({ type: 'SET_ACCESS_TOKEN', payload: data?.AccessToken || null });
+                //xu ly ket qua tra ve, neu co access token moi thi cap nhat vao state, neu khong thi set null
+                if (response?.code === 200 && response?.data?.accessToken) {
+                    dispatch({ type: 'SET_ACCESS_TOKEN', payload: response.data.accessToken });
+                } else {
+                    dispatch({ type: 'SET_ACCESS_TOKEN', payload: null });
+                }
             } catch {
+                console.log("Can't auto create new token");
                 dispatch({ type: 'SET_ACCESS_TOKEN', payload: null });
             } finally {
                 dispatch({ type: "SET_LOADING", payload: false });
+            }
+        };
+
+        const silentLogout = async () => {
+            try {
+                await LoginApi.logout();
+                dispatch({ type: 'LOGOUT' });
+                //redirect ve trang login
+                router.push("/login");
+            } catch (error) {
+                console.error('Logout failed:', error);
             }
         };
         silentRefresh();

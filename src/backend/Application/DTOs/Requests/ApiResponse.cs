@@ -8,6 +8,8 @@ namespace Application.DTOs.Responses
 {
     public class ApiResponse<T>
     {
+        public readonly string? RefreshToken;
+
         public int Code { get; private set; }
         public string Message { get; private set; }
         public T? Data { get; private set; }

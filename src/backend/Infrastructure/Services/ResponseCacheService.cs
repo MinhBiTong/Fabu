@@ -1,6 +1,7 @@
 ﻿//using Application.Interfaces;
 using Application.Interfaces;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using StackExchange.Redis;
@@ -17,6 +18,7 @@ namespace Infrastructure.Services
         public readonly IDistributedCache _distributedCache;
 
         public readonly IConnectionMultiplexer? _connectionMultiplexer;
+        public readonly ILogger<ResponseCacheService> _logger;
 
         public ResponseCacheService(IDistributedCache distributedCache, IConnectionMultiplexer? connectionMultiplexer = null)
         {
@@ -127,11 +129,20 @@ namespace Infrastructure.Services
 
         public async Task SetRawStringAsync(string key, string value, TimeSpan expiry)
         {
-            var options = new DistributedCacheEntryOptions
+            try
             {
-                AbsoluteExpirationRelativeToNow = expiry
-            };
-            await _distributedCache.SetStringAsync(key, value, options);
+                var options = new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = expiry
+                };
+                // Sử dụng await để đảm bảo tác vụ hoàn thành
+                await _distributedCache.SetStringAsync(key, value, options);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi kết nối Redis khi lưu Key: {Key}", key);
+                throw; // Ném lỗi để Login không thành công nếu không lưu được Token
+            }
         }
 
         public async Task<string?> GetRawStringAsync(string key)

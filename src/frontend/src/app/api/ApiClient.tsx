@@ -4,10 +4,9 @@ import { toastError } from "../../services/ToastService";
 interface ApiResponse<T> {
     code: number;
     message: string;
-    data: { AccessToken: string } & T;
+    data: { accessToken: string } & T;
     //data?: T;
 }
-
 
 class ApiClient {
     private baseUrl: string;
@@ -31,8 +30,6 @@ class ApiClient {
         // fallback (older browsers / environments)
         return `sess_${Math.random().toString(36).substring(2)}_${Date.now()}`;
     }
-
-
 
     //ham lay ra session id
     private getOrCreateSessionId(): string {
@@ -91,7 +88,6 @@ class ApiClient {
     //wrapper cho fetch, xu ly header va error
     private async apiCall<T>(url: string, options: RequestInit = {}, retry = true): Promise<ApiResponse<T>> {
         try {
-
             const response = await fetch(url, {
                 ...options,
                 //them credentials de su dung httpOnly cookie
