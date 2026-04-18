@@ -58,7 +58,7 @@ export default function FeedbackDetails() {
   return (
     <div className="AdminFeedDetailsContainer">
 
-      <h1>{feedback.customerName || "Anonymous"}'s Feedback</h1>
+      <h1>{feedback.email || "Anonymous"}'s Feedback</h1>
 
       {/* ⭐ Stars */}
       <div className="StarsRated">
@@ -69,7 +69,7 @@ export default function FeedbackDetails() {
 
       {/* 👤 Info */}
       <div className="Nameplace">
-        <span>UserName: {feedback.customerName || "Unknown"}</span>
+        <span>UserName: {feedback.email || "Unknown"}</span>
         <span>Email: {feedback.email || "N/A"}</span>
       </div>
 
