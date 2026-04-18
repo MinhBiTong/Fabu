@@ -58,7 +58,7 @@ export default function FeedbackDetails() {
   return (
     <div className="AdminFeedDetailsContainer">
 
-      <h1>{feedback.email || "Anonymous"}'s Feedback</h1>
+      <h1>{feedback.email || "Anonymous" } - Feedback</h1>
 
       {/* ⭐ Stars */}
       <div className="StarsRated">
