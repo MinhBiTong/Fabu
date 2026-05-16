@@ -1,4 +1,5 @@
 ﻿using Application.DTOs.Requests.LoginRequest;
+using Application.DTOs.Responses;
 using Application.DTOs.Responses.LoginResponse;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,8 @@ namespace Application.Interfaces
         Task<RegisterResponse> RegisterAsync(RegisterRequest request);
         Task<LoginResponse> LoginAsync(LoginRequest request);
         Task<LoginResponse> RefreshTokenAsync(RefreshRequest request);
-        Task LogoutAsync(LogoutRequest request);
+        Task LogoutAsync(string? refreshToken, string? accessToken = null);
         Task<VerifyOtpResponse> VerifyOtpAsync(VerifyOtpRequest request);
+        Task<ApiResponse<LoginResponse>> RefreshTokenFromCookieAsync(string refreshToken);
     }
 }

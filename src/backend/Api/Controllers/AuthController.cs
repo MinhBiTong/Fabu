@@ -1,18 +1,19 @@
 ﻿using Application.DTOs.Requests;
 using Application.DTOs.Requests.LoginRequest;
+using Application.DTOs.Responses;
 using Application.DTOs.Responses.LoginResponse;
 using Application.Interfaces;
 using Azure;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Google;
-using Application.DTOs.Responses;
 
 namespace Api.Controllers
 {
@@ -24,11 +25,14 @@ namespace Api.Controllers
     {
         private readonly IValidator<LoginRequest> _validator;
         private readonly IAuthService _authService;
-
-        public AuthController(IValidator<LoginRequest> validator, IAuthService authService)
+        private readonly IResponseCacheService _responseCacheService;
+        private ILogger<AuthController> _logger;
+        public AuthController(IValidator<LoginRequest> validator, IAuthService authService, IResponseCacheService responseCacheService, ILogger<AuthController> logger)
         {
             _validator = validator ?? throw new ArgumentNullException(nameof(validator));
             _authService = authService ?? throw new ArgumentNullException(nameof(authService));
+            _responseCacheService = responseCacheService;
+            _logger = logger;
         }
 
         [HttpPost("register")]
@@ -56,7 +60,15 @@ namespace Api.Controllers
             var result = await _authService.VerifyOtpAsync(request);
 
             // Trả về kết quả cho Client
-            return Ok(new ApiResponse<VerifyOtpResponse>(result, "Validate OTP successfully."));
+            return Ok(ApiResponse<VerifyOtpResponse>.Success(result, "Validate OTP successfully."));
+        }
+
+        [HttpGet("test-redis")]
+        public async Task<IActionResult> TestRedis()
+        {
+            await _responseCacheService.SetRawStringAsync("test_key", "Hello Redis", TimeSpan.FromMinutes(5));
+            var value = await _responseCacheService.GetRawStringAsync("test_key");
+            return Ok(new { SavedValue = value });
         }
 
         [HttpPost("login")]
@@ -121,14 +133,26 @@ namespace Api.Controllers
         }
 
         [HttpPost("refresh-token")]
-        public async Task<ActionResult<LoginResponse>> RefreshToken([FromBody] RefreshRequest request) 
+        public async Task<ActionResult<ApiResponse<LoginResponse>>> RefreshToken()
         {
             try
             {
-                var response = await _authService.RefreshTokenAsync(request);
-                // Nếu muốn lưu refresh token vào cookie (secure hơn lưu ở localStorage)
-                SetRefreshTokenCookie(response.RefreshToken);
-                return Ok(ApiResponse<LoginResponse>.Success(response, "Refresh token successfully"));
+                // Backend đọc Refresh Token từ HttpOnly Cookie
+                var refreshToken = Request.Cookies["refreshToken"];
+
+                if (string.IsNullOrEmpty(refreshToken))
+                    return Unauthorized(ApiResponse<LoginResponse>.Fail(401, "Refresh token not exists"));
+
+                // Gọi service với refreshToken từ cookie
+                var response = await _authService.RefreshTokenFromCookieAsync(refreshToken);
+
+                // Nếu backend trả về Refresh Token mới → set lại cookie
+                if (!string.IsNullOrEmpty(response.RefreshToken))
+                {
+                    SetRefreshTokenCookie(response.RefreshToken);
+                }
+
+                return Ok(response);
             }
             catch (UnauthorizedAccessException)
             {
@@ -138,19 +162,33 @@ namespace Api.Controllers
 
         [HttpPost("logout")]
         [Authorize]
-        public async Task<IActionResult> Logout([FromBody] LogoutRequest request) 
+        public async Task<IActionResult> Logout()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int tokenUserId))
-                return BadRequest(ApiResponse<object>.Fail(400, "Token invalid"));
+            try
+            {
+                // Đọc Refresh Token từ HttpOnly Cookie
+                var refreshToken = Request.Cookies["refreshToken"];
 
-            if (tokenUserId != request.UserId)
-                return BadRequest(ApiResponse<object>.Fail(400, "User ID mismatch"));
+                // Đọc Access Token từ Header (để blacklist)
+                var accessToken = Request.Headers["Authorization"]
+                    .ToString()
+                    .Replace("Bearer ", "")
+                    .Trim();
 
-            await _authService.LogoutAsync(request);
-            // Xóa cookie refresh token nếu dùng cookie
-            Response.Cookies.Delete("refreshToken");
-            return Ok(ApiResponse<object>.Success(null, "Logout successfully"));
+                // Gọi Service với dữ liệu từ cookie và header
+                await _authService.LogoutAsync(refreshToken, accessToken);
+
+                // Xóa cookie refreshToken
+                Response.Cookies.Delete("refreshToken");
+
+                return Ok(ApiResponse<object>.Success(null, "Logout Successfully"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Logout failed");
+                Response.Cookies.Delete("refreshToken"); // vẫn xóa cookie dù có lỗi
+                return StatusCode(500, ApiResponse<object>.Fail(500, "Logout Failed"));
+            }
         }
 
         // Private helper method - không cần HttpMethod vì không phải action public

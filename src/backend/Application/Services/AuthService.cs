@@ -2,6 +2,7 @@
 using Application.DTOs.Responses;
 using Application.DTOs.Responses.LoginResponse;
 using Application.Interfaces;
+using Azure.Core;
 using Domain.Abstractions;
 using Domain.Configurations;
 using Domain.Entities;
@@ -19,6 +20,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IdentityModel.Tokens.Jwt; 
 using System.Linq;
+using System.Net.Http;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -147,7 +149,7 @@ namespace Application.Services
             {
                 Success = true,
                 Message = "OTP verification successful. Account has been activated.",
-                CustomerId = customerResult.Result?.Id
+                CustomerId = customerResult.Data?.Id
             };
         }
 
@@ -210,6 +212,7 @@ namespace Application.Services
             //generate tokens
             var accessToken = GenerateAccessToken(claims);
             var refreshToken = GenerateRefreshToken(); //random string
+            _logger.LogInformation("DEBUG LOGIN - Raw RT before hash: {Token}", refreshToken);
             var refreshHash = HashToken(refreshToken); //secure hash
 
             //store refresh in redis
@@ -325,19 +328,40 @@ namespace Application.Services
         }
 
         //store rt trong redis - key: "refresh:{userId}:{hash}", value: expiry -> expiry
-        private async Task StoreRefreshTokenAsync(long userId, string refreshHash, TimeSpan expiry)
+        private async Task StoreRefreshTokenAsync(long userId, string refreshToken, TimeSpan expiry)
         {
-            var key = $"refresh:{userId}:{refreshHash}";
-            // Chuyển Ticks sang String để lưu Plain Text
-            var expiryTicks = DateTime.UtcNow.Add(expiry).Ticks.ToString();
+            if (_responseCache == null) return;
 
-            // Lưu vào Redis dạng chuỗi đơn giản
-            
-            await _responseCache.SetRawStringAsync(key, expiryTicks, expiry);
+            var refreshHash = HashToken(refreshToken);
 
-            var testValue = await _responseCache.GetRawStringAsync(key);
-            _logger.LogInformation("DEBUG NGAY LÚC LƯU - Key: {Key}, Value vừa lưu: {Value}", key, testValue);
+            // Key chính - dễ tìm
+            var mainKey = $"refresh:{userId}:{refreshHash}";
 
+            // Value = userId (string)
+            var value = userId.ToString();
+
+            // Lưu với thời hạn tự động xóa
+            await _responseCache.SetCacheResponseByGroupAsync(
+                mainKey,
+                value,
+                absoluteExpiry: expiry
+            );
+
+            // Lưu thêm key đơn giản chỉ chứa hash (dễ tìm khi chỉ có refreshToken)
+            var simpleKey = $"refreshToken:{refreshHash}";
+            await _responseCache.SetCacheResponseByGroupAsync(
+                simpleKey,
+                value,
+                absoluteExpiry: expiry
+            );
+
+            // Thêm vào group để logout dễ xóa
+            var groupKey = $"group:refresh:{userId}";
+            await _responseCache.AddToGroupAsync(groupKey, mainKey);
+
+            _logger.LogInformation("Stored refresh token - MainKey: {MainKey} | SimpleKey: {SimpleKey} | UserId: {UserId}",
+                mainKey, simpleKey, userId);
+            //--------
             //var groupKey = $"Group:refresh:{userId}";
             //_logger.LogInformation("SAVING to Redis - Key: {Key}, Value: {Value}", key, expiryTicks);
             //await _responseCache.AddToGroupAsync(groupKey, key);
@@ -366,8 +390,13 @@ namespace Application.Services
             _logger.LogInformation("Attempting to refresh token with Key: {Key}", key);
 
             // 2. Lấy giá trị chuỗi thuần từ Redis (Plain Text Ticks)
-            var cachedValue = await _responseCache.GetRawStringAsync(key);
+            // Ensure _responseCache is not null before calling GetRawStringAsync
+            if (_responseCache == null)
+            {
+                throw new InvalidOperationException("Response cache service is not initialized.");
+            }
 
+            var cachedValue = await _responseCache.GetRawStringAsync(key);
             _logger.LogInformation("Raw Ticks from Redis: {Value}", cachedValue ?? "NULL");
 
             // 3. Kiểm tra sự tồn tại và Parse giá trị
@@ -420,6 +449,41 @@ namespace Application.Services
                     Value = c.Value
                 }).ToList()
             };
+        }
+
+        public async Task<ApiResponse<LoginResponse>> RefreshTokenFromCookieAsync(string refreshToken)
+        {
+            if (string.IsNullOrEmpty(refreshToken))
+                throw new UnauthorizedAccessException("Refresh token is required");
+
+            var refreshHash = HashToken(refreshToken);
+
+            // Tìm userId từ Redis
+            var userIdStr = await _responseCache?.GetCachedResponseAsync<string>($"refreshToken:{refreshHash}");
+
+            if (string.IsNullOrEmpty(userIdStr) || !long.TryParse(userIdStr, out long userId))
+                throw new UnauthorizedAccessException("Refresh token not exists or has expired");
+
+            // Lấy user từ DB
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+            if (user == null)
+                throw new AppException(ErrorCode.USER_NOT_EXISTED);
+
+            // Tạo token mới
+            var claims = await GenerateClaimsAsync(user);
+            var newAccessToken = GenerateAccessToken(claims);
+            var newRefreshToken = GenerateRefreshToken();
+            var newRefreshHash = HashToken(newRefreshToken);
+
+            // Lưu refresh token mới
+            await StoreRefreshTokenAsync(user.Id, newRefreshToken, TimeSpan.FromDays(7));
+
+            return ApiResponse<LoginResponse>.Success(new LoginResponse
+            {
+                AccessToken = newAccessToken,
+                RefreshToken = newRefreshToken,
+                ExpiresAt = DateTime.UtcNow.AddMinutes(_jwtConfiguration.ExpiryMinutes)
+            });
         }
 
         //refresh token: validate tu redis, generate at moi
@@ -476,30 +540,56 @@ namespace Application.Services
         //    };
         //}
 
-        public async Task LogoutAsync(LogoutRequest request)
+        public async Task LogoutAsync(string? refreshToken, string? accessToken = null)
         {
-            // Delete all refresh for user (pattern keys – assume _responseCache supports GetKeysAsync)
-            // Xóa group refresh của user
-            var groupKey = $"Group:refresh:{request.UserId}";
-
-            await _responseCache.RemoveCacheResponseByGroupAsync(groupKey);
-
-            // Blacklist access token
-            if (!string.IsNullOrEmpty(request.AccessToken))
+            if (_responseCache == null)
             {
-                var handler = new JwtSecurityTokenHandler();
-                if (handler.CanReadToken(request.AccessToken))
+                _logger.LogWarning("Cache service not available during logout");
+                return;
+            }
+            try
+            {
+                // === XỬ LÝ REFRESH TOKEN TỪ COOKIE ===
+                if (!string.IsNullOrEmpty(refreshToken))
                 {
-                    var jwt = handler.ReadJwtToken(request.AccessToken);
-                    var remaining = jwt.ValidTo - DateTime.UtcNow;
-                    if (remaining > TimeSpan.Zero)
+                    var refreshHash = HashToken(refreshToken);
+
+                    // Tìm userId từ Redis (dựa trên cách em lưu)
+                    var userIdStr = await _responseCache.GetCachedResponseAsync<string>($"refreshToken:{refreshHash}");
+
+                    if (!string.IsNullOrEmpty(userIdStr) && long.TryParse(userIdStr, out long userId))
                     {
-                        await _responseCache.SetCacheResponseByGroupAsync(
-                            $"blacklist:{request.AccessToken}",
-                            true,
-                            absoluteExpiry: remaining);
+                        // Xóa toàn bộ refresh token của user này
+                        var groupKey = $"group:refresh:{userId}";
+                        await _responseCache.RemoveCacheResponseByGroupAsync(groupKey);
+
+                        _logger.LogInformation("Cleared all refresh tokens for user {UserId}", userId);
                     }
                 }
+
+                // === BLACKLIST ACCESS TOKEN (nếu có) ===
+                if (!string.IsNullOrEmpty(accessToken))
+                {
+                    var handler = new JwtSecurityTokenHandler();
+                    if (handler.CanReadToken(accessToken))
+                    {
+                        var jwt = handler.ReadJwtToken(accessToken);
+                        var remaining = jwt.ValidTo - DateTime.UtcNow;
+
+                        if (remaining > TimeSpan.Zero)
+                        {
+                            await _responseCache.SetCacheResponseByGroupAsync(
+                                $"blacklist:at:{accessToken}",
+                                true,
+                                absoluteExpiry: remaining);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during logout process");
+                // Không throw exception ở logout để tránh làm hỏng UX
             }
         }
         //verify token - dung trong middleware - extract claims

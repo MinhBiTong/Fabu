@@ -27,7 +27,7 @@ export default function Recharge() {
     const fetchPackages = async () => {
       try {
         const res = await getPackages();
-        setMoneyList(res.Data || []);
+          setMoneyList(res.data || []);
       } catch (err) {
         console.error(err);
       }
@@ -65,7 +65,7 @@ export default function Recharge() {
         coupon: selectedCoupon,
       });
 
-      const data = res.Data;
+      const data = res.data;
 
       // 👉 chuyển sang bill
       router.push(

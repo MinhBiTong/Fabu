@@ -10,7 +10,7 @@ export const useAuth = () => {
     const {state, dispatch} = context;
 
     return {
-        AccessToken: state.AccessToken,
+        accessToken: state.accessToken,
         isLoading: state.isLoading,
         setToken: (token: string | null) =>
             dispatch({ type: "SET_ACCESS_TOKEN", payload: token }),
