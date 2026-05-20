@@ -1,8 +1,10 @@
 ﻿using Application.DTOs.Requests.PaymentRequest;
 using Application.DTOs.Responses;
 using Application.DTOs.Responses.PaymentResponse;
+using Application.Features.Payments.Queries;
 using Application.Interfaces;
 using Domain.Exceptions;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,13 +16,15 @@ namespace Api.Controllers
     public class PaymentController : ControllerBase
     {
         private readonly IPaymentService _paymentService;
-        public PaymentController(IPaymentService paymentService)
+        private readonly IMediator _mediator;
+        public PaymentController(IPaymentService paymentService, IMediator mediator)
         {
             _paymentService = paymentService;
+            _mediator = mediator;
         }
 
         /// <summary>
-        /// Tạo giao dịch thanh toán và trả về URL chuyển hướng đến VNPay
+        /// Tạo giao dịch thanh toán và trả về URL chuyển hướng đến gateway nếu cần
         /// </summary>
         [HttpPost]
         [Authorize]   // Hoặc [AllowAnonymous] nếu cho phép guest thanh toán
@@ -34,9 +38,9 @@ namespace Api.Controllers
                 var result = await _paymentService.CreatePaymentAsync(request);
                 return Ok(ApiResponse<PaymentResponse>.Success(result, "Create payment request successfully"));
             }
-            catch (AppException ex)
+            catch (AppException)
             {
-                return BadRequest(ApiResponse<PaymentResponse>.Fail(200, "Create payment request failed"));
+                return BadRequest(ApiResponse<PaymentResponse>.Fail(400, "Create payment request failed"));
             }
             catch (Exception)
             {
@@ -51,25 +55,35 @@ namespace Api.Controllers
         [AllowAnonymous]   // VNPay gọi từ ngoài, không cần auth
         public async Task<IActionResult> VNPayCallback([FromQuery] Dictionary<string, string> callbackData)
         {
-            try
-            {
-                var result = await _paymentService.HandleVNPayCallbackAsync(callbackData);
-
-                if (result.IsSuccess)
-                {
-                    // Redirect về trang thành công trên frontend
-                    return Redirect($"https://your-frontend.com/payment-success?ref={result.TransactionRef}");
-                }
-                else
-                {
-                    return Redirect($"https://your-frontend.com/payment-failed?message={Uri.EscapeDataString(result.Message)}");
-                }
-            }
-            catch (Exception ex)
-            {
-                return Redirect("https://your-frontend.com/payment-failed?message=System+error");
-            }
+            var result = await _paymentService.HandleVNPayCallbackAsync(callbackData);
+            return BuildGatewayRedirect(result);
         }
+
+        [HttpGet("paypal-callback")]
+        [AllowAnonymous]
+        public async Task<IActionResult> PayPalCallback([FromQuery] Dictionary<string, string> callbackData)
+        {
+            var result = await _paymentService.HandlePaymentCallbackAsync("PayPal", callbackData);
+            return BuildGatewayRedirect(result);
+        }
+
+        [HttpGet("stripe-callback")]
+        [AllowAnonymous]
+        public async Task<IActionResult> StripeCallback([FromQuery] Dictionary<string, string> callbackData)
+        {
+            var result = await _paymentService.HandlePaymentCallbackAsync("Stripe", callbackData);
+            return BuildGatewayRedirect(result);
+        }
+
+        [HttpGet("paypal-cancel")]
+        [AllowAnonymous]
+        public IActionResult PayPalCancel([FromQuery] string? paymentRef)
+            => Redirect($"https://your-frontend.com/payment-failed?ref={Uri.EscapeDataString(paymentRef ?? string.Empty)}&message=PayPal+payment+cancelled");
+
+        [HttpGet("stripe-cancel")]
+        [AllowAnonymous]
+        public IActionResult StripeCancel([FromQuery] string? paymentRef)
+            => Redirect($"https://your-frontend.com/payment-failed?ref={Uri.EscapeDataString(paymentRef ?? string.Empty)}&message=Stripe+payment+cancelled");
 
         /// <summary>
         /// Lấy thông tin một giao dịch thanh toán theo PaymentRef
@@ -78,15 +92,18 @@ namespace Api.Controllers
         [Authorize]
         public async Task<ActionResult<ApiResponse<PaymentResponse>>> GetPayment(string paymentRef)
         {
-            try
+            var response = await _mediator.Send(new GetPaymentByRefQuery(paymentRef));
+            return response.Code == 200 ? Ok(response) : NotFound(response);
+        }
+
+        private IActionResult BuildGatewayRedirect(Domain.Options.PaymentCallbackResult result)
+        {
+            if (result.IsSuccess)
             {
-                var result = await _paymentService.GetPaymentByRefAsync(paymentRef);
-                return Ok(ApiResponse<PaymentResponse>.Success(result));
+                return Redirect($"https://your-frontend.com/payment-success?ref={Uri.EscapeDataString(result.PaymentRef)}");
             }
-            catch (AppException ex)
-            {
-                return NotFound(ApiResponse<PaymentResponse>.Fail(500, "Not found payment by Ref "));
-            }
+
+            return Redirect($"https://your-frontend.com/payment-failed?message={Uri.EscapeDataString(result.Message)}");
         }
     }
 }

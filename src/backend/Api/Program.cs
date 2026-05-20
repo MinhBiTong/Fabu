@@ -38,10 +38,19 @@ builder.Services.Configure<PermissionConfiguration>(builder.Configuration.GetSec
 builder.Services.Configure<MailConfiguration>(builder.Configuration.GetSection("MailSettings"));
 builder.Services.Configure<RateLimiterConfiguration>(builder.Configuration.GetSection("RateLimiting"));
 builder.Services.Configure<JwtConfiguration>(builder.Configuration.GetSection("Jwt"));
+builder.Services.Configure<AIChatbotConfiguration>(builder.Configuration.GetSection("AIChatbot"));
 builder.Services.AddScoped<Domain.Abstractions.IUserContext, UserContext>();
 //builder.Services.Configure<VNPayConfiguration>(builder.Configuration.GetSection("VNPay"));
 builder.Services.AddOptions<VNPayConfiguration>()
         .Bind(builder.Configuration.GetSection("VNPay"))
+        .ValidateDataAnnotations()
+        .ValidateOnStart();
+builder.Services.AddOptions<PayPalConfiguration>()
+        .Bind(builder.Configuration.GetSection("PayPal"))
+        .ValidateDataAnnotations()
+        .ValidateOnStart();
+builder.Services.AddOptions<StripeConfiguration>()
+        .Bind(builder.Configuration.GetSection("Stripe"))
         .ValidateDataAnnotations()
         .ValidateOnStart();
 

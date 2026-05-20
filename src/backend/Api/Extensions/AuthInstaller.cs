@@ -1,18 +1,14 @@
-﻿using Application.Interfaces;
+using Application.Interfaces;
 using Domain.Entities;
 using Domain.Exceptions;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using StackExchange.Redis;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Api.Extensions
 {
@@ -23,105 +19,155 @@ namespace Api.Extensions
             var authConfig = configuration.GetSection("Auth");
             if (!authConfig.GetValue<bool>("Enabled")) return;
 
-            //identity
-            //services.AddIdentity<User, IdentityRole<long>>(options =>
-            //{
-            //    options.Password.RequireDigit = false;
-            //    options.Password.RequireLowercase = false;
-            //    options.Password.RequireNonAlphanumeric = false;
-            //    options.Password.RequireUppercase = false;
-            //    options.Password.RequiredLength = 6;
-            //})
-            //  .AddEntityFrameworkStores<AppDbContext>()
-            //  .AddDefaultTokenProviders();
-            
-            //JWT
-
             var jwtSettings = configuration.GetSection("Jwt");
             var jwtKey = jwtSettings["Key"];
             if (string.IsNullOrEmpty(jwtKey))
             {
                 throw new InvalidOperationException("JWT Key is not configured in the application settings.");
             }
+
             var key = Encoding.UTF8.GetBytes(jwtKey);
 
-            services.AddAuthentication(options =>
+            var authenticationBuilder = services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-                .AddCookie("Cookies")
-                .AddJwtBearer(options =>
+            .AddCookie("Cookies", options =>
+            {
+                options.Cookie.Name = "fabu.external";
+                options.Cookie.HttpOnly = true;
+                options.Cookie.SameSite = SameSiteMode.Lax;
+                options.SlidingExpiration = true;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.SaveToken = true;
+                options.RequireHttpsMetadata = true;
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    options.SaveToken = true;
-                    options.RequireHttpsMetadata = true;
-                    options.TokenValidationParameters = new TokenValidationParameters()
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtSettings["Issuer"],
+                    ValidAudience = jwtSettings["Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ClockSkew = TimeSpan.Zero
+                };
+
+                if (authConfig.GetValue<bool>("CheckBanEnabled"))
+                {
+                    options.Events = new JwtBearerEvents
                     {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = jwtSettings["Issuer"],
-                        ValidAudience = jwtSettings["Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(key),
-                        ClockSkew = TimeSpan.Zero
-                    };
-                    //chi check ban neu config bat - tranh db call
-                    if (authConfig.GetValue<bool>("CheckBanEnabled"))
-                    {
-                        options.Events = new JwtBearerEvents
+                        OnTokenValidated = async context =>
                         {
-                            OnTokenValidated = async context =>
+                            var userId = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                            if (userId is null)
                             {
-                                var userId = context.Principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                                if (userId == null)
-                                {
-                                    throw new AppException(ErrorCode.UNAUTHENTICATED);
-                                }
-
-                                var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<User>>();
-                                var user = await userManager.FindByIdAsync(userId);
-                                if (user == null) // Giả sử User có prop IsBanned
-                                {
-                                    throw new AppException(ErrorCode.UNAUTHENTICATED);
-                                }
+                                throw new AppException(ErrorCode.UNAUTHENTICATED);
                             }
-                        };
-                    }
-                });
-              //  .AddGoogle(options =>
-              //  {
-             //       options.SignInScheme = "Cookies";
 
-              //      options.ClientId = configuration["Authentication:Google:ClientId"];
-              //      options.ClientSecret = configuration["Authentication:Google:ClientSecret"];
-              ////      options.SaveTokens = true;
-              //  });
-              //ROLE_ADMIN
-              //├─ user.create
-              //├─ user.delete
-              //├─ order.refund
+                            var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<User>>();
+                            var user = await userManager.FindByIdAsync(userId);
+                            if (user is null)
+                            {
+                                throw new AppException(ErrorCode.UNAUTHENTICATED);
+                            }
+                        }
+                    };
+                }
+            });
 
-            //authorization 
+            AddGoogleProvider(authenticationBuilder, configuration);
+            AddOidcProvider(authenticationBuilder, configuration);
+
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("UserDelete", policy => policy.RequireClaim("permission", "user.delete"));
                 options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
                 options.AddPolicy("RequireScope", policy => policy.RequireAssertion(context =>
-                context.User.HasClaim(c => c.Type == "scope" && c.Value.Contains("write:profile")))); 
+                    context.User.HasClaim(claim => claim.Type == "scope" && claim.Value.Contains("write:profile"))));
             });
 
-            //cors
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowReactApp", policy =>
                 {
-                    //policy.WithOrigins("http://localhost:3000")
-                    policy.SetIsOriginAllowed(origin => true)
-                    .AllowAnyMethod()
-                    .AllowAnyHeader()
-                    .AllowCredentials(); //de nhan/gui cookie
+                    policy.SetIsOriginAllowed(_ => true)
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials();
                 });
+            });
+        }
+
+        private static void AddGoogleProvider(
+            Microsoft.AspNetCore.Authentication.AuthenticationBuilder authenticationBuilder,
+            IConfiguration configuration)
+        {
+            var googleConfig = configuration.GetSection("Authentication:Google");
+            var clientId = googleConfig["ClientId"];
+            var clientSecret = googleConfig["ClientSecret"];
+
+            if (string.IsNullOrWhiteSpace(clientId) || string.IsNullOrWhiteSpace(clientSecret))
+            {
+                return;
+            }
+
+            authenticationBuilder.AddGoogle(options =>
+            {
+                options.SignInScheme = "Cookies";
+                options.ClientId = clientId;
+                options.ClientSecret = clientSecret;
+                options.SaveTokens = true;
+            });
+        }
+
+        private static void AddOidcProvider(
+            Microsoft.AspNetCore.Authentication.AuthenticationBuilder authenticationBuilder,
+            IConfiguration configuration)
+        {
+            var oidcConfig = configuration.GetSection("Authentication:Oidc");
+            if (!oidcConfig.GetValue<bool>("Enabled")) return;
+
+            var authority = oidcConfig["Authority"];
+            var clientId = oidcConfig["ClientId"];
+            var clientSecret = oidcConfig["ClientSecret"];
+
+            if (string.IsNullOrWhiteSpace(authority) || string.IsNullOrWhiteSpace(clientId))
+            {
+                throw new InvalidOperationException("OIDC is enabled but Authority or ClientId is missing.");
+            }
+
+            authenticationBuilder.AddOpenIdConnect("oidc", options =>
+            {
+                options.SignInScheme = "Cookies";
+                options.Authority = authority;
+                options.ClientId = clientId;
+                options.ClientSecret = clientSecret;
+                options.ResponseType = "code";
+                options.UsePkce = true;
+                options.SaveTokens = true;
+                options.GetClaimsFromUserInfoEndpoint = true;
+                options.RequireHttpsMetadata = oidcConfig.GetValue("RequireHttpsMetadata", true);
+                options.CallbackPath = oidcConfig["CallbackPath"] ?? "/signin-oidc-callback";
+                options.SignedOutCallbackPath = oidcConfig["SignedOutCallbackPath"] ?? "/signout-callback-oidc";
+
+                options.Scope.Clear();
+                var scopes = oidcConfig.GetSection("Scopes").Get<string[]>()
+                    ?? new[] { "openid", "profile", "email" };
+                foreach (var scope in scopes.Where(scope => !string.IsNullOrWhiteSpace(scope)).Distinct())
+                {
+                    options.Scope.Add(scope);
+                }
+
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    NameClaimType = "name",
+                    RoleClaimType = ClaimTypes.Role,
+                    ValidateIssuer = true
+                };
             });
         }
     }

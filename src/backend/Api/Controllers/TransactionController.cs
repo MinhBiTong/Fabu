@@ -2,9 +2,11 @@
 using Application.DTOs.Requests.TransactionRequest;
 using Application.DTOs.Responses;
 using Application.DTOs.Responses.TransactionResponse;
+using Application.Features.Transactions.Queries;
 using Application.Interfaces;
 using Domain.Abstractions;
 using Domain.Exceptions;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,10 +18,12 @@ namespace Api.Controllers
     public class TransactionController : ControllerBase
     {
         private readonly ITransactionService _transactionService;
+        private readonly IMediator _mediator;
 
-        public TransactionController(ITransactionService transactionService)
+        public TransactionController(ITransactionService transactionService, IMediator mediator)
         {
             _transactionService = transactionService;
+            _mediator = mediator;
         }
 
         /// <summary>
@@ -50,8 +54,8 @@ namespace Api.Controllers
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10)
         {
-            var result = await _transactionService.GetTransactionsByCustomerAsync(customerId, page, pageSize);
-            return Ok(ApiResponse<PagedResult<TransactionResponse>>.Success(result));
+            var result = await _mediator.Send(new GetTransactionsByCustomerQuery(customerId, page, pageSize));
+            return Ok(result);
         }
 
         /// <summary>
@@ -61,15 +65,8 @@ namespace Api.Controllers
         [Authorize]
         public async Task<ActionResult<ApiResponse<TransactionResponse>>> GetTransactionByRef(string transactionRef)
         {
-            try
-            {
-                var result = await _transactionService.GetTransactionByRefAsync(transactionRef);
-                return Ok(ApiResponse<TransactionResponse>.Success(result));
-            }
-            catch (AppException ex)
-            {
-                return NotFound(ApiResponse<TransactionResponse>.Fail(500, "Error the system not found transaction by ref"));
-            }
+            var result = await _mediator.Send(new GetTransactionByRefQuery(transactionRef));
+            return result.Code == 200 ? Ok(result) : NotFound(result);
         }
     }
 }
