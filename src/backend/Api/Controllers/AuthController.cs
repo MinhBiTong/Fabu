@@ -110,24 +110,53 @@ namespace Api.Controllers
         {
             var authenticateResult = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
 
-            if (!authenticateResult.Succeeded)
+            if (!authenticateResult.Succeeded || authenticateResult.Principal is null)
                 return BadRequest(new { Message = "Login Google failed!" });
 
-            var claims = authenticateResult.Principal.Identities.FirstOrDefault()?.Claims;
-            var email = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            var name = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
-            var googleId = claims?.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-
-            if (string.IsNullOrEmpty(email))
-                return BadRequest(new { Message = "Can't get email from Google." });
-
-            return Ok(new
+            try
             {
-                Message = "Get Google's info successfully!",
-                Email = email,
-                Name = name,
-                GoogleId = googleId
-            });
+                var response = await _authService.ExternalLoginAsync(authenticateResult.Principal, "google");
+                SetRefreshTokenCookie(response.RefreshToken);
+                return Ok(ApiResponse<LoginResponse>.Success(response, "Google login successfully"));
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized(ApiResponse<LoginResponse>.Fail(401, "Google account is not linked to an active Fabu user"));
+            }
+        }
+
+        [DisableRateLimiting]
+        [HttpGet("signin-oidc")]
+        public IActionResult SignInOidc([FromQuery] string? returnUrl = null)
+        {
+            var properties = new AuthenticationProperties
+            {
+                RedirectUri = Url.Action(nameof(OidcCallback), new { returnUrl })
+            };
+
+            return Challenge(properties, "oidc");
+        }
+
+        [DisableRateLimiting]
+        [HttpGet("oidc-callback")]
+        public async Task<IActionResult> OidcCallback([FromQuery] string? returnUrl = null)
+        {
+            var authenticateResult = await HttpContext.AuthenticateAsync("Cookies");
+            if (!authenticateResult.Succeeded || authenticateResult.Principal is null)
+            {
+                return Unauthorized(ApiResponse<LoginResponse>.Fail(401, "OIDC login failed"));
+            }
+
+            try
+            {
+                var response = await _authService.ExternalLoginAsync(authenticateResult.Principal, "oidc");
+                SetRefreshTokenCookie(response.RefreshToken);
+                return Ok(ApiResponse<LoginResponse>.Success(response, "OIDC login successfully"));
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized(ApiResponse<LoginResponse>.Fail(401, "OIDC account is not linked to an active Fabu user"));
+            }
         }
 
         [HttpPost("refresh-token")]
@@ -145,9 +174,9 @@ namespace Api.Controllers
                 var response = await _authService.RefreshTokenFromCookieAsync(refreshToken);
 
                 // Nếu backend trả về Refresh Token mới → set lại cookie
-                if (!string.IsNullOrEmpty(response.RefreshToken))
+                if (!string.IsNullOrEmpty(response.Data?.RefreshToken))
                 {
-                    SetRefreshTokenCookie(response.RefreshToken);
+                    SetRefreshTokenCookie(response.Data.RefreshToken);
                 }
 
                 return Ok(response);

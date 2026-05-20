@@ -1,7 +1,10 @@
 using Application.DTOs.Requests;
-using Application.Interfaces;
+using Application.DTOs.Responses;
+using Application.Features.RechargePlanRecommendations.Queries;
+using Application.Features.RechargePlans.Commands;
+using Application.Features.RechargePlans.Queries;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
 namespace Api.Controllers
 {
@@ -9,69 +12,102 @@ namespace Api.Controllers
     [ApiController]
     public class RechargePlansController : ControllerBase
     {
-        private readonly IRechargePlanService _rechargePlanService;
+        private readonly IMediator _mediator;
 
-        public RechargePlansController(IRechargePlanService rechargePlanService)
+        public RechargePlansController(IMediator mediator)
         {
-            _rechargePlanService = rechargePlanService;
+            _mediator = mediator;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
-        {
-            var response = await _rechargePlanService.GetAllAsync();
-            if (response.Code != 200) return BadRequest(response);
-            return Ok(response);
-        }
+            => ToActionResult(await _mediator.Send(new GetAllRechargePlansQuery()));
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
-        {
-            var response = await _rechargePlanService.GetByIdAsync(id);
-            if (response.Code != 200) return NotFound(response);
-            return Ok(response);
-        }
+        public async Task<IActionResult> GetById(long id)
+            => ToActionResult(await _mediator.Send(new GetRechargePlanByIdQuery(id)));
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateRechargePlanRequest request)
         {
-            var response = await _rechargePlanService.CreateAsync(request);
-            if (response.Code != 200) return BadRequest(response);
-            return Ok(response);
+            var command = new CreateRechargePlanCommand(
+                request.Name,
+                request.Price,
+                request.Points,
+                null,
+                request.Description,
+                true);
+
+            return ToActionResult(await _mediator.Send(command));
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] UpdateRechargePlanRequest request)
+        public async Task<IActionResult> Update(long id, [FromBody] UpdateRechargePlanRequest request)
         {
-            var response = await _rechargePlanService.UpdateAsync(id, request);
-            if (response.Code != 200) return BadRequest(response);
-            return Ok(response);
+            if (request.Id != 0 && request.Id != id)
+            {
+                return BadRequest(ApiResponse<bool>.Fail(400, "ID mismatch."));
+            }
+
+            var command = new UpdateRechargePlanCommand(
+                id,
+                request.PlanName,
+                request.Amount,
+                request.BonusAmount,
+                request.ValidityDays,
+                request.Description,
+                request.IsActive);
+
+            return ToActionResult(await _mediator.Send(command));
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var response = await _rechargePlanService.DeleteAsync(id);
-            if (response.Code != 200) return BadRequest(response);
-            return Ok(response);
-        }
+        public async Task<IActionResult> Delete(long id)
+            => ToActionResult(await _mediator.Send(new DeleteRechargePlanCommand(id)));
 
         [HttpGet("active")]
-        public async Task<IActionResult> GetActive() => Ok(await _rechargePlanService.GetActivePlansAsync());
+        public async Task<IActionResult> GetActive()
+            => ToActionResult(await _mediator.Send(new GetActiveRechargePlansQuery()));
 
         [HttpGet("amount/{amount}")]
-        public async Task<IActionResult> GetByAmount(decimal amount) => Ok(await _rechargePlanService.GetByAmountAsync(amount));
+        public async Task<IActionResult> GetByAmount(decimal amount)
+            => ToActionResult(await _mediator.Send(new GetRechargePlanByAmountQuery(amount)));
 
         [HttpGet("price-range")]
-        public async Task<IActionResult> GetByPriceRange([FromQuery] decimal min, [FromQuery] decimal max) => Ok(await _rechargePlanService.GetPlansByPriceRangeAsync(min, max));
+        public async Task<IActionResult> GetByPriceRange([FromQuery] decimal min, [FromQuery] decimal max)
+            => ToActionResult(await _mediator.Send(new GetRechargePlansByPriceRangeQuery(min, max)));
 
         [HttpGet("popular/{top}")]
-        public async Task<IActionResult> GetPopular(int top) => Ok(await _rechargePlanService.GetPopularPlansAsync(top));
+        public async Task<IActionResult> GetPopular(int top)
+            => ToActionResult(await _mediator.Send(new GetPopularRechargePlansQuery(top)));
+
+        [HttpGet("recommendations/{customerId:long}")]
+        public async Task<IActionResult> GetRecommendations(
+            long customerId,
+            [FromQuery] int top = 3,
+            [FromQuery] int recentTransactionLimit = 20,
+            CancellationToken cancellationToken = default)
+            => ToActionResult(await _mediator.Send(
+                new GetPersonalizedRechargePlanRecommendationsQuery(customerId, top, recentTransactionLimit),
+                cancellationToken));
 
         [HttpGet("provider/{provider}")]
-        public async Task<IActionResult> GetByProvider(string provider) => Ok(await _rechargePlanService.GetPlansByProviderAsync(provider));
+        public async Task<IActionResult> GetByProvider(string provider)
+            => ToActionResult(await _mediator.Send(new GetRechargePlansByProviderQuery(provider)));
 
         [HttpGet("{id}/is-active")]
-        public async Task<IActionResult> IsActive(long id) => Ok(await _rechargePlanService.IsPlanActiveAsync(id));
+        public async Task<IActionResult> IsActive(long id)
+            => ToActionResult(await _mediator.Send(new IsRechargePlanActiveQuery(id)));
+
+        private IActionResult ToActionResult<T>(ApiResponse<T> response)
+        {
+            return response.Code switch
+            {
+                200 => Ok(response),
+                400 => BadRequest(response),
+                404 => NotFound(response),
+                _ => StatusCode(response.Code, response)
+            };
+        }
     }
 }
