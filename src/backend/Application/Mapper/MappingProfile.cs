@@ -10,6 +10,8 @@ using Application.DTOs.Responses.CouponResponse;
 using Application.DTOs.Responses.PaymentResponse;
 using Application.DTOs.Responses.TransactionResponse;
 using Application.DTOs.Responses.UserResponse;
+using Application.Features.RechargePlans.Commands;
+using Application.Features.RechargePlans.Dtos;
 using AutoMapper;
 using Domain.Entities;
 using System;
@@ -42,10 +44,23 @@ namespace Application.Mapper
 
             CreateMap<User, UserResponse>().ReverseMap();
             CreateMap<Account, AccountResponse>().ReverseMap();
-            CreateMap<RechargePlan, RechargePlanResponse>().ReverseMap();
+            CreateMap<RechargePlan, RechargePlanResponse>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => (int)src.Id))
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.PlanName))
+                .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Amount))
+                .ForMember(dest => dest.Points, opt => opt.MapFrom(src => (int)src.BonusAmount))
+                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description));
+            CreateMap<RechargePlan, RechargePlanReadDto>();
+            CreateMap<CreateRechargePlanCommand, RechargePlan>()
+                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description ?? string.Empty));
+            CreateMap<UpdateRechargePlanCommand, RechargePlan>()
+                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description ?? string.Empty));
             CreateMap<Coupon, CouponApplyResult>().ReverseMap();
             CreateMap<Payment, PaymentResponse>().ReverseMap();
-            CreateMap<Transaction,  TransactionResponse>().ReverseMap();
+            CreateMap<Transaction, TransactionResponse>()
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+                .ForMember(dest => dest.PaymentMethod, opt => opt.MapFrom(src => src.PaymentMethod.ToString()))
+                .ForMember(dest => dest.CouponUsageCount, opt => opt.MapFrom(src => src.CouponUsages == null ? 0 : src.CouponUsages.Count));
             CreateMap<Account, AccountResponse>().ReverseMap();
             
         }

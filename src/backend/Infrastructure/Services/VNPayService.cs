@@ -40,7 +40,7 @@ namespace Infrastructure.Services
                 { "vnp_OrderInfo", request.OrderInfo },
                 { "vnp_OrderType", "other" },
                 { "vnp_ReturnUrl", _configs.ReturnUrl },
-                { "vnp_TxnRef", request.TransactionRef }
+                { "vnp_TxnRef", request.PaymentRef }
             };
 
             var signData = string.Join("&", vnpayData.Select(kv => $"{kv.Key}={HttpUtility.UrlEncode(kv.Value)}"));
@@ -51,7 +51,7 @@ namespace Infrastructure.Services
             var paymentUrl = $"{_configs.BaseUrl}/paymentv2/vpcpay.html?" +
                             string.Join("&", vnpayData.Select(kv => $"{kv.Key}={HttpUtility.UrlEncode(kv.Value)}"));
 
-            _logger.LogInformation("VNPay payment URL created for transaction {Ref}", request.TransactionRef);
+            _logger.LogInformation("VNPay payment URL created for transaction {Ref}", request.PaymentRef);
 
             return paymentUrl;
         }

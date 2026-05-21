@@ -1,12 +1,8 @@
-﻿using Domain.Entities;
+using Domain.Entities;
 using Domain.Repositories;
-using Microsoft.Identity.Client;
+using Domain.ValueObjects;
+using Microsoft.EntityFrameworkCore;
 using Persistence.Data.Contexts;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Persistence.Repositories
 {
@@ -16,44 +12,84 @@ namespace Persistence.Repositories
         {
         }
 
-        public Task CreditAsync(long customerId, decimal amount)
+        public async Task CreditAsync(long customerId, decimal amount)
         {
-            throw new NotImplementedException();
+            var account = await GetByCustomerIdAsync(customerId)
+                ?? throw new InvalidOperationException("Account not found.");
+
+            EnsureActive(account);
+            account.Balance += amount;
+            account.LastRechargeDate = DateTime.UtcNow;
         }
 
-        public Task DebitAsync(long customerId, decimal amount)
+        public async Task DebitAsync(long customerId, decimal amount)
         {
-            throw new NotImplementedException();
+            var account = await GetByCustomerIdAsync(customerId)
+                ?? throw new InvalidOperationException("Account not found.");
+
+            EnsureActive(account);
+            if (account.Balance < amount)
+            {
+                throw new InvalidOperationException("Account balance is not enough.");
+            }
+
+            account.Balance -= amount;
         }
 
         public Task<Account?> GetByCustomerIdAsync(long customerId)
         {
-            throw new NotImplementedException();
+            return _dbSet
+                .Include(account => account.Customer)
+                .FirstOrDefaultAsync(account => account.CustomerId == customerId);
         }
 
-        public Task<decimal> GetCurrentBalanceAsync(long customerId)
+        public async Task<decimal> GetCurrentBalanceAsync(long customerId)
         {
-            throw new NotImplementedException();
+            var account = await GetByCustomerIdAsync(customerId);
+            return account?.Balance ?? 0;
         }
 
-        public Task<bool> HasEnoughBalanceAsync(long customerId, decimal amount)
+        public async Task<bool> HasEnoughBalanceAsync(long customerId, decimal amount)
         {
-            throw new NotImplementedException();
+            var account = await GetByCustomerIdAsync(customerId);
+            return account is { Status: StatusAccount.Active } && account.Balance >= amount;
         }
 
-        public Task LockAccountAsync(long customerId)
+        public async Task LockAccountAsync(long customerId)
         {
-            throw new NotImplementedException();
+            var account = await GetByCustomerIdAsync(customerId)
+                ?? throw new InvalidOperationException("Account not found.");
+
+            account.Status = StatusAccount.Suspended;
         }
 
-        public Task UnlockAccountAsync(long customerId)
+        public async Task UnlockAccountAsync(long customerId)
         {
-            throw new NotImplementedException();
+            var account = await GetByCustomerIdAsync(customerId)
+                ?? throw new InvalidOperationException("Account not found.");
+
+            account.Status = StatusAccount.Active;
         }
 
-        public Task UpdateBalanceAsync(long accountId, decimal amount, bool isAdd = true)
+        public async Task UpdateBalanceAsync(long accountId, decimal amount, bool isAdd = true)
         {
-            throw new NotImplementedException();
+            var account = await GetByIdAsync(accountId)
+                ?? throw new InvalidOperationException("Account not found.");
+
+            EnsureActive(account);
+            account.Balance = isAdd ? account.Balance + amount : account.Balance - amount;
+            if (isAdd)
+            {
+                account.LastRechargeDate = DateTime.UtcNow;
+            }
+        }
+
+        private static void EnsureActive(Account account)
+        {
+            if (account.Status != StatusAccount.Active)
+            {
+                throw new InvalidOperationException("Account is not active.");
+            }
         }
     }
 }

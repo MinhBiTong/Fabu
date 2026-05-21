@@ -14,9 +14,6 @@ namespace Application.DTOs.Requests.PostpaidRequest
     {
         public long CustomerId { get; set; }
 
-        [ForeignKey("CustomerId")]
-        public virtual Customer Customer { get; set; }
-
         [Required]
         public DateTime BillMonth { get; set; }
 
@@ -25,10 +22,5 @@ namespace Application.DTOs.Requests.PostpaidRequest
 
         public decimal TotalAmount { get; set; }
 
-        public decimal PaidAmount { get; set; } = 0;
-
-        [Required]
-        [StringLength(20)]
-        public StatusPostpaid Status { get; set; } = StatusPostpaid.Unpaid;  // Unpaid, Partial, Paid, Overdue
     }
 }

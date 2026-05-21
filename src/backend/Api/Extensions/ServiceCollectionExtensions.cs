@@ -9,6 +9,7 @@ using Persistence.Data.Contexts;
 using Persistence.Repositories;
 using System.Reflection;
 using Application.Services;
+using Infrastructure.Services.Search;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Api.Extensions
@@ -18,8 +19,10 @@ namespace Api.Extensions
         //Add DbContext, UnitOfWork, Repositories.
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration config)
         {
-            services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(config.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<AppDbContext>((serviceProvider, options) =>
+                options
+                    .UseSqlServer(config.GetConnectionString("DefaultConnection"))
+                    .AddInterceptors(serviceProvider.GetRequiredService<ElasticsearchSaveChangesInterceptor>()));
             
             services.AddScoped<IUnitOfWork, EfUnitOfWork>();
             return services;

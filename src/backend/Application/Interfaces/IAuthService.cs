@@ -4,6 +4,7 @@ using Application.DTOs.Responses.LoginResponse;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,5 +18,6 @@ namespace Application.Interfaces
         Task LogoutAsync(string? refreshToken, string? accessToken = null);
         Task<VerifyOtpResponse> VerifyOtpAsync(VerifyOtpRequest request);
         Task<ApiResponse<LoginResponse>> RefreshTokenFromCookieAsync(string refreshToken);
+        Task<LoginResponse> ExternalLoginAsync(ClaimsPrincipal principal, string provider);
     }
 }

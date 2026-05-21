@@ -24,6 +24,7 @@ namespace Application.Interfaces
         Task<PagedResult<PaymentResponse>> GetPaymentsByCustomerAsync(long customerId, int page = 1, int pageSize = 10);
         Task<decimal> GetTotalPaidAmountAsync(long customerId);
         Task<PaymentResponse> CreatePaymentAsync(PaymentCreateRequest request);
+        Task<PaymentCallbackResult> HandlePaymentCallbackAsync(string providerName, Dictionary<string, string> callbackData);
         Task<PaymentCallbackResult> HandleVNPayCallbackAsync(Dictionary<string, string> callbackData);
     }
 }

@@ -27,7 +27,5 @@ namespace Application.DTOs.Requests.UserRequest
 
         public bool IsActive { get; set; } = true;
 
-        // Relationship
-        public virtual ICollection<Customer> Customers { get; set; }
     }
 }

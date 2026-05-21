@@ -4,7 +4,7 @@ import Image from "next/image";
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { globalApiClient } from "@/app/api/ApiClient";
+import { globalApiClient } from "@/app/api/api-client";
 import Arrow from "../../styles/images/upward-arrow.png";
 export default function DataPlan() {
    const router = useRouter()

@@ -12,9 +12,9 @@ namespace Application.DTOs.Requests.TransactionRequest
 {
     public class TransactionCreateRequest
     {
-        public long CustomerId { get; set; }
-        [ForeignKey("CustomerId")]
-        public virtual Customer Customer { get; set; }
+        public long? CustomerId { get; set; }
+
+        public long? PaymentId { get; set; }
 
         [Required]
         [StringLength(30)]
@@ -33,8 +33,6 @@ namespace Application.DTOs.Requests.TransactionRequest
         public string TransactionRef { get; set; }
 
         public DateTime? CompletedAt { get; set; }
-
-        public virtual ICollection<CouponUsage> CouponUsages { get; set; }
 
         [StringLength(50)]
         public string? CouponCode { get; set; }

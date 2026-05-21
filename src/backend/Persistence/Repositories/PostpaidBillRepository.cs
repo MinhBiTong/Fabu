@@ -1,11 +1,8 @@
-﻿using Domain.Entities;
+using Domain.Entities;
 using Domain.Repositories;
+using Domain.ValueObjects;
+using Microsoft.EntityFrameworkCore;
 using Persistence.Data.Contexts;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Persistence.Repositories
 {
@@ -17,32 +14,51 @@ namespace Persistence.Repositories
 
         public Task<List<PostpaidBill>> GetBillsByDateRangeAsync(long customerId, DateTime from, DateTime to)
         {
-            throw new NotImplementedException();
+            return _dbSet
+                .Include(bill => bill.Payments)
+                .Where(bill => bill.CustomerId == customerId && bill.BillMonth >= from && bill.BillMonth <= to)
+                .OrderByDescending(bill => bill.BillMonth)
+                .ToListAsync();
         }
 
         public Task<PostpaidBill?> GetLatestBillAsync(long customerId)
         {
-            throw new NotImplementedException();
+            return _dbSet
+                .Include(bill => bill.Payments)
+                .Where(bill => bill.CustomerId == customerId)
+                .OrderByDescending(bill => bill.BillMonth)
+                .FirstOrDefaultAsync();
         }
 
         public Task<List<PostpaidBill>> GetOverdueBillsAsync()
         {
-            throw new NotImplementedException();
+            var now = DateTime.UtcNow;
+            return _dbSet
+                .Include(bill => bill.Customer)
+                .Where(bill => bill.Status != StatusPostpaid.Paid && bill.DueDate < now)
+                .OrderBy(bill => bill.DueDate)
+                .ToListAsync();
         }
 
         public Task<decimal> GetTotalUnpaidAmountAsync(long customerId)
         {
-            throw new NotImplementedException();
+            return _dbSet
+                .Where(bill => bill.CustomerId == customerId && bill.Status != StatusPostpaid.Paid)
+                .SumAsync(bill => bill.TotalAmount - bill.PaidAmount);
         }
 
         public Task<List<PostpaidBill>> GetUnpaidBillsByCustomerAsync(long customerId)
         {
-            throw new NotImplementedException();
+            return _dbSet
+                .Include(bill => bill.Payments)
+                .Where(bill => bill.CustomerId == customerId && bill.Status != StatusPostpaid.Paid)
+                .OrderBy(bill => bill.DueDate)
+                .ToListAsync();
         }
 
         public Task<bool> HasUnpaidBillAsync(long customerId)
         {
-            throw new NotImplementedException();
+            return _dbSet.AnyAsync(bill => bill.CustomerId == customerId && bill.Status != StatusPostpaid.Paid);
         }
     }
 }

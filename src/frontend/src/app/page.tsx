@@ -12,11 +12,11 @@ export default function HomePage() {
             <p>Mobile Recharge</p>
           </Link>
 
-         <div className="service-card">
+          <div className="service-card">
             <span>💳</span>
             <p>Bill Payment</p>
           </div>
-           <Link href="/P5GDataPlan" className="service-card">
+          <Link href="/P5GDataPlan" className="service-card">
             <span>📊</span>
             <p>Buy Data Package</p>
           </Link>
@@ -27,7 +27,7 @@ export default function HomePage() {
             <p>Transaction History</p>
           </div>
 
-          <Link  href="/Profile" className="service-card">
+          <Link href="/Profile" className="service-card">
             <span>👤</span>
             <p>Account</p>
           </Link>

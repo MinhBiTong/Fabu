@@ -12,13 +12,7 @@ namespace Application.DTOs.Requests.FeedbackRequest
 {
     public class FeedbackCreateRequest
     {
-        public long? UserId { get; set; }
-        [ForeignKey("UserId")]
-        public virtual User User { get; set; }
-
         public long? CustomerId { get; set; }
-        [ForeignKey("CustomerId")]
-        public virtual Customer Customer { get; set; }
 
         [StringLength(200)]
         public string Subject { get; set; }
@@ -27,8 +21,5 @@ namespace Application.DTOs.Requests.FeedbackRequest
 
         [Range(1, 5)]
         public byte Rating { get; set; }
-
-
-        public int Status { get; set; }// New, Read, Replied
     }
 }
