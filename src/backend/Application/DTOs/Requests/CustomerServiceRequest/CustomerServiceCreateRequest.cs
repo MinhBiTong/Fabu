@@ -12,18 +12,14 @@ namespace Application.DTOs.Requests.CustomerServiceRequest
     public class CustomerServiceCreateRequest
     {
         public long CustomerId { get; set; }
-        [ForeignKey("CustomerId")]
-        public virtual Customer Customer { get; set; }
 
         public long ServiceId { get; set; }
-        [ForeignKey("ServiceId")]
-        public virtual Service Service { get; set; }
 
         public DateTime ActivatedAt { get; set; } = DateTime.UtcNow;
 
         [Required]
         public DateTime ExpiresAt { get; set; } = DateTime.UtcNow;
 
-        public short IsAutoRenewed { get; set; } = 0; // 0: No, 1: Yes
+        public bool IsAutoRenewed { get; set; } // 0: No, 1: Yes
     }
 }

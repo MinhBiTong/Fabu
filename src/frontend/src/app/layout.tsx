@@ -11,7 +11,7 @@ import "../styles/globals.css";
 import "../styles/adminglobal.css";
 import "../styles/themes/dark.css";
 import "../styles/themes/light.css";
-import { AuthProvider } from "@/context/auth/AuthProvider";
+import { AuthProvider } from "@/context/auth/auth-provider";
 
 export default function RootLayout({
     children,

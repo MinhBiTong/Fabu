@@ -10,6 +10,7 @@ namespace Application.DTOs.Requests.UserRequest
 {
     public class UpdateUserRequest
     {
+        public long Id { get; set; }
         [Required(ErrorMessage = "Username is required")]
         [StringLength(50)]
         public string Username { get; set; }
@@ -33,8 +34,5 @@ namespace Application.DTOs.Requests.UserRequest
         public DateTime? DateOfBirth { get; set; }
 
         public bool IsActive { get; set; } = true;
-
-        // Relationship
-        public virtual ICollection<Customer> Customers { get; set; }
     }
 }

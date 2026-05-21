@@ -1,25 +1,28 @@
-import { toastError, toastSuccess } from "../services/ToastService";
-import { LoginApi } from "../app/api/authApi";
+import { toastError, toastSuccess } from "../services/toast-service";
+import { LoginApi } from "../app/api/auth-api";
 import { useAuth } from "../hooks/use-auth";
 import { useForm } from "react-hook-form";
-import { loginSchema, type LoginFormData } from "../core/validations/LoginSchema";
+import { loginSchema, type LoginFormData } from "../core/validations/login.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-// import { useRouter } from "next/router";
 import { useRouter } from "next/navigation";
 
 export const useLogin = () => {
   const { setToken } = useAuth();
   const router = useRouter();
-  const {
-    register, //ham register cua react hook form tra ve 1 object chua name, onBlur, onChange, ref
-    handleSubmit, //ham handleSubmit de wrap ham onSubmit, tu dong preventDefault va lay data
-    formState: { errors, isSubmitting}, //lay errors va isSubmitting tu formState
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema), //ket noi voi zod
-    defaultValues: {
-      email: "",
-      password: "",
-    }
+  // const {
+  //   register, //ham register cua react hook form tra ve 1 object chua name, onBlur, onChange, ref
+  //   handleSubmit, //ham handleSubmit de wrap ham onSubmit, tu dong preventDefault va lay data
+  //   formState: { errors, isSubmitting}, //lay errors va isSubmitting tu formState
+  // } = useForm<LoginFormData>({
+  //   resolver: zodResolver(loginSchema), //ket noi voi zod
+  //   defaultValues: {
+  //     email: "",
+  //     password: "",
+  //   }
+  // });
+  const form = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: "", password: "" }
   });
 
   const onLoginSubmit = async (data: LoginFormData) => { //nhan data tu hook form, ko nhan event
@@ -33,7 +36,7 @@ export const useLogin = () => {
       ));
       console.log(result);
       
-      if (result?.code === 200&& result?.data?.accessToken) {
+      if (result?.code === 200 && result?.data?.accessToken) {
         toastSuccess(result.message);
         setToken(result.data.accessToken); //luu token vao context
         
@@ -56,17 +59,13 @@ export const useLogin = () => {
     window.location.href = `${backendUrl}/api/v1/auth/external-login?provider=Google`;
   }
 
-  const handleClick = () => {
-    alert("This is a demo button click handler.");
-  };
-
   return {
-    register,
-    handleSubmit,
-    errors,
-    isSubmitting,
+    // register,
+    // handleSubmit,
+    // errors,
+    // isSubmitting,
+    ...form,
     onLoginSubmit, 
-    handleClick, 
     handleGoogleLogin
   };
 };

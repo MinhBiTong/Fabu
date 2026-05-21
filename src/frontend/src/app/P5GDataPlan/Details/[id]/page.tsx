@@ -9,11 +9,11 @@ import PName from "../../../../styles/images/subscription.png";
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { globalApiClient } from "@/app/api/ApiClient";
+import { globalApiClient } from "@/app/api/api-client";
 
 export default function DataPlanDetails() {
 
-   type Package = {
+  type Package = {
     id: number;
     serviceName: string;
     serviceCode: string;
@@ -26,7 +26,7 @@ export default function DataPlanDetails() {
     maxActivationsPerMonth: number;
   };
 
- 
+
   const [formData, setFormData] = useState<Package | null>(null);
 
   const params = useParams();
@@ -50,25 +50,25 @@ export default function DataPlanDetails() {
     if (id) fetchPackage();
   }, [id]);
 
-   useEffect(() => {
-     if (pkg) setFormData(pkg);
-   }, [pkg]);
+  useEffect(() => {
+    if (pkg) setFormData(pkg);
+  }, [pkg]);
 
   if (!pkg) return <div>Loading...</div>;
 
 
 
-  return ( 
+  return (
     <div className="Totality">
-        <h1>Data Plan</h1>
-     <div className="DpDetailsContainer">
+      <h1>Data Plan</h1>
+      <div className="DpDetailsContainer">
 
-    
+
         <div className="MainInfos">
 
           <div className="Infobox">
             <Image src={PName} alt="" />
-            <div className="Infotexts"> 
+            <div className="Infotexts">
               <p>Plan Name</p>
               <p>{pkg.serviceName}</p>
             </div>
@@ -115,23 +115,15 @@ export default function DataPlanDetails() {
           </div>
 
         </div>
-
-      
         <div className="Descriptions">
           <div className="Descriptioncontent">
             <p>{pkg.description}</p>
           </div>
         </div>
-
       </div>
-
-<div className="ChoiceButtons">
-      <button className="Sub"> Subscribe</button>
-     </div>
-  
-
-
-
-   </div>
+      <div className="ChoiceButtons">
+        <button className="Sub"> Subscribe</button>
+      </div>
+    </div>
   )
 }

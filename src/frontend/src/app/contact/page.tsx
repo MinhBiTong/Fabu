@@ -3,8 +3,8 @@
 import { ContactForm } from "@/components/ui/Form/contact-form";
 import Image from "next/image";
 import { useState } from "react";
-import { globalApiClient } from "@/app/api/ApiClient";
-import { feedbackSchema } from "@/core/validations/FeedbackSchema";
+import { globalApiClient } from "@/app/api/api-client";
+import { feedbackSchema } from "@/core/validations/feedback.schema";
 import Phone from "../../styles/images/phonecall.png";
 import Starrate from "../../styles/images/Starating.png"
 import Starrateyes from "../../styles/images/StarratingYes.png"

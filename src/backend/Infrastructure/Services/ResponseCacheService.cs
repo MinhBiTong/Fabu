@@ -1,130 +1,112 @@
-﻿//using Application.Interfaces;
 using Application.Interfaces;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using StackExchange.Redis;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Services
 {
     public class ResponseCacheService : IResponseCacheService
     {
-        public readonly IDistributedCache _distributedCache;
-
-        public readonly IConnectionMultiplexer? _connectionMultiplexer;
-        public readonly ILogger<ResponseCacheService> _logger;
-
-        public ResponseCacheService(IDistributedCache distributedCache, IConnectionMultiplexer? connectionMultiplexer = null)
+        private static readonly JsonSerializerSettings SerializerSettings = new()
         {
-            _distributedCache = distributedCache ?? throw new ArgumentException(nameof(distributedCache));
+            ContractResolver = new CamelCasePropertyNamesContractResolver(),
+            Formatting = Formatting.None
+        };
+
+        private readonly IDistributedCache _distributedCache;
+        private readonly IConnectionMultiplexer? _connectionMultiplexer;
+        private readonly ILogger<ResponseCacheService> _logger;
+
+        public ResponseCacheService(
+            IDistributedCache distributedCache,
+            ILogger<ResponseCacheService> logger,
+            IConnectionMultiplexer? connectionMultiplexer = null)
+        {
+            _distributedCache = distributedCache ?? throw new ArgumentNullException(nameof(distributedCache));
+            _logger = logger;
             _connectionMultiplexer = connectionMultiplexer;
         }
 
         public IDatabase? GetRedisDb() => _connectionMultiplexer?.GetDatabase();
-        
+
         public async Task<T?> GetCachedResponseAsync<T>(string cacheKey)
         {
-            var cachedResponse = await _distributedCache.GetStringAsync(cacheKey);
+            if (string.IsNullOrWhiteSpace(cacheKey)) return default;
 
-            // Deserialize the JSON string using JsonConvert.DeserializeObject
-            return string.IsNullOrEmpty(cachedResponse)
-                ? default
-                : JsonConvert.DeserializeObject<T>(cachedResponse);
+            var cachedResponse = await _distributedCache.GetStringAsync(cacheKey);
+            if (string.IsNullOrEmpty(cachedResponse))
+            {
+                return default;
+            }
+
+            return JsonConvert.DeserializeObject<T>(cachedResponse);
         }
 
-        //xoa 1 key cu the
         public async Task RemoveCacheResponseAsync(string cacheKey)
         {
             if (string.IsNullOrWhiteSpace(cacheKey)) return;
 
             await _distributedCache.RemoveAsync(cacheKey);
-            
-            var db = GetRedisDb();
-            if (db == null) return; //skip group vi redis ko co
 
-            var groupName = cacheKey.Split(':')[0];
-            await db.SetRemoveAsync($"group:{groupName}", cacheKey);
+            var db = GetRedisDb();
+            if (db is null) return;
+
+            var defaultGroup = GetDefaultGroupName(cacheKey);
+            foreach (var groupKey in BuildGroupKeyCandidates(defaultGroup))
+            {
+                await db.SetRemoveAsync(groupKey, cacheKey);
+            }
         }
 
-        //xoa toan bo key trong 1 group - ko scan
         public async Task RemoveCacheResponseByGroupAsync(string groupName)
         {
-            var db = GetRedisDb(); 
-            if (db == null) return;
+            if (string.IsNullOrWhiteSpace(groupName)) return;
 
-            var groupKey = $"Group:{groupName}";
+            var db = GetRedisDb();
+            if (db is null) return;
 
-            // Lấy toàn bộ danh sách key trong nhóm ra
-            var keys = await db.SetMembersAsync(groupKey);
-            if(keys.Length == 0) return; // Nếu nhóm không có key nào thì không cần xóa gì cả
-
-            foreach (var key in keys)
-                await _distributedCache.RemoveAsync(key.ToString());
-
-            // Xóa luôn cái Set quản lý nhóm đó
-            await db.KeyDeleteAsync(groupKey);
-        }
-
-        private async IAsyncEnumerable<string> GetKeyAsync(string pattern)
-        {
-            if (string.IsNullOrWhiteSpace(pattern))
+            foreach (var groupKey in BuildGroupKeyCandidates(groupName).Distinct(StringComparer.OrdinalIgnoreCase))
             {
-                throw new ArgumentException("Value cannot be null or whitespace");
-            }
+                var keys = await db.SetMembersAsync(groupKey);
+                if (keys.Length == 0) continue;
 
-            foreach (var endPoint in _connectionMultiplexer.GetEndPoints())
-            {
-                var server = _connectionMultiplexer.GetServer(endPoint);
-
-                //Thêm pageSize để thư viện sử dụng SCAN thay vì KEYS
-                // pageSize: 1000 nghĩa là mỗi lần quét Redis sẽ lấy ra 1000 key, 
-                // sau đó nhường cho các tiến trình khác rồi mới quét tiếp.
-                foreach (var key in server.Keys(pattern: pattern, pageSize: 1000))
+                foreach (var key in keys)
                 {
-                    yield return key.ToString();
+                    await _distributedCache.RemoveAsync(key.ToString());
                 }
+
+                await db.KeyDeleteAsync(groupKey);
             }
         }
 
-        public async Task SetCacheResponseByGroupAsync(string cacheKey, object response, TimeSpan? absoluteExpiry = null, TimeSpan? slidingExpiry = null)
+        public async Task SetCacheResponseByGroupAsync(
+            string cacheKey,
+            object response,
+            TimeSpan? absoluteExpiry = null,
+            TimeSpan? slidingExpiry = null)
         {
-            //check response co du lieu chua
-            if (response == null) return;
-
-            //viet lai de co the truyen vao thoi gian het han tu ngoai, neu khong truyen thi mac dinh la 5 phut
-            var settings = new JsonSerializerSettings
-            {
-                ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                Formatting = Formatting.Indented
-            };
-
-            var json = JsonConvert.SerializeObject(response, settings);
+            if (string.IsNullOrWhiteSpace(cacheKey) || response is null) return;
 
             var options = new DistributedCacheEntryOptions();
-            if (absoluteExpiry.HasValue) options.AbsoluteExpirationRelativeToNow = absoluteExpiry; // Cache sẽ hết hạn sau khoảng thời gian tuyệt đối kể từ thời điểm lưu vào cache.
-            if (slidingExpiry.HasValue) options.SlidingExpiration = slidingExpiry; // Cache sẽ hết hạn nếu không có truy cập nào đến cache này trong khoảng thời gian trượt kể từ lần truy cập cuối cùng.
+            if (absoluteExpiry.HasValue) options.AbsoluteExpirationRelativeToNow = absoluteExpiry;
+            if (slidingExpiry.HasValue) options.SlidingExpiration = slidingExpiry;
+
+            var json = JsonConvert.SerializeObject(response, SerializerSettings);
             await _distributedCache.SetStringAsync(cacheKey, json, options);
 
-            // 2. Lưu key này vào một nhóm để quản lý (Ví dụ lấy tiền tố làm tên nhóm)
-            var db = GetRedisDb();
-            if (db != null)
-            {
-                var groupName = cacheKey.Split(':')[0];   //Giả sử cacheKey là Product_123
-                await db.SetAddAsync($"Group:{groupName}", cacheKey);
-            }            
+            await AddToGroupAsync(GetDefaultGroupName(cacheKey), cacheKey);
         }
 
         public async Task AddToGroupAsync(string groupKey, string value)
         {
+            if (string.IsNullOrWhiteSpace(groupKey) || string.IsNullOrWhiteSpace(value)) return;
+
             var db = GetRedisDb();
-            if (db != null)
-                await db.SetAddAsync(groupKey, value);
+            if (db is null) return;
+
+            await db.SetAddAsync(NormalizeGroupKey(groupKey), value);
         }
 
         public async Task SetRawStringAsync(string key, string value, TimeSpan expiry)
@@ -135,36 +117,63 @@ namespace Infrastructure.Services
                 {
                     AbsoluteExpirationRelativeToNow = expiry
                 };
-                // Sử dụng await để đảm bảo tác vụ hoàn thành
                 await _distributedCache.SetStringAsync(key, value, options);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Lỗi kết nối Redis khi lưu Key: {Key}", key);
-                throw; // Ném lỗi để Login không thành công nếu không lưu được Token
+                _logger.LogError(ex, "Redis error while saving raw key {Key}", key);
+                throw;
             }
         }
 
-        public async Task<string?> GetRawStringAsync(string key)
+        public Task<string?> GetRawStringAsync(string key)
         {
-            return await _distributedCache.GetStringAsync(key);
+            return _distributedCache.GetStringAsync(key);
         }
 
         public async Task SetCacheResponseAsync(string cacheKey, object response, TimeSpan timeToLive)
         {
-            if (response == null) return;
+            if (string.IsNullOrWhiteSpace(cacheKey) || response is null) return;
 
-            // Cấu hình thời gian sống cho Key
             var options = new DistributedCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = timeToLive
             };
 
-            // Serialize object sang chuỗi Json
-            var serializedResponse = JsonConvert.SerializeObject(response);
-
-            // Lưu vào Redis
+            var serializedResponse = JsonConvert.SerializeObject(response, SerializerSettings);
             await _distributedCache.SetStringAsync(cacheKey, serializedResponse, options);
+        }
+
+        private static string GetDefaultGroupName(string cacheKey)
+        {
+            var parts = cacheKey.Split(':', StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length >= 2 && parts[0].StartsWith("v", StringComparison.OrdinalIgnoreCase))
+            {
+                return $"{parts[0]}:{parts[1]}";
+            }
+
+            return parts.Length >= 2 ? $"{parts[0]}:{parts[1]}" : parts.FirstOrDefault() ?? cacheKey;
+        }
+
+        private static string NormalizeGroupKey(string groupName)
+        {
+            if (groupName.StartsWith("cache:group:", StringComparison.OrdinalIgnoreCase) ||
+                groupName.StartsWith("group:", StringComparison.OrdinalIgnoreCase) ||
+                groupName.StartsWith("Group:", StringComparison.Ordinal))
+            {
+                return groupName;
+            }
+
+            return $"cache:group:{groupName}";
+        }
+
+        private static IEnumerable<string> BuildGroupKeyCandidates(string groupName)
+        {
+            yield return NormalizeGroupKey(groupName);
+            yield return groupName;
+            yield return $"Group:{groupName}";
+            yield return $"group:{groupName}";
+            yield return $"cache:group:{groupName}";
         }
     }
 }

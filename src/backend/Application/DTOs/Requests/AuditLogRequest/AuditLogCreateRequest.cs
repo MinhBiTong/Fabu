@@ -9,8 +9,6 @@ namespace Application.DTOs.Requests.AuditLogRequest
 {
     public class AuditLogCreateRequest
     {
-        public long? UserId { get; set; }
-
         [StringLength(100)]
         public string Action { get; set; }
 

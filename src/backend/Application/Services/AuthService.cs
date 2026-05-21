@@ -212,11 +212,9 @@ namespace Application.Services
             //generate tokens
             var accessToken = GenerateAccessToken(claims);
             var refreshToken = GenerateRefreshToken(); //random string
-            _logger.LogInformation("DEBUG LOGIN - Raw RT before hash: {Token}", refreshToken);
-            var refreshHash = HashToken(refreshToken); //secure hash
 
             //store refresh in redis
-            await StoreRefreshTokenAsync(user.Id, refreshHash, TimeSpan.FromDays(7));
+            await StoreRefreshTokenAsync(user.Id, refreshToken, TimeSpan.FromDays(7));
 
             //response
             return new LoginResponse
@@ -383,58 +381,38 @@ namespace Application.Services
             if (string.IsNullOrEmpty(request.RefreshToken))
                 throw new UnauthorizedAccessException("Refresh token is required");
 
-            // 1. Hash Token đầu vào để tìm Key trong Redis
-            var refreshHash = HashToken(request.RefreshToken);
-            var key = $"refresh:{request.UserId}:{refreshHash}";
-
-            _logger.LogInformation("Attempting to refresh token with Key: {Key}", key);
-
-            // 2. Lấy giá trị chuỗi thuần từ Redis (Plain Text Ticks)
-            // Ensure _responseCache is not null before calling GetRawStringAsync
             if (_responseCache == null)
             {
                 throw new InvalidOperationException("Response cache service is not initialized.");
             }
 
-            var cachedValue = await _responseCache.GetRawStringAsync(key);
-            _logger.LogInformation("Raw Ticks from Redis: {Value}", cachedValue ?? "NULL");
+            var refreshHash = HashToken(request.RefreshToken);
+            var key = $"refresh:{request.UserId}:{refreshHash}";
 
-            // 3. Kiểm tra sự tồn tại và Parse giá trị
-            if (string.IsNullOrEmpty(cachedValue) || !long.TryParse(cachedValue, out long storedTicks))
+            _logger.LogInformation("Attempting to refresh token with Key: {Key}", key);
+
+            var cachedUserId = await _responseCache.GetCachedResponseAsync<string>(key);
+            if (string.IsNullOrEmpty(cachedUserId) || cachedUserId != request.UserId.ToString())
             {
-                _logger.LogWarning("Refresh Token not found or invalid format in Redis. Key: {Key}", key);
+                _logger.LogWarning("Refresh Token not found or mismatched in Redis. Key: {Key}", key);
                 throw new AppException(ErrorCode.UNAUTHENTICATED, "Invalid or expired refresh token");
             }
 
-            // 4. Kiểm tra thời hạn hết hạn
-            if (storedTicks < DateTime.UtcNow.Ticks)
-            {
-                _logger.LogWarning("Refresh Token has expired. Key: {Key}", key);
-                // Xóa luôn key đã hết hạn để dọn dẹp Redis
-                await _responseCache.RemoveCacheResponseAsync(key);
-                throw new AppException(ErrorCode.UNAUTHENTICATED, "Refresh token expired");
-            }
-
-            // 5. Xóa Token cũ ngay lập tức (One-time use / Refresh Token Rotation)
             await _responseCache.RemoveCacheResponseAsync(key);
+            await _responseCache.RemoveCacheResponseAsync($"refreshToken:{refreshHash}");
 
-            // 6. Lấy User từ DB
             var user = await _unitOfWork.Users.GetByIdAsync(request.UserId);
             if (user == null)
                 throw new AppException(ErrorCode.USER_NOT_EXISTED, "User not found");
 
-            // 7. Tạo Identity mới (Claims & Scope)
             var claims = await GenerateClaimsAsync(user);
             var scope = await BuildScope(user);
             claims.Add(new Claim("scope", scope));
 
-            // 8. Generate cặp Token mới
             var newAccessToken = GenerateAccessToken(claims);
             var newRefreshToken = GenerateRefreshToken();
-            var newRefreshHash = HashToken(newRefreshToken);
 
-            // 9. Lưu Refresh Token mới vào Redis (Dưới dạng Plain Text)
-            await StoreRefreshTokenAsync(user.Id, newRefreshHash, TimeSpan.FromDays(7));
+            await StoreRefreshTokenAsync(user.Id, newRefreshToken, TimeSpan.FromDays(7));
 
             _logger.LogInformation("Refresh successful for User {UserId}. New RT created.", user.Id);
 
@@ -456,13 +434,19 @@ namespace Application.Services
             if (string.IsNullOrEmpty(refreshToken))
                 throw new UnauthorizedAccessException("Refresh token is required");
 
+            if (_responseCache == null)
+                throw new InvalidOperationException("Response cache service is not initialized.");
+
             var refreshHash = HashToken(refreshToken);
 
             // Tìm userId từ Redis
-            var userIdStr = await _responseCache?.GetCachedResponseAsync<string>($"refreshToken:{refreshHash}");
+            var userIdStr = await _responseCache.GetCachedResponseAsync<string>($"refreshToken:{refreshHash}");
 
             if (string.IsNullOrEmpty(userIdStr) || !long.TryParse(userIdStr, out long userId))
                 throw new UnauthorizedAccessException("Refresh token not exists or has expired");
+
+            await _responseCache.RemoveCacheResponseAsync($"refresh:{userId}:{refreshHash}");
+            await _responseCache.RemoveCacheResponseAsync($"refreshToken:{refreshHash}");
 
             // Lấy user từ DB
             var user = await _unitOfWork.Users.GetByIdAsync(userId);
@@ -471,9 +455,10 @@ namespace Application.Services
 
             // Tạo token mới
             var claims = await GenerateClaimsAsync(user);
+            var scope = await BuildScope(user);
+            claims.Add(new Claim("scope", scope));
             var newAccessToken = GenerateAccessToken(claims);
             var newRefreshToken = GenerateRefreshToken();
-            var newRefreshHash = HashToken(newRefreshToken);
 
             // Lưu refresh token mới
             await StoreRefreshTokenAsync(user.Id, newRefreshToken, TimeSpan.FromDays(7));
@@ -482,8 +467,49 @@ namespace Application.Services
             {
                 AccessToken = newAccessToken,
                 RefreshToken = newRefreshToken,
-                ExpiresAt = DateTime.UtcNow.AddMinutes(_jwtConfiguration.ExpiryMinutes)
+                ExpiresAt = DateTime.UtcNow.AddMinutes(_jwtConfiguration.ExpiryMinutes),
+                Claims = claims.Select(c => new LoginResponse.ClaimDto
+                {
+                    Type = c.Type,
+                    Value = c.Value
+                }).ToList()
             });
+        }
+
+        public async Task<LoginResponse> ExternalLoginAsync(ClaimsPrincipal principal, string provider)
+        {
+            var email = principal.FindFirst(ClaimTypes.Email)?.Value
+                ?? principal.FindFirst("email")?.Value;
+
+            if (string.IsNullOrWhiteSpace(email))
+                throw new UnauthorizedAccessException("External provider did not return an email claim.");
+
+            var user = await _unitOfWork.Users.GetByEmailAsync(email);
+            if (user == null || !user.IsActive)
+                throw new UnauthorizedAccessException("External account is not linked to an active Fabu user.");
+
+            var claims = await GenerateClaimsAsync(user);
+            claims.Add(new Claim("idp", provider));
+            claims.Add(new Claim("amr", "external"));
+
+            var scope = await BuildScope(user);
+            claims.Add(new Claim("scope", scope));
+
+            var accessToken = GenerateAccessToken(claims);
+            var refreshToken = GenerateRefreshToken();
+            await StoreRefreshTokenAsync(user.Id, refreshToken, _refreshTokenExpiry);
+
+            return new LoginResponse
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken,
+                ExpiresAt = DateTime.UtcNow.AddMinutes(_jwtConfiguration.ExpiryMinutes),
+                Claims = claims.Select(c => new LoginResponse.ClaimDto
+                {
+                    Type = c.Type,
+                    Value = c.Value
+                }).ToList()
+            };
         }
 
         //refresh token: validate tu redis, generate at moi

@@ -25,13 +25,8 @@ namespace Application.DTOs.Requests.CustomerRequest
 
         [StringLength(200)]
         public string Address { get; set; }
-
         public long? UserId { get; set; }
-        [ForeignKey("UserId")]
-        public virtual User User { get; set; }
 
-        public virtual Account Account { get; set; }
-        public virtual ICollection<Transaction> Transactions { get; set; }
     }
 }
 

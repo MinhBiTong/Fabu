@@ -1,7 +1,17 @@
-﻿namespace Application.Interfaces
+using Application.DTOs.Responses.SmsResponse;
+
+namespace Application.Interfaces
 {
     public interface ISmsService
     {
-        Task SendSmsAsync(string phone, string sms_message);
+        Task<SmsSendResult> SendSmsAsync(
+            string phone,
+            string smsMessage,
+            CancellationToken cancellationToken = default);
+
+        Task<SmsSendResult> SendOtpAsync(
+            string phone,
+            string otp,
+            CancellationToken cancellationToken = default);
     }
 }

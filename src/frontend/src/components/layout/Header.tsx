@@ -4,14 +4,14 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
 
-import Loginform from "../features/auth/LoginForm";
-import { globalApiClient } from "../../app/api/ApiClient";
+import Loginform from "../../app/(auth)/login/page";
+import { globalApiClient } from "../../app/api/api-client";
 
 import logo from "../../styles/images/FABUlogo.png";
 import Icon from "../../styles/images/search.png";
 import Menu from "../../styles/images/menu.png";
 import User from "../../styles/images/user.png";
-import SignUpForm from "../features/auth/SignupForm";
+import SignUpForm from "../../app/(auth)/register/page";
 
 function Header() {
     const router = useRouter()

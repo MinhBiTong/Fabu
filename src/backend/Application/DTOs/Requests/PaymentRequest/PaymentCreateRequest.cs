@@ -15,17 +15,22 @@ namespace Application.DTOs.Requests.PaymentRequest
         [Required]
         public decimal Amount { get; set; }
 
-        public DateTime PaymentDate { get; set; } = DateTime.UtcNow;
-
         [StringLength(50)]
         public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.Stripe;
 
         [StringLength(100)]
-        public string? TransactionRef { get; set; }
+        public string? PaymentRef { get; set; }
 
         public long? BillId { get; set; }               // Nếu thanh toán hóa đơn postpaid
+        public long? CustomerId { get; set; }
 
-        public long? CustomerId { get; set; }           // Dùng khi guest thanh toán
+        [StringLength(50)]
+        public string? MobileNumber { get; set; }
+
+        [StringLength(30)]
+        public string TransactionType { get; set; } = "Recharge";
+
+        public bool UseAccountBalance { get; set; }
 
         public string? IpAddress { get; set; }
 
