@@ -38,6 +38,7 @@ builder.Services.Configure<PermissionConfiguration>(builder.Configuration.GetSec
 builder.Services.Configure<MailConfiguration>(builder.Configuration.GetSection("MailSettings"));
 builder.Services.Configure<RateLimiterConfiguration>(builder.Configuration.GetSection("RateLimiting"));
 builder.Services.Configure<JwtConfiguration>(builder.Configuration.GetSection("Jwt"));
+builder.Services.Configure<AuthSecurityConfiguration>(builder.Configuration.GetSection("AuthSecurity"));
 builder.Services.Configure<AIChatbotConfiguration>(builder.Configuration.GetSection("AIChatbot"));
 builder.Services.Configure<SmsConfiguration>(builder.Configuration.GetSection("Sms"));
 builder.Services.Configure<ElasticsearchConfiguration>(builder.Configuration.GetSection("Elasticsearch"));
@@ -92,14 +93,14 @@ else
 //app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseCors("AllowReactApp");
+app.UseSerilogRequestLogging();
 app.UseRouting();
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseMiddleware<TokenBlacklistMiddleware>();
 app.UseAuthorization();
 app.MapControllers();
-app.UseSerilogRequestLogging();
-app.MapReverseProxy();
+app.MapReverseProxy().RequireRateLimiting("GatewayPolicy");
 
 app.Run();
 

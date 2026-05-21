@@ -11,6 +11,7 @@ namespace Domain.Repositories
     public interface IUserRepository : IRepositoryBase<User, long>
     {
         Task<User?> GetByEmailAsync(string email);
+        Task<User?> GetByIdWithRolesAsync(long id);
         Task<List<User>> GetActiveUserAsync();
         Task<User?> GetByMobileNumberAsync(string phoneNumber);
     }
