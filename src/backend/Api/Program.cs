@@ -39,6 +39,7 @@ builder.Services.Configure<MailConfiguration>(builder.Configuration.GetSection("
 builder.Services.Configure<RateLimiterConfiguration>(builder.Configuration.GetSection("RateLimiting"));
 builder.Services.Configure<JwtConfiguration>(builder.Configuration.GetSection("Jwt"));
 builder.Services.Configure<AIChatbotConfiguration>(builder.Configuration.GetSection("AIChatbot"));
+builder.Services.Configure<SmsConfiguration>(builder.Configuration.GetSection("Sms"));
 builder.Services.AddScoped<Domain.Abstractions.IUserContext, UserContext>();
 //builder.Services.Configure<VNPayConfiguration>(builder.Configuration.GetSection("VNPay"));
 builder.Services.AddOptions<VNPayConfiguration>()
