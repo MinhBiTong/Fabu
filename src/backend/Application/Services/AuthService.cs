@@ -2,11 +2,13 @@
 using Application.DTOs.Responses;
 using Application.DTOs.Responses.LoginResponse;
 using Application.Interfaces;
+using Application.Common.Security;
 using Azure.Core;
 using Domain.Abstractions;
 using Domain.Configurations;
 using Domain.Entities;
 using Domain.Exceptions;
+using Domain.Options;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -33,30 +35,40 @@ namespace Application.Services
     {
         private readonly IConfiguration _configuration; // de lay jwt setting
         private readonly IResponseCacheService? _responseCache;
-        private readonly TimeSpan _refreshTokenExpiry = TimeSpan.FromDays(7); //7 days
+        private readonly TimeSpan _refreshTokenExpiry;
         private readonly JwtConfiguration _jwtConfiguration;
+        private readonly AuthSecurityConfiguration _authSecurity;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidator<LoginRequest> _validator;
         private readonly ILogger<AuthService> _logger;
         private readonly ICustomerService _customerService;
+        private readonly IEmailService? _emailService;
 
         public AuthService(
             IConfiguration configuration,
             IValidator<LoginRequest> validator,
             IOptions<JwtConfiguration> jwtOptions,
+            IOptions<AuthSecurityConfiguration> authSecurityOptions,
             IUnitOfWork unitOfWork,
             ILogger<AuthService> logger,
             ICustomerService customerService,
+            IEmailService? emailService = null,
             IResponseCacheService? responseCache = null)
         {
             _configuration = configuration;
             _responseCache = responseCache;
             _jwtConfiguration = jwtOptions.Value;
+            _authSecurity = authSecurityOptions.Value;
+            _refreshTokenExpiry = TimeSpan.FromDays(Math.Max(1, _authSecurity.RefreshTokenDays));
             _unitOfWork = unitOfWork;
             _validator = validator;
             _logger = logger;
             _customerService = customerService;
+            _emailService = emailService;
         }
+
+        private TimeSpan AccessTokenLifetime =>
+            TimeSpan.FromMinutes(Math.Max(1, _authSecurity.AccessTokenMinutes));
 
         public async Task<RegisterResponse> RegisterAsync(RegisterRequest request)
         {
@@ -115,15 +127,23 @@ namespace Application.Services
 
         public async Task<VerifyOtpResponse> VerifyOtpAsync(VerifyOtpRequest request)
         {
-            // Giả sử OTP đã được validate ở middleware hoặc service riêng (OTPService)
-            // Ở đây chúng ta chỉ xử lý business sau khi OTP đúng
-
             var user = await _unitOfWork.Users.GetByIdAsync(request.UserId);
             if (user == null)
                 throw new AppException(ErrorCode.USER_NOT_EXISTED);
 
             if (user.IsActive)
                 return new VerifyOtpResponse { Success = true, Message = "The account was previously activated." };
+
+            if (_responseCache == null)
+                throw new AppException(ErrorCode.OTP_SERVICE_UNAVAILABLE, "OTP cache service is not available.");
+
+            var otpKey = AuthCacheKeys.OtpVerify(user.Id);
+            var cachedOtp = await _responseCache.GetCachedResponseAsync<string>(otpKey);
+            if (string.IsNullOrWhiteSpace(cachedOtp))
+                throw new AppException(ErrorCode.OTP_EXPIRED, "OTP expired or not found.");
+
+            if (!string.Equals(cachedOtp, request.Otp, StringComparison.Ordinal))
+                throw new AppException(ErrorCode.INVALID_OTP, "OTP is invalid.");
 
             // Gọi business tạo Customer + Account
             var customerResult = await _customerService.VerifyOtpAndCreateCustomerAsync(user.Id, request.Otp);
@@ -141,8 +161,8 @@ namespace Application.Services
             //xoa OTP trong Redis sau khi verify thanh cong - clean up
             if (_responseCache != null)
             {
-                var key = $"otp:verify:{user.Id}";
-                await _responseCache.RemoveCacheResponseAsync(key);
+                await _responseCache.RemoveCacheResponseAsync(otpKey);
+                await _responseCache.RemoveCacheResponseAsync($"otp:verify:{user.Id}");
             }
 
             return new VerifyOtpResponse
@@ -156,18 +176,16 @@ namespace Application.Services
         // ====================== Helper Methods ======================
         private async Task SendOtpAsync(long userId, string phoneNumber)
         {
-            // TODO: Tích hợp SMS gateway thực tế (SpeedSMS, Twilio, ...)
-            // Hiện tại mock OTP
-            var otp = new Random().Next(100000, 999999).ToString();
-            var cacheOptions = new DistributedCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
-            };
+            if (_responseCache == null)
+                throw new AppException(ErrorCode.OTP_SERVICE_UNAVAILABLE, "OTP cache service is not available.");
 
-            var key = $"otp:verify:{userId}";
-            await _responseCache.SetCacheResponseAsync(key, otp, TimeSpan.FromMinutes(5));
+            var otp = RandomNumberGenerator.GetInt32(100000, 1000000).ToString();
+            var ttl = TimeSpan.FromMinutes(Math.Max(1, _authSecurity.OtpTtlMinutes));
+            var key = AuthCacheKeys.OtpVerify(userId);
+            await _responseCache.SetCacheResponseAsync(key, otp, ttl);
 
-            _logger.LogInformation("OTP sent to phone {Phone} for user {UserId}. OTP: {Otp} (mock)", phoneNumber, userId, otp);
+            _logger.LogInformation("OTP issued for user {UserId}, phone {Phone}. TTL: {TtlMinutes} minutes",
+                userId, phoneNumber, ttl.TotalMinutes);
         }
 
         public async Task<ApiResponse<bool>> ResendOtpAsync(ResendOtpRequest request)
@@ -179,8 +197,11 @@ namespace Application.Services
             // 2. Nếu tài khoản đã active rồi thì không gửi lại làm gì
             if (user.IsActive) return ApiResponse<bool>.Fail(400, "The account was previously activated.");
 
+            if (_responseCache == null)
+                throw new AppException(ErrorCode.OTP_SERVICE_UNAVAILABLE, "OTP cache service is not available.");
+
             // 3. (Optional) Check Rate Limit - Tránh spam SMS tốn tiền
-            var rateLimitKey = $"otp:limit:{user.Id}";
+            var rateLimitKey = AuthCacheKeys.OtpLimit(user.Id);
             var isWaiting = await _responseCache.GetCachedResponseAsync<string>(rateLimitKey);
             if (!string.IsNullOrEmpty(isWaiting))
                 return ApiResponse<bool>.Fail(429, "Please wait 60s before request new OTP.");
@@ -203,9 +224,12 @@ namespace Application.Services
             //validate user credentials
             var user = await _unitOfWork.Users.GetByEmailAsync(request.Email);
             if (user == null || !VerifyPassword(request.Password, user.PasswordHash)) throw new UnauthorizedAccessException("Invalid email or password");
+            if (!user.IsActive) throw new UnauthorizedAccessException("User is inactive or OTP has not been verified.");
 
             //generate claims + scope
+            var sessionId = Guid.NewGuid().ToString("N");
             var claims = await GenerateClaimsAsync(user);
+            claims.Add(new Claim("sid", sessionId));
             var scope = await BuildScope(user); //custom scope dua vao role
             claims.Add(new Claim("scope", scope)); //add scope as claim
 
@@ -214,14 +238,14 @@ namespace Application.Services
             var refreshToken = GenerateRefreshToken(); //random string
 
             //store refresh in redis
-            await StoreRefreshTokenAsync(user.Id, refreshToken, TimeSpan.FromDays(7));
+            await StoreRefreshTokenAsync(user.Id, refreshToken, sessionId, "password", _refreshTokenExpiry);
 
             //response
             return new LoginResponse
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken, // tra cho client luu secure storage
-                ExpiresAt = DateTime.Now.AddMinutes(_jwtConfiguration.ExpiryMinutes), //access expiry
+                ExpiresAt = DateTime.UtcNow.Add(AccessTokenLifetime), //access expiry
                 Claims = claims.Select(c => new LoginResponse.ClaimDto { Type = c.Type, Value = c.Value }).ToList()
             };
         }
@@ -245,18 +269,37 @@ namespace Application.Services
                 new(ClaimTypes.Name, user.Username ?? "")
             };
 
-            //add roles
-            var roles = user.UserRoles?.Select(ur => ur.Role?.Name).Where(role => role != null).ToList() ?? new List<string?>();
-            //var roles = rolesTask.Result;
-            //claims.AddRange(rolesTask.Select(role => new Claim(ClaimTypes.Role, role)));
-            foreach (var role in roles)
+            var roles = user.UserRoles?
+                .Select(ur => ur.Role)
+                .Where(role => role != null && !string.IsNullOrWhiteSpace(role.Name))
+                .GroupBy(role => role!.Name.Trim(), StringComparer.OrdinalIgnoreCase)
+                .Select(group => group.First()!)
+                .ToList() ?? new List<Role>();
+
+            foreach (var roleEntity in roles)
             {
-                claims.Add(new Claim(ClaimTypes.Role, role.Trim()));
-                //permission khop voi policy trong authInstaller
-                if (role == "Admin")
+                var role = roleEntity.Name.Trim();
+                claims.Add(new Claim(ClaimTypes.Role, role));
+
+                var permissions = roleEntity.RolePermissions?
+                    .Select(rp => rp.Permission?.Name)
+                    .Where(permission => !string.IsNullOrWhiteSpace(permission))
+                    .Select(permission => permission!.Trim())
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList() ?? new List<string>();
+
+                foreach (var permission in permissions)
+                {
+                    claims.Add(new Claim("permission", permission));
+                }
+
+                if (string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase))
                 {
                     claims.Add(new Claim("permission", "user.delete"));
                     claims.Add(new Claim("permission", "user.create"));
+                    claims.Add(new Claim("permission", "post.edit"));
+                    claims.Add(new Claim("permission", "payment.manage"));
+                    claims.Add(new Claim("permission", "system.audit.read"));
                 }
             }
             return claims;
@@ -265,14 +308,18 @@ namespace Application.Services
         //buildScope- define scope cho token, dua vao role - vd read:user write:order
         private async Task<string> BuildScope(User user)
         {
-            var roles = user.UserRoles?.Select(ur => ur.Role?.Name).Where(role => role != null).ToList() ?? new List<string>();// Removed `.Result` to fix the issue
+            var roles = user.UserRoles?
+                .Select(ur => ur.Role?.Name)
+                .Where(role => !string.IsNullOrWhiteSpace(role))
+                .Select(role => role!)
+                .ToList() ?? new List<string>();
             var scopes = new List<string>();
 
-            if (roles.Contains("Admin"))
+            if (roles.Contains("Admin", StringComparer.OrdinalIgnoreCase))
             {
                 scopes.AddRange(new[] { "read:all", "write:all", "delete:all" });
             }
-            else if (roles.Contains("Customer"))
+            else if (roles.Contains("Customer", StringComparer.OrdinalIgnoreCase))
             {
                 scopes.AddRange(new[] { "read:user", "write:profile" });
             }
@@ -287,6 +334,20 @@ namespace Application.Services
         //generate access token 
         private string GenerateAccessToken(IEnumerable<Claim> claims)
         {
+            var claimList = claims.ToList();
+            if (!claimList.Any(claim => claim.Type == JwtRegisteredClaimNames.Jti))
+            {
+                claimList.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")));
+            }
+
+            if (!claimList.Any(claim => claim.Type == JwtRegisteredClaimNames.Iat))
+            {
+                claimList.Add(new Claim(
+                    JwtRegisteredClaimNames.Iat,
+                    DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(),
+                    ClaimValueTypes.Integer64));
+            }
+
             // 1. Tạo Security Key từ chuỗi Key trong cấu hình
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfiguration.Key));
 
@@ -297,9 +358,9 @@ namespace Application.Services
             var token = new JwtSecurityToken(
                 issuer: _jwtConfiguration.Issuer,
                 audience: _jwtConfiguration.Audience,
-                claims: claims,
+                claims: claimList,
                 notBefore: DateTime.UtcNow,
-                expires: DateTime.UtcNow.AddMinutes(_jwtConfiguration.ExpiryMinutes), // Không cần GetValue<double> nữa
+                expires: DateTime.UtcNow.Add(AccessTokenLifetime),
                 signingCredentials: creds
             );
 
@@ -310,70 +371,46 @@ namespace Application.Services
         //generate rt random long-lived string
         private string GenerateRefreshToken()
         {
-            var randomBytes = new byte[64];
-            using var rng = RandomNumberGenerator.Create();
-            rng.GetBytes(randomBytes);
-            return Convert.ToBase64String(randomBytes); //random string 86 char
+            return AuthCacheKeys.NewSecureToken();
         }
 
         //hash token sha256 cho secure storage
         private string HashToken(string token)
         {
-            using var sha256 = SHA256.Create();
-            var bytes = Encoding.UTF8.GetBytes(token);
-            var hashBytes = sha256.ComputeHash(bytes);
-            return BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
+            return AuthCacheKeys.Sha256(token);
         }
 
-        //store rt trong redis - key: "refresh:{userId}:{hash}", value: expiry -> expiry
-        private async Task StoreRefreshTokenAsync(long userId, string refreshToken, TimeSpan expiry)
+        private async Task StoreRefreshTokenAsync(long userId, string refreshToken, string sessionId, string provider, TimeSpan expiry)
         {
-            if (_responseCache == null) return;
+            if (_responseCache == null)
+                throw new InvalidOperationException("Response cache service is not initialized.");
 
             var refreshHash = HashToken(refreshToken);
+            var issuedAt = DateTimeOffset.UtcNow;
+            var entry = new RefreshTokenCacheEntry
+            {
+                UserId = userId,
+                TokenHash = refreshHash,
+                SessionId = sessionId,
+                Provider = provider,
+                IssuedAt = issuedAt,
+                ExpiresAt = issuedAt.Add(expiry)
+            };
 
-            // Key chính - dễ tìm
-            var mainKey = $"refresh:{userId}:{refreshHash}";
+            var tokenKey = AuthCacheKeys.RefreshToken(refreshHash);
+            var userTokenKey = AuthCacheKeys.UserRefreshToken(userId, refreshHash);
+            var sessionKey = AuthCacheKeys.Session(sessionId);
+            var userGroupKey = AuthCacheKeys.UserRefreshTokenGroup(userId);
 
-            // Value = userId (string)
-            var value = userId.ToString();
+            await _responseCache.SetCacheResponseByGroupAsync(tokenKey, entry, absoluteExpiry: expiry);
+            await _responseCache.SetCacheResponseByGroupAsync(userTokenKey, entry, absoluteExpiry: expiry);
+            await _responseCache.SetCacheResponseByGroupAsync(sessionKey, entry, absoluteExpiry: expiry);
+            await _responseCache.AddToGroupAsync(userGroupKey, tokenKey);
+            await _responseCache.AddToGroupAsync(userGroupKey, userTokenKey);
+            await _responseCache.AddToGroupAsync(userGroupKey, sessionKey);
 
-            // Lưu với thời hạn tự động xóa
-            await _responseCache.SetCacheResponseByGroupAsync(
-                mainKey,
-                value,
-                absoluteExpiry: expiry
-            );
-
-            // Lưu thêm key đơn giản chỉ chứa hash (dễ tìm khi chỉ có refreshToken)
-            var simpleKey = $"refreshToken:{refreshHash}";
-            await _responseCache.SetCacheResponseByGroupAsync(
-                simpleKey,
-                value,
-                absoluteExpiry: expiry
-            );
-
-            // Thêm vào group để logout dễ xóa
-            var groupKey = $"group:refresh:{userId}";
-            await _responseCache.AddToGroupAsync(groupKey, mainKey);
-
-            _logger.LogInformation("Stored refresh token - MainKey: {MainKey} | SimpleKey: {SimpleKey} | UserId: {UserId}",
-                mainKey, simpleKey, userId);
-            //--------
-            //var groupKey = $"Group:refresh:{userId}";
-            //_logger.LogInformation("SAVING to Redis - Key: {Key}, Value: {Value}", key, expiryTicks);
-            //await _responseCache.AddToGroupAsync(groupKey, key);
-
-            //if (_responseCache == null) return;
-            //var key = $"refresh:{userId}:{refreshHash}";
-            //var expiryTicks = DateTime.UtcNow.Add(expiry).Ticks.ToString();
-
-            ////luu token
-            //await _responseCache.SetRawStringAsync(key, expiryTicks, expiry);
-
-            //// Thêm key vào group của user qua service response cache
-            //var groupKey = $"Group:refresh:{userId}";
-            //await _responseCache.AddToGroupAsync(groupKey, key);
+            _logger.LogInformation("Stored refresh token in Redis. UserId: {UserId}, SessionId: {SessionId}, TTLDays: {TtlDays}",
+                userId, sessionId, expiry.TotalDays);
         }
 
         public async Task<LoginResponse> RefreshTokenAsync(RefreshRequest request)
@@ -381,46 +418,62 @@ namespace Application.Services
             if (string.IsNullOrEmpty(request.RefreshToken))
                 throw new UnauthorizedAccessException("Refresh token is required");
 
+            return await RefreshTokenCoreAsync(request.RefreshToken, request.UserId);
+        }
+
+        public async Task<ApiResponse<LoginResponse>> RefreshTokenFromCookieAsync(string refreshToken)
+        {
+            if (string.IsNullOrEmpty(refreshToken))
+                throw new UnauthorizedAccessException("Refresh token is required");
+
+            var response = await RefreshTokenCoreAsync(refreshToken);
+            return ApiResponse<LoginResponse>.Success(response);
+        }
+
+        private async Task<LoginResponse> RefreshTokenCoreAsync(string refreshToken, long? expectedUserId = null)
+        {
             if (_responseCache == null)
-            {
                 throw new InvalidOperationException("Response cache service is not initialized.");
-            }
 
-            var refreshHash = HashToken(request.RefreshToken);
-            var key = $"refresh:{request.UserId}:{refreshHash}";
-
-            _logger.LogInformation("Attempting to refresh token with Key: {Key}", key);
-
-            var cachedUserId = await _responseCache.GetCachedResponseAsync<string>(key);
-            if (string.IsNullOrEmpty(cachedUserId) || cachedUserId != request.UserId.ToString())
+            var refreshHash = HashToken(refreshToken);
+            var tokenKey = AuthCacheKeys.RefreshToken(refreshHash);
+            var entry = await _responseCache.GetCachedResponseAsync<RefreshTokenCacheEntry>(tokenKey);
+            if (entry == null || entry.ExpiresAt <= DateTimeOffset.UtcNow)
             {
-                _logger.LogWarning("Refresh Token not found or mismatched in Redis. Key: {Key}", key);
-                throw new AppException(ErrorCode.UNAUTHENTICATED, "Invalid or expired refresh token");
+                _logger.LogWarning("Refresh token not found or expired. Key: {Key}", tokenKey);
+                throw new UnauthorizedAccessException("Refresh token invalid or expired");
             }
 
-            await _responseCache.RemoveCacheResponseAsync(key);
-            await _responseCache.RemoveCacheResponseAsync($"refreshToken:{refreshHash}");
+            if (expectedUserId.HasValue && expectedUserId.Value > 0 && entry.UserId != expectedUserId.Value)
+            {
+                _logger.LogWarning("Refresh token user mismatch. Expected: {ExpectedUserId}, Actual: {ActualUserId}",
+                    expectedUserId.Value, entry.UserId);
+                throw new UnauthorizedAccessException("Refresh token invalid");
+            }
 
-            var user = await _unitOfWork.Users.GetByIdAsync(request.UserId);
-            if (user == null)
-                throw new AppException(ErrorCode.USER_NOT_EXISTED, "User not found");
+            await RemoveRefreshTokenEntryAsync(entry);
+
+            var user = await _unitOfWork.Users.GetByIdWithRolesAsync(entry.UserId);
+            if (user == null || !user.IsActive)
+                throw new AppException(ErrorCode.USER_NOT_EXISTED, "User not found or inactive");
 
             var claims = await GenerateClaimsAsync(user);
+            claims.Add(new Claim("sid", entry.SessionId));
             var scope = await BuildScope(user);
             claims.Add(new Claim("scope", scope));
 
             var newAccessToken = GenerateAccessToken(claims);
             var newRefreshToken = GenerateRefreshToken();
+            await StoreRefreshTokenAsync(user.Id, newRefreshToken, entry.SessionId, entry.Provider, _refreshTokenExpiry);
 
-            await StoreRefreshTokenAsync(user.Id, newRefreshToken, TimeSpan.FromDays(7));
-
-            _logger.LogInformation("Refresh successful for User {UserId}. New RT created.", user.Id);
+            _logger.LogInformation("Refresh token rotated successfully. UserId: {UserId}, SessionId: {SessionId}",
+                user.Id, entry.SessionId);
 
             return new LoginResponse
             {
                 AccessToken = newAccessToken,
                 RefreshToken = newRefreshToken,
-                ExpiresAt = DateTime.Now.AddMinutes(_jwtConfiguration.ExpiryMinutes),
+                ExpiresAt = DateTime.UtcNow.Add(AccessTokenLifetime),
                 Claims = claims.Select(c => new LoginResponse.ClaimDto
                 {
                     Type = c.Type,
@@ -429,51 +482,13 @@ namespace Application.Services
             };
         }
 
-        public async Task<ApiResponse<LoginResponse>> RefreshTokenFromCookieAsync(string refreshToken)
+        private async Task RemoveRefreshTokenEntryAsync(RefreshTokenCacheEntry entry)
         {
-            if (string.IsNullOrEmpty(refreshToken))
-                throw new UnauthorizedAccessException("Refresh token is required");
+            if (_responseCache == null) return;
 
-            if (_responseCache == null)
-                throw new InvalidOperationException("Response cache service is not initialized.");
-
-            var refreshHash = HashToken(refreshToken);
-
-            // Tìm userId từ Redis
-            var userIdStr = await _responseCache.GetCachedResponseAsync<string>($"refreshToken:{refreshHash}");
-
-            if (string.IsNullOrEmpty(userIdStr) || !long.TryParse(userIdStr, out long userId))
-                throw new UnauthorizedAccessException("Refresh token not exists or has expired");
-
-            await _responseCache.RemoveCacheResponseAsync($"refresh:{userId}:{refreshHash}");
-            await _responseCache.RemoveCacheResponseAsync($"refreshToken:{refreshHash}");
-
-            // Lấy user từ DB
-            var user = await _unitOfWork.Users.GetByIdAsync(userId);
-            if (user == null)
-                throw new AppException(ErrorCode.USER_NOT_EXISTED);
-
-            // Tạo token mới
-            var claims = await GenerateClaimsAsync(user);
-            var scope = await BuildScope(user);
-            claims.Add(new Claim("scope", scope));
-            var newAccessToken = GenerateAccessToken(claims);
-            var newRefreshToken = GenerateRefreshToken();
-
-            // Lưu refresh token mới
-            await StoreRefreshTokenAsync(user.Id, newRefreshToken, TimeSpan.FromDays(7));
-
-            return ApiResponse<LoginResponse>.Success(new LoginResponse
-            {
-                AccessToken = newAccessToken,
-                RefreshToken = newRefreshToken,
-                ExpiresAt = DateTime.UtcNow.AddMinutes(_jwtConfiguration.ExpiryMinutes),
-                Claims = claims.Select(c => new LoginResponse.ClaimDto
-                {
-                    Type = c.Type,
-                    Value = c.Value
-                }).ToList()
-            });
+            await _responseCache.RemoveCacheResponseAsync(AuthCacheKeys.RefreshToken(entry.TokenHash));
+            await _responseCache.RemoveCacheResponseAsync(AuthCacheKeys.UserRefreshToken(entry.UserId, entry.TokenHash));
+            await _responseCache.RemoveCacheResponseAsync(AuthCacheKeys.Session(entry.SessionId));
         }
 
         public async Task<LoginResponse> ExternalLoginAsync(ClaimsPrincipal principal, string provider)
@@ -488,7 +503,9 @@ namespace Application.Services
             if (user == null || !user.IsActive)
                 throw new UnauthorizedAccessException("External account is not linked to an active Fabu user.");
 
+            var sessionId = Guid.NewGuid().ToString("N");
             var claims = await GenerateClaimsAsync(user);
+            claims.Add(new Claim("sid", sessionId));
             claims.Add(new Claim("idp", provider));
             claims.Add(new Claim("amr", "external"));
 
@@ -497,13 +514,13 @@ namespace Application.Services
 
             var accessToken = GenerateAccessToken(claims);
             var refreshToken = GenerateRefreshToken();
-            await StoreRefreshTokenAsync(user.Id, refreshToken, _refreshTokenExpiry);
+            await StoreRefreshTokenAsync(user.Id, refreshToken, sessionId, provider, _refreshTokenExpiry);
 
             return new LoginResponse
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
-                ExpiresAt = DateTime.UtcNow.AddMinutes(_jwtConfiguration.ExpiryMinutes),
+                ExpiresAt = DateTime.UtcNow.Add(AccessTokenLifetime),
                 Claims = claims.Select(c => new LoginResponse.ClaimDto
                 {
                     Type = c.Type,
@@ -575,25 +592,20 @@ namespace Application.Services
             }
             try
             {
-                // === XỬ LÝ REFRESH TOKEN TỪ COOKIE ===
                 if (!string.IsNullOrEmpty(refreshToken))
                 {
                     var refreshHash = HashToken(refreshToken);
+                    var entry = await _responseCache.GetCachedResponseAsync<RefreshTokenCacheEntry>(
+                        AuthCacheKeys.RefreshToken(refreshHash));
 
-                    // Tìm userId từ Redis (dựa trên cách em lưu)
-                    var userIdStr = await _responseCache.GetCachedResponseAsync<string>($"refreshToken:{refreshHash}");
-
-                    if (!string.IsNullOrEmpty(userIdStr) && long.TryParse(userIdStr, out long userId))
+                    if (entry != null)
                     {
-                        // Xóa toàn bộ refresh token của user này
-                        var groupKey = $"group:refresh:{userId}";
-                        await _responseCache.RemoveCacheResponseByGroupAsync(groupKey);
-
-                        _logger.LogInformation("Cleared all refresh tokens for user {UserId}", userId);
+                        await RemoveRefreshTokenEntryAsync(entry);
+                        _logger.LogInformation("Removed refresh token session during logout. UserId: {UserId}, SessionId: {SessionId}",
+                            entry.UserId, entry.SessionId);
                     }
                 }
 
-                // === BLACKLIST ACCESS TOKEN (nếu có) ===
                 if (!string.IsNullOrEmpty(accessToken))
                 {
                     var handler = new JwtSecurityTokenHandler();
@@ -601,11 +613,13 @@ namespace Application.Services
                     {
                         var jwt = handler.ReadJwtToken(accessToken);
                         var remaining = jwt.ValidTo - DateTime.UtcNow;
+                        var jti = jwt.Claims.FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Jti)?.Value
+                            ?? HashToken(accessToken);
 
                         if (remaining > TimeSpan.Zero)
                         {
                             await _responseCache.SetCacheResponseByGroupAsync(
-                                $"blacklist:at:{accessToken}",
+                                AuthCacheKeys.AccessTokenBlacklist(jti),
                                 true,
                                 absoluteExpiry: remaining);
                         }
@@ -617,6 +631,102 @@ namespace Application.Services
                 _logger.LogError(ex, "Error during logout process");
                 // Không throw exception ở logout để tránh làm hỏng UX
             }
+        }
+
+        public async Task<ApiResponse<bool>> ForgotPasswordAsync(ForgotPasswordRequest request)
+        {
+            if (_responseCache == null)
+                throw new InvalidOperationException("Response cache service is not initialized.");
+
+            var normalizedEmail = NormalizeEmail(request.Email);
+            var emailHash = AuthCacheKeys.Sha256(normalizedEmail);
+            var rateLimitKey = AuthCacheKeys.ForgotPasswordLimit(emailHash);
+
+            var rateLimited = await _responseCache.GetCachedResponseAsync<string>(rateLimitKey);
+            if (!string.IsNullOrEmpty(rateLimited))
+                return ApiResponse<bool>.Fail(429, "Please wait before requesting another password reset token.");
+
+            await _responseCache.SetCacheResponseAsync(rateLimitKey, "1", TimeSpan.FromSeconds(60));
+
+            var user = await _unitOfWork.Users.GetByEmailAsync(normalizedEmail);
+            if (user == null || user.IsDeleted)
+            {
+                _logger.LogInformation("Password reset requested for non-existing email hash {EmailHash}", emailHash);
+                return ApiResponse<bool>.Success(true, "If the email exists, a reset instruction has been sent.");
+            }
+
+            var resetToken = AuthCacheKeys.NewSecureToken(32);
+            var resetTokenHash = AuthCacheKeys.Sha256(resetToken);
+            var resetKey = AuthCacheKeys.PasswordReset(emailHash, resetTokenHash);
+            var ttl = TimeSpan.FromMinutes(Math.Max(1, _authSecurity.PasswordResetTtlMinutes));
+
+            await _responseCache.SetCacheResponseAsync(resetKey, user.Id.ToString(), ttl);
+
+            if (_emailService != null)
+            {
+                try
+                {
+                    var body = $"""
+                        <p>Ban dang yeu cau dat lai mat khau Fabu.</p>
+                        <p>Ma reset password cua ban:</p>
+                        <p><strong>{System.Net.WebUtility.HtmlEncode(resetToken)}</strong></p>
+                        <p>Ma het han sau {ttl.TotalMinutes:0} phut. Neu ban khong yeu cau, hay bo qua email nay.</p>
+                        """;
+
+                    await _emailService.SendEmailAsync(user.Email, "Fabu - Reset password", body);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Could not send password reset email for UserId {UserId}", user.Id);
+                }
+            }
+
+            _logger.LogInformation("Password reset token issued. UserId: {UserId}, TTLMinutes: {TtlMinutes}",
+                user.Id, ttl.TotalMinutes);
+
+            return ApiResponse<bool>.Success(true, "If the email exists, a reset instruction has been sent.");
+        }
+
+        public async Task<ApiResponse<bool>> ResetPasswordAsync(ResetPasswordRequest request)
+        {
+            if (_responseCache == null)
+                throw new InvalidOperationException("Response cache service is not initialized.");
+
+            var normalizedEmail = NormalizeEmail(request.Email);
+            var emailHash = AuthCacheKeys.Sha256(normalizedEmail);
+            var tokenHash = AuthCacheKeys.Sha256(request.Token);
+            var resetKey = AuthCacheKeys.PasswordReset(emailHash, tokenHash);
+            var cachedUserId = await _responseCache.GetCachedResponseAsync<string>(resetKey);
+
+            if (string.IsNullOrWhiteSpace(cachedUserId) || !long.TryParse(cachedUserId, out var userId))
+                throw new AppException(ErrorCode.UNAUTHENTICATED, "Reset token invalid or expired.");
+
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+            if (user == null || !string.Equals(NormalizeEmail(user.Email), normalizedEmail, StringComparison.Ordinal))
+                throw new AppException(ErrorCode.USER_NOT_EXISTED, "User not found.");
+
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+            _unitOfWork.Users.Update(user);
+            await _unitOfWork.SaveChangesAsync();
+
+            await _responseCache.RemoveCacheResponseAsync(resetKey);
+            await _responseCache.RemoveCacheResponseByGroupAsync(AuthCacheKeys.UserRefreshTokenGroup(user.Id));
+
+            _logger.LogInformation("Password reset successfully. UserId: {UserId}", user.Id);
+
+            return ApiResponse<bool>.Success(true, "Password reset successfully.");
+        }
+
+        private static string NormalizeEmail(string email) => email.Trim().ToLowerInvariant();
+
+        private sealed class RefreshTokenCacheEntry
+        {
+            public long UserId { get; set; }
+            public string TokenHash { get; set; } = string.Empty;
+            public string SessionId { get; set; } = string.Empty;
+            public string Provider { get; set; } = "password";
+            public DateTimeOffset IssuedAt { get; set; }
+            public DateTimeOffset ExpiresAt { get; set; }
         }
         //verify token - dung trong middleware - extract claims
     }

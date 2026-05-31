@@ -1,15 +1,4 @@
-import React, { createContext} from "react";
-import type { AuthAction, AuthState } from "./types";
+import { createContext } from "react";
+import type { AuthContextValue } from "./types";
 
-//expose state + dispatch + helper
-//day la noi duy nhat set token
-type AuthContextType = {
-    state: AuthState;
-    dispatch: React.Dispatch<AuthAction>;
-};
-
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-
- 
-
+export const AuthContext = createContext<AuthContextValue | undefined>(undefined);

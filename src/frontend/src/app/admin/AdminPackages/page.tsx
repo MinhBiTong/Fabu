@@ -1,202 +1,123 @@
 "use client";
 
-import Image from "next/image";
-import Way from "../../styles/images/Way.png";
+import Link from "next/link";
+import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { AdminTable } from "@/features/admin/AdminTable";
+import { useServicePlans } from "@/hooks/use-service-plans";
+import { formatCurrency } from "@/lib/utils/format";
 
-import { useEffect, useState } from "react";
-import { globalApiClient } from "@/app/api/api-client";
-import { useRouter } from "next/navigation";
+const itemsPerPage = 10;
 
-export default function AdminPackages() {
-  const router = useRouter();
-
-
-  const [packages, setPackages] = useState<Package[]>([]);
-const [searchTerm, setSearchTerm] = useState("");
-  
-    
-const [selectedCategory, setSelectedCategory] = useState("");
-const categories = [...new Set(packages.map(p => p.category))];
-
-const filteredPackages = packages.filter((pkg) => {
-  const matchSearch = pkg.serviceName
-    .toLowerCase()
-    .includes(searchTerm.toLowerCase());
-
-  const matchCategory =
-    selectedCategory === "" || pkg.category === selectedCategory;
-
-  return matchSearch && matchCategory;
-});
-
-
+export default function AdminPackagesPage() {
+  const { groups, categories, isLoading, error } = useServicePlans();
+  const allPlans = useMemo(() => groups.flatMap((group) => group.plans), [groups]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-    const itemsPerPage = 10;
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentPackages = filteredPackages.slice(indexOfFirstItem, indexOfLastItem);
+  const filteredPackages = useMemo(() => {
+    return allPlans.filter((pkg) => {
+      const matchSearch = pkg.serviceName.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchCategory = !selectedCategory || pkg.category === selectedCategory;
+      return matchSearch && matchCategory;
+    });
+  }, [allPlans, searchTerm, selectedCategory]);
 
-
-  const totalPages = Math.ceil(filteredPackages.length / itemsPerPage);
-
-
-  type Package = {
-    id: number;
-    serviceName: string;
-    category: string;
-    dataAmountMB: number;
-    price: number;
-    validityDays: number;
-  };
-  
-  useEffect(() => {
-    const fetchPackages = async () => {
-      try {
-        const token = localStorage.getItem("accessToken");
-        globalApiClient.setToken(token);
-
-        const res = await globalApiClient.get<Package[]>("Service");
-
-         console.log("DATA:", res.data);
-
-             setPackages(res.data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    fetchPackages();
-  }, []);
-
-
-  /* Add PAckage area*/
-
-
-
-
-
-
+  const totalPages = Math.max(Math.ceil(filteredPackages.length / itemsPerPage), 1);
+  const currentPackages = filteredPackages.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
-    <>
-    <div className="PackagesContainer">
-      <h1>Packages</h1>
+    <section className="fabu-section">
+      <div className="fabu-container grid gap-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <h1>Packages</h1>
+            <p className="mt-2 text-sm text-fabu-gray">
+              Manage backend `Service` records.
+            </p>
+          </div>
+          <Button asChild>
+            <Link href="/admin/AdminPackages/AddPackage">Add Package</Link>
+          </Button>
+        </div>
 
-      <div className="SearchTools">
-        <input className="Search" placeholder="Search Package Name" value={searchTerm} onChange={(e) => {setSearchTerm(e.target.value); setCurrentPage(1);  }} />
-     <select
-  className="DropDown"
-  value={selectedCategory}
-  onChange={(e) => {
-    setSelectedCategory(e.target.value);
-    setCurrentPage(1); 
-  }}
->
-  <option value="">All Categories</option>
+        <div className="grid gap-3 md:grid-cols-[1fr_220px]">
+          <Input
+            placeholder="Search package name"
+            value={searchTerm}
+            onChange={(event) => {
+              setSearchTerm(event.target.value);
+              setCurrentPage(1);
+            }}
+          />
+          <select
+            className="fabu-input"
+            value={selectedCategory}
+            onChange={(event) => {
+              setSelectedCategory(event.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">All Categories</option>
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+        </div>
 
-  {categories.map((cat) => (
-    <option key={cat} value={cat}>
-      {cat}
-    </option>
-  ))}
-</select>          
-      </div>
+        {error ? <p className="fabu-error">{error}</p> : null}
 
-      <div className="SearchTools">
-        <button className="AddPack"  onClick={() =>router.push(`/AdminPackages/AddPackage`)}>Add Package</button>
-      </div>
-
-      <div className="TableList">
-        <table>
-          <thead>
-            <tr>
-              <th>Package Name</th>
-              <th>Amount</th>
-              <th>Category</th>
-              <th>Price</th>
-              <th>Length</th>
-              <th>Options</th>
+        <AdminTable
+          headers={["Package Name", "Amount", "Category", "Price", "Length", "Options"]}
+          isEmpty={!isLoading && currentPackages.length === 0}
+          empty="No packages found"
+        >
+          {currentPackages.map((pkg) => (
+            <tr key={pkg.id} className="border-t border-fabu-border">
+              <td className="p-4 font-semibold">{pkg.serviceName}</td>
+              <td className="p-4">{pkg.dataAmountMB.toLocaleString()} MB</td>
+              <td className="p-4">{pkg.category}</td>
+              <td className="p-4">{formatCurrency(pkg.price)}</td>
+              <td className="p-4">{pkg.validityDays} days</td>
+              <td className="p-4">
+                <Link
+                  className="font-semibold text-fabu-red hover:text-fabu-red-hover"
+                  href={`/admin/AdminPackages/PackagesDetails/${pkg.id}`}
+                >
+                  Details
+                </Link>
+              </td>
             </tr>
-          </thead>
+          ))}
+        </AdminTable>
 
-          <tbody>
-            {filteredPackages.length === 0 ? (
-              <tr>
-                <td colSpan={6} style={{ textAlign: "center" }}>
-                  No packages found
-                </td>
-              </tr>
-            ) : (
-              currentPackages.map((pkg) => (
-                <tr key={pkg.id}>
-                  <td>{pkg.serviceName}</td>
-
-             
-                  <td>{pkg.dataAmountMB} GB</td>
-
-                  <td>{pkg.category}</td>
-
-                  <td>${pkg.price}</td>
-
-                  <td>{pkg.validityDays} Days</td>
-
-                  <td>
-                    <span
-                      className="Clickablewords"
-                      onClick={() =>
-                        router.push(`/AdminPackages/PackagesDetails/${pkg.id}`)
-                      }
-                    >
-                      Details
-                    </span>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+        <div className="flex items-center justify-center gap-3">
+          <Button
+            variant="outline"
+            onClick={() => setCurrentPage((page) => Math.max(page - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </Button>
+          <span className="text-sm text-fabu-gray">
+            {currentPage} / {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            onClick={() => setCurrentPage((page) => Math.min(page + 1, totalPages))}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </Button>
+        </div>
       </div>
-
-    <div className="Pagination">
-  
-   <div
-    className="Left"
-    onClick={() => {
-      if (currentPage > 1) {
-        setCurrentPage((prev) => prev - 1);
-      }
-    }}
-    style={{
-      opacity: currentPage === 1 ? 0.5 : 1,
-      cursor: currentPage === 1 ? "not-allowed" : "pointer",
-    }}
-  >
-    <Image src={Way} alt="left" />
-  </div>
-
-
-  <div className="Page">
-  <span>{currentPage}</span>
-</div>
-
-  <div
-    className="Right"
-    onClick={() => {
-      if (currentPage < totalPages) {
-        setCurrentPage((prev) => prev + 1);
-      }
-    }}
-    style={{
-      opacity: currentPage === totalPages ? 0.5 : 1,
-      cursor: currentPage === totalPages ? "not-allowed" : "pointer",
-    }}
-  >
-    <Image src={Way} alt="right" />
-  </div>
-</div>
-    </div>
-
-</>
+    </section>
   );
 }

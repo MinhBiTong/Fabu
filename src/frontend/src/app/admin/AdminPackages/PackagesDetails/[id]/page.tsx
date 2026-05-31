@@ -1,271 +1,154 @@
 "use client";
 
-import Image from "next/image";
-import Wallet from "../../../../styles/images/wallet.png";
-import Clock from "../../../../styles/images/clock.png";
-import Bonus from "../../../../styles/images/revenue.png";
-import Gb from "../../../../styles/images/gb.png";
-import PName from "../../../../styles/images/subscription.png";
-
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
-import { globalApiClient } from "@/app/api/api-client";
+import { useEffect, useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/common/EmptyState";
+import { LoadingState } from "@/components/common/LoadingState";
+import {
+  ServicePlanForm,
+  toServicePlanPayload,
+  emptyServicePlanForm,
+} from "@/features/services/ServicePlanForm";
+import { serviceSchema } from "@/core/validations/service.schema";
+import { useServicePlanStore } from "@/store/service-plan.store";
+import { toastError, toastSuccess } from "@/services/toast-service";
+import { formatCurrency } from "@/lib/utils/format";
 
-export default function PackagesDetails() {
-  type Package = {
-    id: number;
-    serviceName: string;
-    serviceCode: string;
-    category: string;
-    dataAmountMB: number;
-    price: number;
-    validityDays: number;
-    description: string;
-    isActive: boolean;
-    maxActivationsPerMonth: number;
+type FormState = typeof emptyServicePlanForm;
+
+function planToForm(plan: NonNullable<ReturnType<typeof useServicePlanStore.getState>["activePlan"]>): FormState {
+  return {
+    serviceName: plan.serviceName,
+    serviceCode: plan.serviceCode,
+    category: plan.category,
+    dataAmountMB: plan.dataAmountMB,
+    price: plan.price,
+    validityDays: plan.validityDays,
+    description: plan.description,
+    maxActivationsPerMonth: plan.maxActivationsPerMonth,
+    isAutoRenew: plan.isAutoRenew,
+    isActive: plan.isActive,
   };
+}
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState<Package | null>(null);
-
+export default function PackagesDetailsPage() {
+  const router = useRouter();
   const params = useParams();
+  const { activePlan, loadPlan, updatePlan, deletePlan, isLoading, error } = useServicePlanStore();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
-
-  const [pkg, setPkg] = useState<Package | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [form, setForm] = useState<FormState | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    const fetchPackage = async () => {
-      try {
-        const token = localStorage.getItem("accessToken");
-        globalApiClient.setToken(token);
+    if (id) loadPlan(id);
+  }, [id, loadPlan]);
 
-        const res = await globalApiClient.get<Package>(`Service/${id}`);
-        setPkg(res.data);
-      } catch (err) {
-        console.error("DETAIL ERROR:", err);
-      }
-    };
+  const details = useMemo(() => {
+    if (!activePlan) return [];
+    return [
+      ["Service Name", activePlan.serviceName],
+      ["Service Code", activePlan.serviceCode],
+      ["Price", formatCurrency(activePlan.price)],
+      ["Duration", `${activePlan.validityDays} days`],
+      ["Amount", `${activePlan.dataAmountMB.toLocaleString()} MB`],
+      ["Category", activePlan.category],
+      ["Active", activePlan.isActive ? "Yes" : "No"],
+      ["Auto Renew", activePlan.isAutoRenew ? "Yes" : "No"],
+    ];
+  }, [activePlan]);
 
-    if (id) fetchPackage();
-  }, [id]);
+  const handleUpdate = async () => {
+    const formValue = form ?? (activePlan ? planToForm(activePlan) : null);
+    if (!id || !formValue) return;
+    const result = serviceSchema.safeParse(formValue);
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.issues.forEach((issue) => {
+        fieldErrors[String(issue.path[0])] = issue.message;
+      });
+      setErrors(fieldErrors);
+      return;
+    }
 
-   useEffect(() => {
-     if (pkg) setFormData(pkg);
-   }, [pkg]);
+    const updated = await updatePlan(id, toServicePlanPayload(formValue));
+    if (updated) {
+      toastSuccess("Package updated");
+      setIsEditing(false);
+    } else {
+      toastError("Could not update package");
+    }
+  };
 
-  if (!pkg) return <div>Loading...</div>;
+  const handleDelete = async () => {
+    if (!id || !window.confirm("Delete this package?")) return;
+    const deleted = await deletePlan(id);
+    if (deleted) {
+      toastSuccess("Package deleted");
+      router.push("/admin/AdminPackages");
+    } else {
+      toastError("Could not delete package");
+    }
+  };
 
+  if (isLoading && !activePlan) return <LoadingState label="Loading package..." />;
+  if (error) return <EmptyState title="Could not load package" description={error} />;
+  if (!activePlan) return <EmptyState title="Package not found" />;
 
+  const formValue = form ?? planToForm(activePlan);
 
-
-   const handleChange = (field: keyof Package, value: any) => {
-  setFormData((prev) => prev ? { ...prev, [field]: value } : prev);
-};
-
-
-const handleDelete = async () => {
-  if (!confirm("Are you sure you want to delete this package?")) return;
-
-  try {
-    const token = localStorage.getItem("accessToken");
-    globalApiClient.setToken(token);
-
-    await globalApiClient.delete(`Service/${id}`);
-
-    alert("Deleted successfully");
-      window.location.href = "/AdminPackages"; 
-    } catch (err) {
-    console.error("DELETE ERROR:", err);
-  }
-};
-
-const handleUpdate = async () => {
-  try {
-    const token = localStorage.getItem("accessToken");
-    globalApiClient.setToken(token);
-
-    await globalApiClient.put(`Service/${id}`, formData);
-
-    setPkg(formData);
-    setIsEditing(false);
-
-    alert("Updated successfully");
-  } catch (err) {
-    console.error("UPDATE ERROR:", err);
-  }
-};
-
-
-  return ( 
-    <div className="AdminTotality">
-        <h1>Data Plan</h1>
-  <div className="DpDetailsContainer">
-
-        <div className="MainInfos">
-
-  <div className="Infobox">
-    <Image src={PName} alt="" />
-    <div className="Infotexts">
-      <p>Service Name</p>
-      {isEditing ? (
-  <input
-    value={formData?.serviceName || ""}
-    onChange={(e) => handleChange("serviceName", e.target.value)}
-  />
-) : (
-  <p>{pkg.serviceName}</p>
-)}
-    </div>
-  </div>
-
-
- <div className="Infobox">
-    <Image src={PName} alt="" />
-    <div className="Infotexts">
-      <p>Service Code</p>
-       {isEditing ? (
-  <input
-    value={formData?.serviceCode || ""}
-    onChange={(e) => handleChange("serviceCode", e.target.value)}
-  />
-) : (
-  <p>{pkg.serviceCode}</p>
-)}
-    </div>
-  </div>
-
-  <div className="Infobox">
-    <Image src={Wallet} alt="" />
-    <div className="Infotexts">
-      <p>Price</p>
-      {isEditing ? (
-  <input
-    type="number"
-    value={formData?.price || 0}
-    onChange={(e) => handleChange("price", Number(e.target.value))}
-  />
-) : (
-  <p>{pkg.price}$</p>
-)}
-    </div>
-  </div>
-
-  <div className="Infobox">
-    <Image src={Clock} alt="" />
-    <div className="Infotexts">
-      <p>Duration</p>
-       {isEditing ? (
-  <input
-    value={formData?.validityDays || ""}
-    onChange={(e) => handleChange("validityDays", e.target.value)}
-  />
-) : (
-  <p>{pkg.validityDays} Days</p>
-)}
-    </div>
-  </div>
-
-  <div className="Infobox">
-    <Image src={Gb} alt="" />
-    <div className="Infotexts">
-      <p>Amount</p>
-    {isEditing ? (
-  <input
-    type="number"
-    value={formData?.dataAmountMB || 0}
-    onChange={(e) => handleChange("dataAmountMB", Number(e.target.value))}
-  />
-) : (
-  <p>{pkg.dataAmountMB} GB</p>
-)}
-    </div>
-  </div>
-
-  <div className="Infobox">
-    <Image src={Bonus} alt="" />
-    <div className="Infotexts">
-      <p>Category</p>
-         {isEditing ? (
-  <input
-    value={formData?.category || ""}
-    onChange={(e) => handleChange("category", e.target.value)}
-  />
-) : (
-  <p>{pkg.category}</p>
-)}
-    </div>
-  </div>
-
-<div className="Infobox">
-    <Image src={Bonus} alt="" />
-    <div className="Infotexts">
-      <p>Activation per/month</p>
-        {isEditing ? (
-  <input
-    value={formData?.maxActivationsPerMonth || ""}
-    onChange={(e) => handleChange("maxActivationsPerMonth", e.target.value)}
-  />
-) : (
-  <p>{pkg.maxActivationsPerMonth}</p>
-)}
-    </div>
-  </div>
-
-<div className="Infobox">
-    <Image src={Bonus} alt="" />
-    <div className="Infotexts">
-      <p>isActive</p>
-      {isEditing ? (
-  <select
-    value={formData?.isActive ? "true" : "false"}
-    onChange={(e) => handleChange("isActive", e.target.value === "true")}
-  >
-    <option value="true">Yes</option>
-    <option value="false">No</option>
-  </select>
-) : (
-  <p>{pkg.isActive ? "Yes" : "No"}</p>
-)}
-    </div>
-  </div>
-
-</div>
-
-<div className="Descriptions">
-  <div className="Descriptioncontent">
-  {isEditing ? (
-  <textarea
-    value={formData?.description || ""}
-    onChange={(e) => handleChange("description", e.target.value)}
-  />
-) : (
-  <p>{pkg.description}</p>
-)}
-  </div>
-      </div>
+  return (
+    <section className="fabu-section">
+      <div className="fabu-container grid gap-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <h1>Data Plan</h1>
+            <p className="mt-2 text-sm text-fabu-gray">{activePlan.description}</p>
+          </div>
+          <div className="flex gap-3">
+            <Button variant="destructive" onClick={handleDelete}>
+              Delete
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setForm(planToForm(activePlan));
+                setIsEditing((value) => !value);
+              }}
+            >
+              {isEditing ? "Cancel" : "Edit"}
+            </Button>
+          </div>
         </div>
 
-
-
-
-<div className="ChoiceButtons">
-  <button className="Sub" onClick={handleDelete}>
-    Delete
-  </button>
-
-  {isEditing ? (
-    <button className="Sub" onClick={handleUpdate}>
-      Save
-    </button>
-  ) : (
-    <button className="Sub" onClick={() => setIsEditing(true)}>
-      Edit
-    </button>
-  )}
-</div>
-
-
-
-   </div>
-  )
+        {isEditing ? (
+          <ServicePlanForm
+            value={formValue}
+            errors={errors}
+            isSubmitting={isLoading}
+            submitLabel="Save"
+            onChange={(field, value) => setForm((current) => current && { ...current, [field]: value })}
+            onSubmit={handleUpdate}
+          />
+        ) : (
+          <div className="grid gap-5 lg:grid-cols-[0.8fr_1.2fr]">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+              {details.map(([label, value]) => (
+                <div key={label} className="fabu-card p-4">
+                  <p className="text-xs font-bold uppercase text-fabu-gray">{label}</p>
+                  <p className="mt-1 text-base font-bold text-fabu-ink">{value}</p>
+                </div>
+              ))}
+            </div>
+            <div className="fabu-card">
+              <h2 className="text-2xl">Description</h2>
+              <p className="mt-4 text-sm leading-7 text-fabu-charcoal">{activePlan.description}</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  );
 }

@@ -1,35 +1,30 @@
-"use client";
-import Header from "../components/layout/Header";
-import Footer from "../components/layout/Footer";
-import Chatbot from "../components/layout/Chatbot";
-import AdminSidebar from "../components/layout/AdminSidebar";
+import type { ReactNode } from "react";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import Chatbot from "@/components/layout/Chatbot";
+import AdminSidebar from "@/components/layout/AdminSidebar";
+import { Providers } from "./providers";
 
-import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import "./globals.css";
 
-import "../styles/globals.css";
-import "../styles/adminglobal.css";
-import "../styles/themes/dark.css";
-import "../styles/themes/light.css";
-import { AuthProvider } from "@/context/auth/auth-provider";
+export const metadata = {
+  title: "Fabu",
+  description: "Fabu digital telecom services",
+};
 
-export default function RootLayout({
-    children,
-}: {
-    children: React.ReactNode
-}) {
-    return (
-        <html lang="en">
-            <body>
-                <AuthProvider>
-                    <Header />
-                    <Chatbot />
-                    <AdminSidebar />
-                    <main>{children}</main>
-                    <ToastContainer />
-                    <Footer />
-                </AuthProvider>
-            </body>
-        </html>
-    )
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="vi">
+      <body>
+        <Providers>
+          <Header />
+          <AdminSidebar />
+          <main className="min-h-screen pt-20">{children}</main>
+          <Chatbot />
+          <Footer />
+        </Providers>
+      </body>
+    </html>
+  );
 }

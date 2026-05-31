@@ -1,71 +1,57 @@
-import { toastError, toastSuccess } from "../services/toast-service";
-import { LoginApi } from "../app/api/auth-api";
-import { useAuth } from "../hooks/use-auth";
-import { useForm } from "react-hook-form";
-import { loginSchema, type LoginFormData } from "../core/validations/login.schema";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+"use client";
 
-export const useLogin = () => {
-  const { setToken } = useAuth();
+import { useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toastError, toastSuccess } from "@/services/toast-service";
+import { authService } from "@/services/auth-service";
+import { useAuthStore } from "@/store/auth.store";
+import { loginSchema, type LoginFormData } from "@/core/validations/login.schema";
+
+type UseLoginOptions = {
+  onSuccess?: () => void;
+};
+
+export const useLogin = (options?: UseLoginOptions) => {
   const router = useRouter();
-  // const {
-  //   register, //ham register cua react hook form tra ve 1 object chua name, onBlur, onChange, ref
-  //   handleSubmit, //ham handleSubmit de wrap ham onSubmit, tu dong preventDefault va lay data
-  //   formState: { errors, isSubmitting}, //lay errors va isSubmitting tu formState
-  // } = useForm<LoginFormData>({
-  //   resolver: zodResolver(loginSchema), //ket noi voi zod
-  //   defaultValues: {
-  //     email: "",
-  //     password: "",
-  //   }
-  // });
+  const setSession = useAuthStore((state) => state.setSession);
+
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" }
+    defaultValues: { email: "", password: "" },
   });
 
-  const onLoginSubmit = async (data: LoginFormData) => { //nhan data tu hook form, ko nhan event
-    console.log(data);
-   
-    try {
-      //gui xuong .net de xac thuc
-      const result = (await LoginApi.login(
-        data.email,
-        data.password
-      ));
-      console.log(result);
-      
-      if (result?.code === 200 && result?.data?.accessToken) {
-        toastSuccess(result.message);
-        setToken(result.data.accessToken); //luu token vao context
-        
-        //redirect
-        router.push("/");
-        return { success: true };
-        //router.refresh();
-      } else {
-        toastError(result.message  || "Login failed. Please try again.");
-      }
-    } catch (error: any) {
-        const errorMessage = error.response?.data?.message || error.message || "An unexpected error occurred from the server.";
-        toastError("Login failed. Please try again." + errorMessage);
-    } 
-  };
+  const onLoginSubmit = useCallback(
+    async (data: LoginFormData) => {
+      try {
+        const result = await authService.login(data.email, data.password);
+        if (result.code === 200 && result.data?.accessToken) {
+          setSession(result.data);
+          toastSuccess(result.message || "Login successfully");
+          options?.onSuccess?.();
+          router.push("/");
+          return { success: true };
+        }
 
-  const handleGoogleLogin = () => {
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-    // Điều hướng trình duyệt trực tiếp đến Endpoint của Backend
-    window.location.href = `${backendUrl}/api/v1/auth/external-login?provider=Google`;
-  }
+        toastError(result.message || "Login failed. Please try again.");
+        return { success: false };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Login failed.";
+        toastError(message);
+        return { success: false };
+      }
+    },
+    [options, router, setSession]
+  );
+
+  const handleGoogleLogin = useCallback(() => {
+    window.location.href = authService.getExternalLoginUrl("google");
+  }, []);
 
   return {
-    // register,
-    // handleSubmit,
-    // errors,
-    // isSubmitting,
     ...form,
-    onLoginSubmit, 
-    handleGoogleLogin
+    onLoginSubmit,
+    handleGoogleLogin,
   };
 };

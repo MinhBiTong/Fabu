@@ -19,5 +19,7 @@ namespace Application.Interfaces
         Task<VerifyOtpResponse> VerifyOtpAsync(VerifyOtpRequest request);
         Task<ApiResponse<LoginResponse>> RefreshTokenFromCookieAsync(string refreshToken);
         Task<LoginResponse> ExternalLoginAsync(ClaimsPrincipal principal, string provider);
+        Task<ApiResponse<bool>> ForgotPasswordAsync(ForgotPasswordRequest request);
+        Task<ApiResponse<bool>> ResetPasswordAsync(ResetPasswordRequest request);
     }
 }

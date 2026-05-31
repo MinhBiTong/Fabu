@@ -1,204 +1,136 @@
-"use client"
+"use client";
 
-import {    BarChart,Bar, XAxis, YAxis,Tooltip, ResponsiveContainer} from "recharts";
-import Image from "next/image";
+export const dynamic = "force-dynamic";
 
-import { useEffect, useState } from "react";
-import { globalApiClient } from "@/app/api/api-client";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useFeedbackStore } from "@/store/feedback.store";
 
-import { useRouter } from "next/navigation";
-import Way from "../../styles/images/Way.png"
-import Star from "../../styles/images/StarratingYes.png"
-import search from "../../styles/images/search.png"
-
-export default function AdminFeedbacks() {
-
-const router = useRouter()
-
-
-const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
-
-const [selectedStar, setSelectedStar] = useState<number | null>(null);
-
-
-const [currentPage, setCurrentPage] = useState(1);
 const itemsPerPage = 12;
 
-const filteredFeedbacks = feedbacks.filter((fb) => {
-  if (!selectedStar) return true;
-  return fb.rating === selectedStar;
-});
+export default function AdminFeedbacksPage() {
+  const { feedbacks, loadFeedbacks, isLoading, error } = useFeedbackStore();
+  const [selectedStar, setSelectedStar] = useState<number | null>(null);
+  const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
+  useEffect(() => {
+    loadFeedbacks();
+  }, [loadFeedbacks]);
 
-const totalPages = Math.ceil(filteredFeedbacks.length / itemsPerPage);
+  const chartData = useMemo(() => {
+    return [5, 4, 3, 2, 1].map((star) => ({
+      star: String(star),
+      total: feedbacks.filter((feedback) => feedback.rating === star).length,
+    }));
+  }, [feedbacks]);
 
-const paginatedFeedbacks = filteredFeedbacks.slice(
-  (currentPage - 1) * itemsPerPage,
-  currentPage * itemsPerPage
-);
+  const filteredFeedbacks = useMemo(() => {
+    return feedbacks.filter((feedback) => {
+      const matchStar = !selectedStar || feedback.rating === selectedStar;
+      const text = `${feedback.email ?? ""} ${feedback.subject ?? ""} ${
+        feedback.message ?? feedback.content ?? ""
+      }`.toLowerCase();
+      return matchStar && text.includes(search.toLowerCase());
+    });
+  }, [feedbacks, search, selectedStar]);
 
-const [chartData, setChartData] = useState([
-  { star: "5", total: 0 },
-  { star: "4", total: 0 },
-  { star: "3", total: 0 },
-  { star: "2", total: 0 },
-  { star: "1", total: 0 },
-]);
+  const totalPages = Math.max(Math.ceil(filteredFeedbacks.length / itemsPerPage), 1);
+  const paginatedFeedbacks = filteredFeedbacks.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
-type Feedback = {
-  id: number;
-  email: string;
-  rating: number;
-};
-
-useEffect(() => {
-  const fetchFeedbacks = async () => {
-    try {
-      const token = localStorage.getItem("accessToken");
-      globalApiClient.setToken(token);
-
-      const res = await globalApiClient.get<Feedback[]>("Feedbacks");
-
-      const feedbackArray = Array.isArray(res.data) ? res.data : [];
-      setFeedbacks(feedbackArray);
-
-  
-      const counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-
-      feedbackArray.forEach((fb) => {
-        if (fb.rating >= 1 && fb.rating <= 5) {
-          counts[fb.rating as 1 | 2 | 3 | 4 | 5]++;
-        }
-      });
-
-      const formatted = [
-        { star: "5", total: counts[5] },
-        { star: "4", total: counts[4] },
-        { star: "3", total: counts[3] },
-        { star: "2", total: counts[2] },
-        { star: "1", total: counts[1] },
-      ];
-
-      setChartData(formatted);
-
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  fetchFeedbacks();
-}, []);
-
-useEffect(() => {
-  setCurrentPage(1);
-}, [selectedStar]);
-  
-  return ( 
-  <>
-  <div className="AdminFeedbacksContainer"> 
-   <div className="TotalStarContainer">
-    <h2>Stars Chart</h2>
-    <ResponsiveContainer>
-        <BarChart
-          data={chartData}
-          layout="vertical"  
-          margin={{ top: 10, right: 80, left: 40, bottom: 0 }}
-          barCategoryGap="85%" 
-        >
-          <XAxis type="number" />
-          <YAxis dataKey="star" type="category" />
-          <Tooltip />
-          <Bar dataKey="total"  fill="#3586e1"
-            radius={[0, 10, 10, 0]} />
-        </BarChart>
-      </ResponsiveContainer>
-
-   </div>
-       <div className="FeedbackListContainer">
-        <h1>Feedback Lists</h1>
-        <div className="OptionsBox">
-            <div className="Searchbar">
-                <Image className="SearchImg"src={search} alt=""></Image>
-                  <input className="SearchInput" type="text"></input>            
-            </div>
-          
-             <input  className="StarAmount"
-  type="number"
-  min={1}
-  max={5}
-  onChange={(e) => {
-    const value = Number(e.target.value);
-    setSelectedStar(value >= 1 && value <= 5 ? value : null);
-  }}></input>
+  return (
+    <section className="fabu-section">
+      <div className="fabu-container grid gap-6">
+        <div>
+          <h1>Feedbacks</h1>
+          <p className="mt-2 text-sm text-fabu-gray">Customer feedback from `Feedbacks`.</p>
         </div>
 
-
-        <div className="Listing">
-       
-          {/* 
-             Each box
-
-           <div className="FeedbackBox"  onClick={() => router.push("/AdminFeedbacks/FeedbackDetails")}>
-          <div className="Email">Email123456789@gmail.com</div>
-          <div className="AmountStars">
-                    <Image src={Star} alt=""></Image>
-          </div>
-          </div>
-        
-          */}
-
-  {paginatedFeedbacks.map((fb) => (
-  <div
-    key={fb.id}
-    className="FeedbackBox"
-    onClick={() =>
-      router.push(`/AdminFeedbacks/FeedbackDetails/${fb.id}`)
-    }
-  >
-    <div className="Email">
-      {fb.email?.trim() ? fb.email : "Anonymous"}
-    </div>
-
-    <div className="AmountStars">
-      {[...Array(fb.rating)].map((_, i) => (
-        <Image key={i} src={Star} alt="" />
-      ))}
-    </div>
-  </div>
-))}
-
-
+        <div className="fabu-card h-[320px]">
+          <h2 className="mb-4 text-2xl">Stars Chart</h2>
+          <ResponsiveContainer width="100%" height="80%">
+            <BarChart data={chartData} layout="vertical">
+              <XAxis type="number" />
+              <YAxis dataKey="star" type="category" />
+              <Tooltip />
+              <Bar dataKey="total" fill="#EE0033" radius={[0, 8, 8, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
 
-       <div className="Pagination">
-  <div
-    className="Left"
-    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-  >
-    <Image src={Way} alt="" />
-  </div>
+        <div className="grid gap-3 md:grid-cols-[1fr_160px]">
+          <Input
+            placeholder="Search feedback"
+            value={search}
+            onChange={(event) => {
+              setSearch(event.target.value);
+              setCurrentPage(1);
+            }}
+          />
+          <Input
+            type="number"
+            min={1}
+            max={5}
+            placeholder="Stars"
+            value={selectedStar ?? ""}
+            onChange={(event) => {
+              const value = Number(event.target.value);
+              setSelectedStar(value >= 1 && value <= 5 ? value : null);
+              setCurrentPage(1);
+            }}
+          />
+        </div>
 
-  <div className="Page">
-    <span>{currentPage}</span>
-  </div>
+        {error ? <p className="fabu-error">{error}</p> : null}
 
-  <div
-    className="Right"
-    onClick={() =>
-      setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-    }
-  >
-    <Image src={Way} alt="" />
-  </div>
-</div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {paginatedFeedbacks.map((feedback) => (
+            <Link
+              key={feedback.id}
+              href={`/admin/AdminFeedbacks/FeedbackDetails/${feedback.id}`}
+              className="fabu-card"
+            >
+              <p className="truncate text-sm font-bold text-fabu-ink">
+                {feedback.email?.trim() || "Anonymous"}
+              </p>
+              <p className="mt-3 text-sm text-fabu-gray">{feedback.rating} / 5 stars</p>
+              <p className="mt-3 line-clamp-2 text-sm text-fabu-charcoal">
+                {feedback.message || feedback.content || feedback.subject || "No message"}
+              </p>
+            </Link>
+          ))}
+        </div>
 
-       </div>
+        {!isLoading && paginatedFeedbacks.length === 0 ? (
+          <p className="text-center text-sm text-fabu-gray">No feedbacks found.</p>
+        ) : null}
 
-
-  </div>
-
-  
-  
-  </>
-  )
+        <div className="flex items-center justify-center gap-3">
+          <Button
+            variant="outline"
+            onClick={() => setCurrentPage((page) => Math.max(page - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </Button>
+          <span className="text-sm text-fabu-gray">
+            {currentPage} / {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            onClick={() => setCurrentPage((page) => Math.min(page + 1, totalPages))}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
 }

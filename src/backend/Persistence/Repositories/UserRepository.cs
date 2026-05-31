@@ -24,13 +24,26 @@ namespace Persistence.Repositories
         public async Task<User?> GetByEmailAsync(string email)
         {
             return await _dbSet
+                .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                        .ThenInclude(r => r.RolePermissions)
+                            .ThenInclude(rp => rp.Permission)
                 .FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
+        }
+
+        public async Task<User?> GetByIdWithRolesAsync(long id)
+        {
+            return await _dbSet
+                .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                        .ThenInclude(r => r.RolePermissions)
+                            .ThenInclude(rp => rp.Permission)
+                .FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted);
         }
 
         public async Task<User?> GetByMobileNumberAsync(string phoneNumber)
         {
             return await _dbSet
-                .Include(u => u.PhoneNumber)
                 .FirstOrDefaultAsync(u => u.PhoneNumber == phoneNumber && !u.IsDeleted);
         }
     }
