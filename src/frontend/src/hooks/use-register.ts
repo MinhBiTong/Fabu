@@ -1,60 +1,63 @@
-import { toastError, toastSuccess } from "../services/toast-service";
+"use client";
+
+import { useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { signupSchema, type SignupFormData } from "../core/validations/signup.schema";
-import { globalApiClient } from "@/app/api/api-client";
-import { LoginApi } from "@/app/api/auth-api";
+import { toastError, toastSuccess } from "@/services/toast-service";
+import { authService } from "@/services/auth-service";
+import { signupSchema, type SignupFormData } from "@/core/validations/signup.schema";
 
-export const useRegister = (onClose?: () => void) => {
+type UseRegisterOptions = {
+  onSuccess?: () => void;
+};
+
+export const useRegister = (options?: UseRegisterOptions) => {
   const router = useRouter();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<SignupFormData>({
+  const form = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
       username: "",
+      fullName: "",
       email: "",
+      phoneNumber: "",
       password: "",
       confirmPassword: "",
     },
   });
 
-  const onRegisterSubmit = async (data: SignupFormData) => {
-    console.log(data);
-    
-    try {
-      // Gọi API đăng ký (Thay đổi endpoint tùy theo backend của bạn)
-      const response = (await LoginApi.register(
-        data.email,
-        data.password,
-        data.username,
-        data.confirmPassword
-      ));
+  const onRegisterSubmit = useCallback(
+    async (data: SignupFormData) => {
+      try {
+        const response = await authService.register({
+          Username: data.username,
+          FullName: data.fullName,
+          PhoneNumber: data.phoneNumber,
+          Email: data.email,
+          Password: data.password,
+        });
 
-      if (response.code === 200 || response.code === 201) {
-        toastSuccess("Đăng ký tài khoản thành công!");
-        
-        // Nếu có truyền vào hàm đóng Modal thì thực thi
-        if (onClose) onClose();
-        
-        // Điều hướng người dùng (ví dụ: sang trang login hoặc bắt xác thực email)
-        router.push("/login"); 
+        if (response.code === 200 || response.code === 201) {
+          toastSuccess(response.data?.message || "Register successfully");
+          options?.onSuccess?.();
+          router.push("/login");
+          return { success: true };
+        }
+
+        toastError(response.message || "Register failed.");
+        return { success: false };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Register failed.";
+        toastError(message);
+        return { success: false };
       }
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.message || "Đăng ký thất bại.";
-      toastError(errorMessage);
-    }
-  };
+    },
+    [options, router]
+  );
 
   return {
-    register,
-    handleSubmit,
-    errors,
-    isSubmitting,
+    ...form,
     onRegisterSubmit,
   };
 };

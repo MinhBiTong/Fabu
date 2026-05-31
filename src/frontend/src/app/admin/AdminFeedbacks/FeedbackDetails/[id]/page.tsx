@@ -1,83 +1,41 @@
 "use client";
 
-import Image from "next/image";
-import Star from "../../../../styles/images/StarratingYes.png";
-
-import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { globalApiClient } from "@/app/api/api-client";
+import { useEffect } from "react";
+import { EmptyState } from "@/components/common/EmptyState";
+import { LoadingState } from "@/components/common/LoadingState";
+import { useFeedbackStore } from "@/store/feedback.store";
 
-type Feedback = {
-  id: number;
-  subject: string;
-  message: string;
-  rating: number;
-  status: number;
-  customerName?: string;
-  email?: string;
-};
-
-export default function FeedbackDetails() {
- type Feedback = {
-    id: number;
-    email: string;
-    rating: number;
-    subject: string;
-    message: string;
-    status: number; // 0 = unread, 1 = read
-  };
-
-  const [feedback, setFeedback] = useState<Feedback | null>(null);
-
+export default function FeedbackDetailsPage() {
   const params = useParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
+  const { activeFeedback, loadFeedback, isLoading, error } = useFeedbackStore();
 
-  // ✅ FETCH ONLY
   useEffect(() => {
-    const fetchFeedback = async () => {
-      try {
-        const token = localStorage.getItem("accessToken");
-        globalApiClient.setToken(token);
+    if (id) loadFeedback(id);
+  }, [id, loadFeedback]);
 
-        const res = await globalApiClient.get<Feedback>(`Feedbacks/${id}`);
-
-     
-        setFeedback(res.data);
-
-      } catch (err) {
-        console.error("DETAIL ERROR:", err);
-      }
-    };
-
-    if (id) fetchFeedback();
-  }, [id]);
-
-  if (!feedback) return <div>Loading...</div>;
+  if (isLoading) return <LoadingState label="Loading feedback..." />;
+  if (error) return <EmptyState title="Could not load feedback" description={error} />;
+  if (!activeFeedback) return <EmptyState title="Feedback not found" />;
 
   return (
-    <div className="AdminFeedDetailsContainer">
+    <section className="fabu-section">
+      <div className="fabu-container grid gap-6">
+        <div>
+          <h1>{activeFeedback.email || "Anonymous"} - Feedback</h1>
+          <p className="mt-2 text-sm text-fabu-gray">
+            Rating: {activeFeedback.rating} / 5
+          </p>
+        </div>
 
-      <h1>{feedback.email || "Anonymous" } - Feedback</h1>
-
-      {/* ⭐ Stars */}
-      <div className="StarsRated">
-        {Array.from({ length: feedback.rating }).map((_, i) => (
-          <Image key={i} src={Star} alt="star" />
-        ))}
+        <div className="fabu-card">
+          <h2 className="text-2xl">{activeFeedback.subject || "Feedback content"}</h2>
+          <p className="mt-4 text-sm leading-7 text-fabu-charcoal">
+            {activeFeedback.message || activeFeedback.content || "No message"}
+          </p>
+        </div>
       </div>
-
-      {/* 👤 Info */}
-      <div className="Nameplace">
-        <span>UserName: {feedback.email || "Unknown"}</span>
-        <span>Email: {feedback.email || "N/A"}</span>
-      </div>
-
-      {/* 📝 Content */}
-      <div className="DisplayContent">
-        <h2>Subject: {feedback.subject}</h2>
-        <span>{feedback.message}</span>
-      </div>
-
-    </div>
+    </section>
   );
 }

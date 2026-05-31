@@ -1,110 +1,61 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { globalApiClient } from "@/app/api/api-client";
+import { useState } from "react";
 import { serviceSchema } from "@/core/validations/service.schema";
-export default function AdminPackages() {
+import {
+  emptyServicePlanForm,
+  ServicePlanForm,
+  toServicePlanPayload,
+} from "@/features/services/ServicePlanForm";
+import { useServicePlanStore } from "@/store/service-plan.store";
+import { toastError, toastSuccess } from "@/services/toast-service";
 
-  type Package = {
-    id: number;
-    serviceName: string;
-    serviceCode: string;
-    category: string;
-    dataAmountMB: number;
-    price: number;
-    validityDays: number;
-    description: string;
-    isActive: boolean;
-    maxActivationsPerMonth: number;
-  };
-
-  const [errors, setErrors] = useState<any>({});
-  const [packages, setPackages] = useState<Package[]>([]);
-  const router = useRouter(); 
-
-
-  const [form, setForm] = useState({
-    serviceName: "",
-    serviceCode: "",
-    category: "",
-    dataAmountMB: "",
-    price: "",
-    validityDays: "",
-    description: "",
-    maxActivationsPerMonth: "",
-  });
-
- 
-  const handleChange = (e: any) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
-  };
-
+export default function AddPackagePage() {
+  const router = useRouter();
+  const createPlan = useServicePlanStore((state) => state.createPlan);
+  const isLoading = useServicePlanStore((state) => state.isLoading);
+  const [form, setForm] = useState(emptyServicePlanForm);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleSubmit = async () => {
-  try {
-
     const result = serviceSchema.safeParse(form);
-
     if (!result.success) {
-      const fieldErrors: any = {};
-
-      result.error.issues.forEach((err) => {
-        fieldErrors[err.path[0]] = err.message;
+      const fieldErrors: Record<string, string> = {};
+      result.error.issues.forEach((issue) => {
+        fieldErrors[String(issue.path[0])] = issue.message;
       });
-
       setErrors(fieldErrors);
       return;
     }
 
-    setErrors({}); 
-
-    const token = localStorage.getItem("accessToken");
-    globalApiClient.setToken(token);
-
-    const payload = {
-      ...result.data,
-      isActive: true,
-    };
-
-    const res = await globalApiClient.post<any>("Service", payload);
-
-    router.push("/AdminPackages");
-
-  } catch (err) {
-    console.error("CREATE ERROR:", err);
-  }
-};
+    const created = await createPlan(toServicePlanPayload(form));
+    if (created) {
+      toastSuccess("Package created");
+      router.push("/admin/AdminPackages");
+    } else {
+      toastError("Could not create package");
+    }
+  };
 
   return (
-    <div className="AddServForm">
-      <h1>Add New Package</h1>
-
-      <div className="Formitself">
-        <input name="serviceName" value={form.serviceName} placeholder="ServiceName" onChange={handleChange} />
-        {errors.serviceName && <span className="error">{errors.serviceName}</span>}
-        <input name="serviceCode" value={form.serviceCode} placeholder="ServiceCode" onChange={handleChange} />
-        {errors.serviceCode && <span className="error">{errors.serviceCode}</span>}
-        <input name="category" value={form.category} placeholder="Category" onChange={handleChange} />
-        {errors.category && <span className="error">{errors.category}</span>}
-        <input name="dataAmountMB" value={form.dataAmountMB} placeholder="Data Amount(MB)" onChange={handleChange} />
-        {errors.dataAmountMB && <span className="error">{errors.dataAmountMB}</span>}
-        <input name="price" value={form.price} placeholder="Price" onChange={handleChange} />
-        {errors.price && <span className="error">{errors.price}</span>}
-        <input name="validityDays" value={form.validityDays} placeholder="Validity (Days)" onChange={handleChange} />
-        {errors.validityDays && <span className="error">{errors.validityDays}</span>}
-        <input name="description" value={form.description} placeholder="Description" onChange={handleChange} />
-        {errors.description && <span className="error">{errors.description}</span>}
-        <input name="maxActivationsPerMonth" value={form.maxActivationsPerMonth} placeholder="Max Activation per Month" onChange={handleChange} />
-        {errors.maxActivationsPerMonth && <span className="error">{errors.maxActivationsPerMonth}</span>}
+    <section className="fabu-section">
+      <div className="fabu-container grid gap-6">
+        <div>
+          <h1>Add New Package</h1>
+          <p className="mt-2 text-sm text-fabu-gray">
+            Payload matches backend `ServiceCreateRequest`.
+          </p>
+        </div>
+        <ServicePlanForm
+          value={form}
+          errors={errors}
+          isSubmitting={isLoading}
+          submitLabel="Add"
+          onChange={(field, value) => setForm((current) => ({ ...current, [field]: value }))}
+          onSubmit={handleSubmit}
+        />
       </div>
-
-      <button className="SubmitAdd" onClick={handleSubmit}>
-        Add
-      </button>
-    </div>
+    </section>
   );
 }

@@ -1,66 +1,97 @@
-import { useEffect, useReducer } from "react";
+"use client";
+
+import { useCallback, useEffect, useMemo, type ReactNode } from "react";
 import { AuthContext } from "./auth-context";
-import { globalApiClient } from "../../app/api/api-client";
-import { authReducer, initialAuthState } from "../auth/reduce";
-import { LoginApi } from "@/app/api/auth-api";
-import { useRouter } from "next/navigation";
-//logic refresh token + apiClient
+import { authService } from "@/services/auth-service";
+import { globalApiClient } from "@/lib/api/http-client";
+import { useAuthStore } from "@/store/auth.store";
+
 type AuthProviderProps = {
-    children: React.ReactNode;
-}
-export const AuthProvider = ({ children }: AuthProviderProps) => {
-    const router = useRouter();
-    const [state, dispatch] = useReducer(
-        authReducer,
-        initialAuthState
-    );
-
-    //moi khi accessToken thay doi, cap nhat lai globalApiClient (apiclient)
-    useEffect(() => {
-        globalApiClient.setToken(state.accessToken);
-    }, [state.accessToken]);
-
-    useEffect(() => {
-        //1, khi load trang, goi api /refresh-token len .NET
-        //2, neu success -> cookie hop le, setAccessToken (token moi)
-        //3, neu fail -> cookie khong hop le, setAccessToken(null)
-        //4, set isloading(false)
-
-        //logic refresh token, silent refresh khi load app
-        const silentRefresh = async () => {
-            try {
-                //api goi refresh token, truyen refresh token tu cookie len server, neu hop le se tra ve access token moi
-                const response = await LoginApi.refreshToken();
-                //xu ly ket qua tra ve, neu co access token moi thi cap nhat vao state, neu khong thi set null
-                if (response?.code === 200 && response?.data?.accessToken) {
-                    dispatch({ type: 'SET_ACCESS_TOKEN', payload: response.data.accessToken });
-                } else {
-                    dispatch({ type: 'SET_ACCESS_TOKEN', payload: null });
-                }
-            } catch {
-                console.log("Can't auto create new token");
-                dispatch({ type: 'SET_ACCESS_TOKEN', payload: null });
-            } finally {
-                dispatch({ type: "SET_LOADING", payload: false });
-            }
-        };
-
-        const silentLogout = async () => {
-            try {
-                await LoginApi.logout();
-                dispatch({ type: 'LOGOUT' });
-                //redirect ve trang login
-                router.push("/login");
-            } catch (error) {
-                console.error('Logout failed:', error);
-            }
-        };
-        silentRefresh();
-    }, []);
-
-    return (
-        <AuthContext.Provider value={{ state, dispatch }}>
-            {children}
-        </AuthContext.Provider>
-    )
+  children: ReactNode;
 };
+
+export function AuthProvider({ children }: AuthProviderProps) {
+  const {
+    accessToken,
+    expiresAt,
+    profile,
+    isAuthenticated,
+    isLoading,
+    isBootstrapped,
+    setSession,
+    setAccessToken,
+    setLoading,
+    markBootstrapped,
+    reset,
+    hasRole,
+    hasPermission,
+  } = useAuthStore();
+
+  useEffect(() => {
+    globalApiClient.setToken(accessToken);
+  }, [accessToken]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function bootstrap() {
+      setLoading(true);
+      try {
+        const response = await authService.refreshToken();
+        if (!cancelled && response.data?.accessToken) {
+          setSession(response.data);
+          return;
+        }
+      } catch {
+        if (!cancelled) reset();
+        return;
+      }
+
+      if (!cancelled) markBootstrapped();
+    }
+
+    bootstrap();
+    return () => {
+      cancelled = true;
+    };
+  }, [markBootstrapped, reset, setLoading, setSession]);
+
+  const logout = useCallback(async () => {
+    try {
+      await authService.logout();
+    } catch {
+      // The client must clear local auth state even if the server session is already gone.
+    } finally {
+      reset();
+    }
+  }, [reset]);
+
+  const value = useMemo(
+    () => ({
+      accessToken,
+      expiresAt,
+      profile,
+      isAuthenticated,
+      isLoading,
+      isBootstrapped,
+      setToken: setAccessToken,
+      logout,
+      hasRole,
+      hasPermission,
+    }),
+    [
+      accessToken,
+      expiresAt,
+      hasPermission,
+      hasRole,
+      isAuthenticated,
+      isBootstrapped,
+      isLoading,
+      logout,
+      profile,
+      setAccessToken,
+    ]
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}

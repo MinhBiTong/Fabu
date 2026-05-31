@@ -1,132 +1,172 @@
 "use client";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { memo, useCallback, useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { LoginForm } from "@/features/auth/LoginForm";
+import { RegisterForm } from "@/features/auth/RegisterForm";
+import { featureRoutes } from "@/features/value-added/feature-routes";
+import { useAuth } from "@/hooks/use-auth";
+import logo from "@/styles/images/FABUlogo.png";
 
-import Loginform from "../../app/(auth)/login/page";
-import { globalApiClient } from "../../app/api/api-client";
+type NavItem = {
+  href: string;
+  label: string;
+  match?: string;
+};
 
-import logo from "../../styles/images/FABUlogo.png";
-import Icon from "../../styles/images/search.png";
-import Menu from "../../styles/images/menu.png";
-import User from "../../styles/images/user.png";
-import SignUpForm from "../../app/(auth)/register/page";
+const navItems: NavItem[] = [
+  { href: "/", label: "Home" },
+  { href: "/P5GDataPlan", label: "5G Data" },
+  { href: featureRoutes[0].href, label: "Features", match: "/features" },
+  { href: "/recharge", label: "Recharge" },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
+];
 
 function Header() {
-    const router = useRouter()
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [showLogin, setShowLogin] = useState(false);
-     const [showSignup , setSignup] = useState(false);
-    const [showOptionbar, setOptionBar] = useState(false);
-    const [showSettings , setSettings] = useState(false);
-    const[showSettingOptions , setSettingOptions] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
+  const { isAuthenticated, profile, logout } = useAuth();
+  const [isMenuOpen, setMenuOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<"login" | "register" | null>(null);
+  const [isAccountOpen, setAccountOpen] = useState(false);
 
-    useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    setIsLoggedIn(!!token);
-    }, []);
+  const username = useMemo(
+    () => profile.username || profile.email || "Account",
+    [profile.email, profile.username]
+  );
 
+  const closeAuth = useCallback(() => setAuthMode(null), []);
+
+  const handleLogout = useCallback(async () => {
+    await logout();
+    setAccountOpen(false);
+    router.push("/");
+  }, [logout, router]);
 
   return (
     <>
-    <div className="navibar">
+      <header className="fixed left-0 top-0 z-40 w-full border-b border-fabu-border bg-white">
+        <div className="mx-auto flex h-20 max-w-[1400px] items-center justify-between gap-4 px-4 md:px-5 lg:px-8">
+          <button
+            type="button"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-fabu-muted text-xl text-fabu-charcoal hover:bg-[#E7E7E7] lg:hidden"
+            onClick={() => setMenuOpen((value) => !value)}
+            aria-label="Toggle navigation"
+          >
+            =
+          </button>
 
-      <div className="menu">
-      <Image src={Menu} alt="Menu" onClick={() => setOptionBar(prev => !prev)} />
-      </div>
-      
-       <div className="logo">
-        <Image src={logo} alt="Logo" onClick={() => router.push("/")} />
-      </div>
+          <Link href="/" className="flex min-h-11 items-center gap-3" aria-label="Fabu home">
+            <Image src={logo} alt="Fabu" className="h-12 w-auto" priority />
+          </Link>
 
-      <div className="navlinks">
-         <button onClick={() => router.push("/")}>Home</button>
-          <button onClick={() => router.push("/P5GDataPlan")}>P5GDataPlan</button>
-         <button onClick={() => router.push("/about")}>About</button>
-       
-         <button onClick={() => router.push("/contact")}>Contact</button>
-      </div>
-      <div className="signin">
-      <button className="SearchButton">
-        <Image src={Icon} alt="Search" width={20} height={20} />
-      </button >
-     
-      {!isLoggedIn && (
-        <button className="SigninButton" onClick={() => setShowLogin(true)}>
-         Sign in
-         </button>
-      )}
+          <nav className="hidden h-full items-center gap-1 lg:flex">
+            {navItems.map((item) => {
+              const isActive =
+                item.href === "/"
+                  ? pathname === item.href
+                  : pathname.startsWith(item.match ?? item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex min-h-11 items-center rounded px-4 text-sm transition ${
+                    isActive
+                      ? "bg-fabu-red text-white"
+                      : "text-fabu-charcoal hover:bg-fabu-muted hover:text-fabu-red"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
 
-    {isLoggedIn && (
-       <button className="ProfileButton" onClick={() => setSettings(prev => !prev)}>
-        <Image src={User} alt="Profile"/>
-         </button>
-     )}
-
-      </div>
-
-    </div>
-      {showLogin && (
-       <Loginform 
-     onClose={() => setShowLogin(false)} 
-     onSwitchToSignup={() => {
-     setShowLogin(false);
-      setSignup(true);
-    }}
-/>
-      )}
-
-      {showOptionbar &&(
-        <div className="MenuList">
-           <button onClick={() => { router.push("/"); setOptionBar(false); }}>Home</button>
-          <button onClick={() => {router.push("/P5GDataPlan") ; setOptionBar(false); }}>P5GDataPlan</button>
-         <button onClick={() => {router.push("/about"); setOptionBar(false);}}>About</button>
-         <button onClick={() => {router.push("/contact"); setOptionBar(false);}}>Contact</button>
+          <div className="relative flex items-center gap-2">
+            {!isAuthenticated ? (
+              <>
+                <Button variant="ghost" onClick={() => setAuthMode("login")}>
+                  Sign in
+                </Button>
+                <Button className="hidden sm:inline-flex" onClick={() => setAuthMode("register")}>
+                  Register
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="secondary" onClick={() => setAccountOpen((value) => !value)}>
+                  {username}
+                </Button>
+                {isAccountOpen ? (
+                  <div className="absolute right-0 top-14 w-56 rounded border border-fabu-border bg-white p-2 shadow-modal">
+                    <button
+                      type="button"
+                      className="flex min-h-11 w-full items-center rounded px-3 text-left text-sm hover:bg-fabu-muted"
+                      onClick={() => {
+                        setAccountOpen(false);
+                        router.push("/Profile");
+                      }}
+                    >
+                      Profile
+                    </button>
+                    <button
+                      type="button"
+                      className="flex min-h-11 w-full items-center rounded px-3 text-left text-sm hover:bg-fabu-muted"
+                      onClick={handleLogout}
+                    >
+                      Log out
+                    </button>
+                  </div>
+                ) : null}
+              </>
+            )}
+          </div>
         </div>
-      )}
 
-     {showSignup && (
-  <SignUpForm onClose={() => setSignup(false)} />
-   )}
- 
-    {showSettings &&(
-         <div className="Settings">
-           <button onClick={() => setSettings(false)}>Profile</button>
-          <button onClick={() => setSettings(false)}>Settings</button>
-       <button onClick={() => setSettings(false)}>Contact</button>
-       <button
-  onClick={() => {
-    // remove stored token
-    localStorage.removeItem("accessToken");
-    // clear token from ApiClient
-    globalApiClient.setToken(null);
-    // update UI state
-    setIsLoggedIn(false);
-    // close dropdown
-    setSettings(false);
-
-    router.push("/");
-  }}
->
-  Log out
-</button>
-        </div>
-      )}
-
-         {showSettingOptions &&(
-         <div className="SettingsChoicesContainer">
-            <div className="SettingsChoices">
-
-
-
+        {isMenuOpen ? (
+          <nav className="border-t border-fabu-border bg-white px-4 py-3 lg:hidden">
+            <div className="grid gap-2">
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="flex min-h-11 items-center rounded px-3 text-sm hover:bg-fabu-muted hover:text-fabu-red"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {item.label}
+                </Link>
+              ))}
             </div>
-       </div>
-      )}
+          </nav>
+        ) : null}
+      </header>
 
-
+      {authMode ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-8"
+          onMouseDown={closeAuth}
+        >
+          <div onMouseDown={(event) => event.stopPropagation()} className="w-full max-w-lg">
+            {authMode === "login" ? (
+              <LoginForm
+                onClose={closeAuth}
+                onSwitchToSignup={() => setAuthMode("register")}
+              />
+            ) : (
+              <RegisterForm
+                onClose={closeAuth}
+                onSwitchToLogin={() => setAuthMode("login")}
+              />
+            )}
+          </div>
+        </div>
+      ) : null}
     </>
   );
 }
 
-export default Header;
+export default memo(Header);

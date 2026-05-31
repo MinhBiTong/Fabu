@@ -1,171 +1,34 @@
-"use client"
+import { ContactFeedbackForm } from "@/features/feedback/ContactFeedbackForm";
 
-import { ContactForm } from "@/components/ui/Form/contact-form";
-import Image from "next/image";
-import { useState } from "react";
-import { globalApiClient } from "@/app/api/api-client";
-import { feedbackSchema } from "@/core/validations/feedback.schema";
-import Phone from "../../styles/images/phonecall.png";
-import Starrate from "../../styles/images/Starating.png"
-import Starrateyes from "../../styles/images/StarratingYes.png"
-import Location2 from "../../styles/images/location2.png";
-import Gmail from "../../styles/images/gmail.png"
+const contactCards = [
+  { title: "Phone", body: "0924010294\n0694206767" },
+  { title: "Email", body: "support@fabu.vn" },
+  { title: "Office", body: "Fabu customer support center, Ho Chi Minh City" },
+];
 
 export default function ContactPage() {
-  const [hovered, setHovered] = useState(0);
-  const [rating, setRating] = useState(0);
-
-  // ✅ NEW STATE
-  const [form, setForm] = useState({
-
-    subject: "",
-    message: ""
-  });
-
-  const [errors, setErrors] = useState<any>({});
-
-  // ✅ HANDLE INPUT
-  const handleChange = (e: any) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-const handleSubmit = async () => {
-  const result = feedbackSchema.safeParse({
- 
-    subject: form.subject,
-    message: form.message,
-    rating: rating
-  });
-
-  if (!result.success) {
-    const fieldErrors: any = {};
-
-    result.error.issues.forEach((err) => {
-      fieldErrors[err.path[0]] = err.message;
-    });
-
-    setErrors(fieldErrors);
-    return;
-  }
-
-  try {
-    const token = localStorage.getItem("accessToken");
-    if (token) globalApiClient.setToken(token);
-
-    const res = await globalApiClient.post<any>("Feedbacks", {
-  
-      subject: form.subject,
-      message: form.message,
-      rating: rating,
-      status: 0,
-      customerId: null
-    });
-
-    if (res.code === 200) {
-      alert("Feedback submitted successfully!");
-
-      setForm({
-     
-        subject: "",
-        message: ""
-      });
-      setRating(0);
-      setErrors({});
-    } else {
-      alert("Failed to submit feedback");
-    }
-
-  } catch (err) {
-    console.error(err);
-    alert("Server error");
-  }
-};
   return (
-    <div className="ContactContainer">
-      <h1>Contact Us</h1>
-
-      <div className="ContactContent">
-
-        <h3>How would you rate your experience?</h3>
-
-        <div className="Starsrating">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <Image
-              key={star}
-              src={star <= (hovered || rating) ? Starrateyes : Starrate}
-              alt=""
-              onClick={() => setRating(star)}
-              onMouseEnter={() => setHovered(star)}
-              onMouseLeave={() => setHovered(0)}
-              style={{ cursor: "pointer" }}
-            />
-          ))}
+    <section className="fabu-section">
+      <div className="fabu-container grid gap-8 lg:grid-cols-[1fr_0.85fr]">
+        <div>
+          <h1>Contact Us</h1>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-fabu-gray">
+            Rate your experience or contact Fabu support directly.
+          </p>
+          <div className="mt-8 grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
+            {contactCards.map((card) => (
+              <article key={card.title} className="fabu-card">
+                <h3 className="text-xl">{card.title}</h3>
+                <p className="mt-2 whitespace-pre-line text-sm leading-6 text-fabu-gray">
+                  {card.body}
+                </p>
+              </article>
+            ))}
+          </div>
         </div>
 
-        {/* ✅ rating error */}
-        {errors.rating && <span className="error">{errors.rating}</span>}
-
-        <h3>Any suggestions for improvement? Send us a message!</h3>
-
-        <div className="ContactForm">
-
-          <p>Subject</p>
-          <input
-            name="subject"
-            value={form.subject}
-            onChange={handleChange}
-            placeholder="Enter subject"
-          />
-          {errors.subject && <span className="error">{errors.subject}</span>}
-
-          <p>Message</p>
-          <textarea
-            name="message"
-            value={form.message}
-            onChange={handleChange}
-            placeholder="Enter your message"
-          />
-          {errors.message && <span className="error">{errors.message}</span>}
-
-          <button type="button" onClick={handleSubmit}>
-            Submit
-          </button>
-        </div>
+        <ContactFeedbackForm />
       </div>
-
-      <h1>You want to contact us directly ?</h1>
-
-      <div className="ContactInfos">
-        <div className="ContactLine">
-          <div className="ContactBox">
-            <Image src={Phone} alt=""></Image>
-            <h3>Phone Numbers</h3>
-            <div className="Lines">
-              <p>0924010294</p>
-              <p>0694206767</p>
-              <p>0694206767</p>
-            </div>
-          </div>
-
-          <div className="ContactBox">
-            <Image src={Location2} alt=""></Image>
-            <h3>Phone Numbers</h3>
-            <div className="Lines">
-              <p>fjsdkahksdj ashjkdg d ashkjdh kjasd d jkasdjk dh...</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="ContactLine">
-          <div className="ContactBox">
-            <Image src={Gmail} alt=""></Image>
-            <h3>Phone Numbers</h3>
-            <div className="Lines">
-              <p>fjsdkahksdj ashjkdg d ashkjdh kjasd d jkasdjk dh...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    </section>
   );
 }

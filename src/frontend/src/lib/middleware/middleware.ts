@@ -1,19 +1,21 @@
 import { NextResponse } from "next/server";
+import type { JWTPayload } from "jose";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 
-// 🔐 ENV
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "secret");
 
-// 🔹 Route config
 const PUBLIC_ROUTES = ["/login", "/register"];
 const AUTH_ROUTES = ["/dashboard", "/recharge", "/bill-payment"];
 const ADMIN_ROUTES = ["/admin"];
 
-// 🔹 Fake Redis 
+type RolePayload = JWTPayload & {
+  role?: string;
+};
+
 async function isBlacklisted(token: string) {
   try {
-    const res = await fetch(`${process.env.API_URL}/auth/check-blacklist`, {
+    const response = await fetch(`${process.env.API_URL}/auth/check-blacklist`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -21,17 +23,16 @@ async function isBlacklisted(token: string) {
       body: JSON.stringify({ token }),
     });
 
-    const data = await res.json();
-    return data.blacklisted;
-  } catch (err) {
-    return false; // fail-open 
+    const data = (await response.json()) as { blacklisted?: boolean };
+    return Boolean(data.blacklisted);
+  } catch {
+    return false;
   }
 }
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon.ico") ||
@@ -44,64 +45,36 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const token = request.cookies.get("token")?.value;
-
-  // ========================
-  // ❌ No token → login
-  // ========================
+  const token = request.cookies.get("fabu_at")?.value;
   if (!token) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // ========================
-  // 🔐 Verify JWT
-  // ========================
-  let payload: any = null;
-
+  let payload: RolePayload;
   try {
-    const { payload: decoded } = await jwtVerify(token, JWT_SECRET);
-    payload = decoded;
-  } catch (err) {
+    const verified = await jwtVerify(token, JWT_SECRET);
+    payload = verified.payload as RolePayload;
+  } catch {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // ========================
-  // 🚫 Check blacklist (Redis)
-  // ========================
   const blacklisted = await isBlacklisted(token);
-
   if (blacklisted) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // ========================
-  // 🧑‍💼 Role check
-  // ========================
-  const role = payload?.role;
-
-  if (ADMIN_ROUTES.some((route) => pathname.startsWith(route))) {
-    if (role !== "admin") {
-      return NextResponse.redirect(new URL("/403", request.url));
-    }
+  const role = payload.role;
+  if (ADMIN_ROUTES.some((route) => pathname.startsWith(route)) && role !== "Admin") {
+    return NextResponse.redirect(new URL("/403", request.url));
   }
 
-  if (AUTH_ROUTES.some((route) => pathname.startsWith(route))) {
-    if (!role) {
-      return NextResponse.redirect(new URL("/login", request.url));
-    }
+  if (AUTH_ROUTES.some((route) => pathname.startsWith(route)) && !role) {
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // ========================
-  // ✅ OK -> skip
-  // ========================
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: [
-    "/dashboard/:path*",
-    "/admin/:path*",
-    "/recharge/:path*",
-    "/bill-payment/:path*",
-  ],
+  matcher: ["/dashboard/:path*", "/admin/:path*", "/recharge/:path*", "/bill-payment/:path*"],
 };

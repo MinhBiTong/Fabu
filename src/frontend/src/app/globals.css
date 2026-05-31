@@ -1,3 +1,113 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 200 5% 19%;
+  --card: 0 0% 100%;
+  --card-foreground: 200 5% 19%;
+  --primary: 347 100% 47%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 0 0% 96%;
+  --secondary-foreground: 0 0% 20%;
+  --muted: 0 0% 93%;
+  --muted-foreground: 0 0% 40%;
+  --accent: 199 100% 95%;
+  --accent-foreground: 206 100% 40%;
+  --destructive: 347 100% 47%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 0 0% 82%;
+  --input: 0 0% 82%;
+  --ring: 347 100% 47%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background: #ffffff;
+  color: #333333;
+  font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+a,
+[role="button"] {
+  touch-action: manipulation;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: rgba(238, 0, 51, 0.16);
+}
+
+@layer base {
+  h1,
+  h2,
+  h3 {
+    color: #2c2f31;
+    font-family: FS PFBeauSansPro, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+
+  h1,
+  h2 {
+    font-size: clamp(28px, 4vw, 44px);
+    line-height: 1.25;
+  }
+
+  h3 {
+    font-size: clamp(20px, 2vw, 26px);
+    line-height: 1.38;
+  }
+}
+
+@layer components {
+  .fabu-page {
+    @apply min-h-screen bg-white;
+  }
+
+  .fabu-section {
+    @apply w-full px-4 py-10 md:px-5 lg:px-8 lg:py-[60px];
+  }
+
+  .fabu-container {
+    @apply mx-auto w-full max-w-[1400px];
+  }
+
+  .fabu-card {
+    @apply rounded-card border border-fabu-border bg-white p-6 shadow-elevated transition hover:border-fabu-red hover:shadow-prominent;
+  }
+
+  .fabu-input {
+    @apply h-11 w-full rounded border border-fabu-border bg-white px-4 text-sm text-fabu-charcoal outline-none transition placeholder:text-neutral-400 focus:border-fabu-red focus:shadow-[0_0_0_2px_rgba(238,0,51,0.1)];
+  }
+
+  .fabu-label {
+    @apply text-sm font-semibold text-fabu-ink;
+  }
+
+  .fabu-error {
+    @apply text-xs text-fabu-red;
+  }
+}

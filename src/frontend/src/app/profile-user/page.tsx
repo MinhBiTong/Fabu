@@ -1,7 +1,3 @@
-export default function UserProfilePage() {
-    return(
-        <div className="Container">
-            <p>Hello World</p>
-        </div>
-    )
-}
+import ProfilePage from "@/app/Profile/page";
+
+export default ProfilePage;

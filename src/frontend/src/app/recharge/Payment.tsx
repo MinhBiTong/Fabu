@@ -1,77 +1,20 @@
-"use client";
+import { formatCurrency } from "@/lib/utils/format";
 
-import { useEffect, useState } from "react";
-import "../../styles/css/payment.css";
-
-type Props = {
-  phone: string;
+type PaymentProps = {
   amount: number | null;
-  selectedCoupon: string;
-  onFinalChange: (value: number) => void;
+  finalPrice: number;
 };
 
-export default function Payment({
-  phone,
-  amount,
-  selectedCoupon,
-  onFinalChange,
-}: Props) {
-  const [method, setMethod] = useState("");
-  const [discount, setDiscount] = useState(0);
-  const [final, setFinal] = useState(0);
-
-  const methods = [
-    { id: "001", label: "Viettel Gate", discount: 0.025 },
-    { id: "002", label: "ZaloPay", discount: 0.05 },
-  ];
-
-  const couponMap: any = {
-    SALE10: 0.1,
-    SALE5: 0.05,
-  };
-
-  useEffect(() => {
-  if (!amount) {
-    setDiscount(0);
-    setFinal(0);
-    onFinalChange(0);
-    return;
-  }
-
-  const methodDiscount =
-    methods.find((m) => m.id === method)?.discount || 0;
-
-  const couponDiscount = couponMap[selectedCoupon] || 0;
-
-  const totalDiscount = amount * (methodDiscount + couponDiscount);
-  const finalValue = amount - totalDiscount;
-
-  setDiscount(totalDiscount);
-  setFinal(finalValue);
-
-  onFinalChange(finalValue);
-}, [amount, method, selectedCoupon]);
-
+export default function Payment({ amount, finalPrice }: PaymentProps) {
   return (
-    <div className="payment-container">
-      {phone && amount && (
-        <div className="methods">
-          {methods.map((m) => (
-            <div
-              key={m.id}
-              className={`method ${method === m.id ? "active" : ""}`}
-              onClick={() => setMethod(m.id)}
-            >
-              {m.label} (-{m.discount * 100}%)
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div className="summary">
-        <p>Total: {amount?.toLocaleString("vi-VN")} VND</p>
-        <p>Discount: -{discount.toLocaleString("vi-VN")} VND</p>
-        <h3>Total Payment: {final.toLocaleString("vi-VN")} VND</h3>
+    <div className="rounded bg-fabu-muted p-4">
+      <div className="flex justify-between text-sm text-fabu-gray">
+        <span>Amount</span>
+        <span>{formatCurrency(amount ?? 0)}</span>
+      </div>
+      <div className="mt-3 flex justify-between text-lg font-bold text-fabu-ink">
+        <span>Total payment</span>
+        <span>{formatCurrency(finalPrice)}</span>
       </div>
     </div>
   );

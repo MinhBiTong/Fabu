@@ -1,27 +1,18 @@
-import { createTheme } from '@mui/material/styles';
+import { create } from "zustand";
 
-  export const ThemeColor = createTheme({
-    palette: {
-      primary: {
-        main: '#ca1f66',
-      },
-      secondary: {
-        main: '#000000ff',
-      },
-      error: {
-        main: '#ff0000',
-      },
-      warning: {
-        main: '#ffeb3b',
-      },
-      info: {
-        main: '#2196f3',
-      },
-      success: {
-        main: '#4caf50',
-      },
-      background: {
-        default: '#f5f5f5',
-      },
-    },
-  });
+type ThemeMode = "light" | "dark";
+
+type ThemeStore = {
+  mode: ThemeMode;
+  setMode: (mode: ThemeMode) => void;
+  toggleMode: () => void;
+};
+
+export const useThemeStore = create<ThemeStore>((set) => ({
+  mode: "light",
+  setMode: (mode) => set({ mode }),
+  toggleMode: () =>
+    set((state) => ({
+      mode: state.mode === "light" ? "dark" : "light",
+    })),
+}));
