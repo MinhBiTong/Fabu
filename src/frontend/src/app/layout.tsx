@@ -3,6 +3,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Chatbot from "@/components/layout/Chatbot";
 import AdminSidebar from "@/components/layout/AdminSidebar";
+import LayoutAdBroadcast from "@/components/layout/LayoutAdBroadcast";
 import { Providers } from "./providers";
 
 import "react-toastify/dist/ReactToastify.css";
@@ -20,7 +21,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <Providers>
           <Header />
           <AdminSidebar />
-          <main className="min-h-screen pt-20">{children}</main>
+          <main className="min-h-screen pt-20">
+            <LayoutAdBroadcast />
+            {children}
+          </main>
           <Chatbot />
           <Footer />
         </Providers>

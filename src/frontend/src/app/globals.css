@@ -60,6 +60,52 @@ a {
   background: rgba(238, 0, 51, 0.16);
 }
 
+@keyframes fabu-shimmer {
+  0% {
+    background-position: 120% 0;
+  }
+
+  100% {
+    background-position: -120% 0;
+  }
+}
+
+@keyframes fabu-toast-in {
+  from {
+    opacity: 0;
+    transform: translate3d(16px, -8px, 0) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes fabu-live-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.22);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
 @layer base {
   h1,
   h2,
@@ -99,6 +145,10 @@ a {
     @apply rounded-card border border-fabu-border bg-white p-6 shadow-elevated transition hover:border-fabu-red hover:shadow-prominent;
   }
 
+  .fabu-dashboard-card {
+    @apply rounded-card border border-fabu-border bg-white p-5 shadow-elevated transition hover:border-fabu-red hover:shadow-prominent md:p-6;
+  }
+
   .fabu-input {
     @apply h-11 w-full rounded border border-fabu-border bg-white px-4 text-sm text-fabu-charcoal outline-none transition placeholder:text-neutral-400 focus:border-fabu-red focus:shadow-[0_0_0_2px_rgba(238,0,51,0.1)];
   }
@@ -109,5 +159,27 @@ a {
 
   .fabu-error {
     @apply text-xs text-fabu-red;
+  }
+
+  .fabu-skeleton {
+    background: linear-gradient(90deg, #eeeeee 25%, #f7f7f7 37%, #eeeeee 63%);
+    background-size: 400% 100%;
+    animation: fabu-shimmer 1.3s ease-in-out infinite;
+  }
+
+  .fabu-toast {
+    border: 1px solid #d1d1d1;
+    border-radius: 8px;
+    color: #333333;
+    box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.15);
+    animation: fabu-toast-in 180ms ease-out;
+  }
+
+  .fabu-toast-progress {
+    background: #ee0033;
+  }
+
+  .fabu-live-dot {
+    animation: fabu-live-pulse 1.4s ease-in-out infinite;
   }
 }

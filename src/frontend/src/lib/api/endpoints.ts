@@ -35,6 +35,21 @@ export const endpoints = {
     byRef: (transactionRef: string) => `v1/Transaction/${transactionRef}`,
     byCustomer: (customerId: number | string) => `v1/Transaction/customer/${customerId}`,
   },
+  commerce: {
+    products: "v1/Products",
+    featuredProducts: "v1/Products/featured",
+    productDetail: (productId: number | string) => `v1/Products/${productId}`,
+    cartByCustomer: (customerId: number | string) => `v1/Cart/customer/${customerId}`,
+    cartItem: "v1/Cart/items",
+    cartItemForProduct: (customerId: number | string, productId: number | string) =>
+      `v1/Cart/customer/${customerId}/items/${productId}`,
+    checkout: "v1/Cart/checkout",
+    orderDetail: (orderId: number | string) => `v1/Orders/${orderId}`,
+    orderByCode: (orderCode: string) => `v1/Orders/code/${orderCode}`,
+    ordersByCustomer: (customerId: number | string) => `v1/Orders/customer/${customerId}`,
+    packagePayment: "v1/Payment/package",
+    postpaidPayment: (billId: number | string) => `v1/Postpaid/bills/${billId}/pay`,
+  },
   chatbot: {
     chat: "AIChatbot/chat",
   },

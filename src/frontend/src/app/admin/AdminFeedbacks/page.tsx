@@ -3,13 +3,18 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
+import nextDynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
-import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { ChartSkeleton } from "@/components/ui/skeleton";
 import { useFeedbackStore } from "@/store/feedback.store";
 
 const itemsPerPage = 12;
+const FeedbackStarsChart = nextDynamic(
+  () => import("@/features/admin/FeedbackStarsChart").then((module) => module.FeedbackStarsChart),
+  { ssr: false, loading: () => <ChartSkeleton /> }
+);
 
 export default function AdminFeedbacksPage() {
   const { feedbacks, loadFeedbacks, isLoading, error } = useFeedbackStore();
@@ -52,16 +57,11 @@ export default function AdminFeedbacksPage() {
           <p className="mt-2 text-sm text-fabu-gray">Customer feedback from `Feedbacks`.</p>
         </div>
 
-        <div className="fabu-card h-[320px]">
+        <div className="fabu-card">
           <h2 className="mb-4 text-2xl">Stars Chart</h2>
-          <ResponsiveContainer width="100%" height="80%">
-            <BarChart data={chartData} layout="vertical">
-              <XAxis type="number" />
-              <YAxis dataKey="star" type="category" />
-              <Tooltip />
-              <Bar dataKey="total" fill="#EE0033" radius={[0, 8, 8, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="h-[260px] min-w-0">
+            <FeedbackStarsChart data={chartData} />
+          </div>
         </div>
 
         <div className="grid gap-3 md:grid-cols-[1fr_160px]">

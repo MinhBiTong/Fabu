@@ -20,6 +20,7 @@ type NavItem = {
 const navItems: NavItem[] = [
   { href: "/", label: "Home" },
   { href: "/P5GDataPlan", label: "5G Data" },
+  { href: "/shop", label: "Shop" },
   { href: featureRoutes[0].href, label: "Features", match: "/features" },
   { href: "/recharge", label: "Recharge" },
   { href: "/about", label: "About" },

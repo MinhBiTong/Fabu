@@ -79,6 +79,9 @@ export type FeedbackResponse = {
 export type TransactionResponse = {
   customerId?: number | null;
   paymentId?: number | null;
+  orderId?: string | null;
+  serviceId?: number | null;
+  subscriptionMonths?: number | null;
   transactionType: string;
   amount: number;
   status: string;
@@ -99,6 +102,89 @@ export type TransactionCreateRequest = {
   CompletedAt: string;
   CouponCode?: string | null;
   MobileNumber?: string | null;
+};
+
+export type TelecomProduct = {
+  id: string;
+  sku?: string;
+  name: string;
+  category: string;
+  brand?: string | null;
+  description?: string | null;
+  price: number;
+  originalPrice?: number | null;
+  stockQuantity: number;
+  imageUrl?: string | null;
+  isFeatured?: boolean;
+  isActive?: boolean;
+  createdAt?: string;
+};
+
+export type CartItem = {
+  productId: string;
+  productName: string;
+  sku?: string;
+  quantity: number;
+  unitPrice: number;
+  lineTotal: number;
+};
+
+export type CartResponse = {
+  id: string;
+  customerId: number;
+  status: string;
+  totalItems: number;
+  subtotal: number;
+  items: CartItem[];
+};
+
+export type CartItemRequest = {
+  customerId: number;
+  productId: string;
+  quantity: number;
+};
+
+export type CartCheckoutRequest = {
+  customerId: number;
+  paymentMethod: number;
+  contactPhone?: string | null;
+  shippingAddress?: string | null;
+  note?: string | null;
+  couponCode?: string | null;
+};
+
+export type OrderItem = {
+  productId: string;
+  productName: string;
+  sku?: string;
+  quantity: number;
+  unitPrice: number;
+  lineTotal: number;
+};
+
+export type OrderResponse = {
+  id: string;
+  customerId: number;
+  paymentId?: number | null;
+  orderCode: string;
+  status: string;
+  subtotal: number;
+  discountAmount: number;
+  totalAmount: number;
+  paymentMethod: string;
+  contactPhone?: string | null;
+  shippingAddress?: string | null;
+  note?: string | null;
+  paidAt?: string | null;
+  items: OrderItem[];
+};
+
+export type PackagePaymentRequest = {
+  customerId: number;
+  serviceId: number;
+  paymentMethod: number;
+  subscriptionMonths: number;
+  couponCode?: string | null;
 };
 
 export type UserSummary = {

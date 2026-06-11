@@ -1,0 +1,220 @@
+import type { DashboardProfile } from "./dashboard-types";
+
+const baseTrends = [
+  { label: "T2", revenue: 118000000, orders: 420, conversion: 4.2 },
+  { label: "T3", revenue: 146000000, orders: 510, conversion: 4.8 },
+  { label: "T4", revenue: 132000000, orders: 488, conversion: 4.4 },
+  { label: "T5", revenue: 171000000, orders: 612, conversion: 5.3 },
+  { label: "T6", revenue: 186000000, orders: 688, conversion: 5.7 },
+  { label: "T7", revenue: 214000000, orders: 741, conversion: 6.1 },
+];
+
+const baseActivity = [
+  {
+    id: "act-1",
+    time: "09:12",
+    actor: "Fabu Shop Hanoi",
+    action: "bán router 5G + gói tháng",
+    amount: 1890000,
+    status: "success" as const,
+  },
+  {
+    id: "act-2",
+    time: "09:20",
+    actor: "Merchant 247",
+    action: "đẩy chiến dịch voucher trả sau",
+    amount: 420000,
+    status: "pending" as const,
+  },
+  {
+    id: "act-3",
+    time: "09:28",
+    actor: "Rider West",
+    action: "xác nhận giao thiết bị",
+    amount: 980000,
+    status: "success" as const,
+  },
+  {
+    id: "act-4",
+    time: "09:35",
+    actor: "Billing",
+    action: "phát hiện 14 bill quá hạn",
+    amount: 12600000,
+    status: "warning" as const,
+  },
+  {
+    id: "act-5",
+    time: "09:48",
+    actor: "Digital Ads",
+    action: "campaign đạt ngưỡng impression",
+    amount: 0,
+    status: "pending" as const,
+  },
+  {
+    id: "act-6",
+    time: "10:02",
+    actor: "Fabu Care",
+    action: "upsell gói data 3 tháng",
+    amount: 690000,
+    status: "success" as const,
+  },
+  {
+    id: "act-7",
+    time: "10:11",
+    actor: "Store District 1",
+    action: "thêm tồn kho phụ kiện",
+    amount: 3120000,
+    status: "pending" as const,
+  },
+  {
+    id: "act-8",
+    time: "10:19",
+    actor: "Payment Saga",
+    action: "hoàn tất giao dịch trả trước",
+    amount: 250000,
+    status: "success" as const,
+  },
+];
+
+export const dashboardProfiles: DashboardProfile[] = [
+  {
+    id: "executive",
+    label: "Executive",
+    description: "Tổng quan điều hành doanh thu, tăng trưởng và chất lượng vận hành.",
+    kpis: [
+      { id: "gmv", label: "GMV hôm nay", value: 214000000, formatter: "currency", change: "+18.4%", sentiment: "positive" },
+      { id: "orders", label: "Đơn hàng", value: 741, formatter: "number", change: "+9.2%", sentiment: "positive" },
+      { id: "margin", label: "Biên lợi nhuận", value: 22.8, formatter: "percent", change: "+1.6%", sentiment: "positive" },
+      { id: "risk", label: "Bill quá hạn", value: 14, formatter: "number", change: "cần xử lý", sentiment: "warning" },
+    ],
+    trends: baseTrends,
+    channels: [
+      { name: "Thiết bị", value: 42 },
+      { name: "Gói tháng", value: 31 },
+      { name: "Trả trước", value: 18 },
+      { name: "Trả sau", value: 9 },
+    ],
+    activity: baseActivity,
+    rankings: [
+      { name: "Router 5G Pro", value: "128 đơn", change: "+24%" },
+      { name: "SIM data 120GB", value: "96 đơn", change: "+18%" },
+      { name: "Voucher trả sau", value: "64 đơn", change: "+11%" },
+    ],
+    insights: [
+      { id: "exec-1", title: "Doanh thu thiết bị kéo gói tháng", body: "Nhóm bundle thiết bị + thuê bao tháng đang tạo phần lớn tăng trưởng GMV.", severity: "success" },
+      { id: "exec-2", title: "Cần xử lý bill quá hạn", body: "14 bill quá hạn nên được chuyển sang queue chăm sóc trước 15:00.", severity: "warning" },
+    ],
+  },
+  {
+    id: "revenue",
+    label: "Revenue",
+    description: "Theo dõi doanh thu, conversion và mix sản phẩm theo kênh.",
+    kpis: [
+      { id: "revenue", label: "Doanh thu tháng", value: 1284000000, formatter: "currency", change: "+21.1%", sentiment: "positive" },
+      { id: "aov", label: "AOV", value: 865000, formatter: "currency", change: "+6.8%", sentiment: "positive" },
+      { id: "conversion", label: "Conversion", value: 6.1, formatter: "percent", change: "+0.7%", sentiment: "positive" },
+      { id: "refund", label: "Hoàn tiền", value: 1.8, formatter: "percent", change: "ổn định", sentiment: "neutral" },
+    ],
+    trends: baseTrends.map((point) => ({ ...point, revenue: point.revenue * 1.12 })),
+    channels: [
+      { name: "Online", value: 38 },
+      { name: "Merchant", value: 34 },
+      { name: "App", value: 21 },
+      { name: "Care", value: 7 },
+    ],
+    activity: baseActivity,
+    rankings: [
+      { name: "Bundle router + 5G", value: "312M", change: "+31%" },
+      { name: "Gói tháng data", value: "248M", change: "+19%" },
+      { name: "Phụ kiện", value: "81M", change: "+8%" },
+    ],
+    insights: [
+      { id: "rev-1", title: "AOV tăng nhờ bundle", body: "Cross-sell phụ kiện sau khi thêm router vào giỏ tạo AOV tốt nhất.", severity: "success" },
+      { id: "rev-2", title: "Tối ưu voucher", body: "Voucher trả sau nên giới hạn theo merchant có conversion thấp.", severity: "info" },
+    ],
+  },
+  {
+    id: "realtime",
+    label: "Realtime",
+    description: "Luồng đơn, payment saga và cảnh báo vận hành đang diễn ra.",
+    kpis: [
+      { id: "live-orders", label: "Đơn 15 phút", value: 86, formatter: "number", change: "+13 live", sentiment: "positive" },
+      { id: "payment-success", label: "Payment success", value: 97.2, formatter: "percent", change: "+0.4%", sentiment: "positive" },
+      { id: "queue", label: "Queue xử lý", value: 23, formatter: "number", change: "đang giảm", sentiment: "neutral" },
+      { id: "latency", label: "Saga latency", value: 1.8, formatter: "duration", change: "mượt", sentiment: "positive" },
+    ],
+    trends: baseTrends.map((point) => ({ ...point, orders: Math.round(point.orders / 4), conversion: point.conversion + 0.3 })),
+    channels: [
+      { name: "Paid", value: 71 },
+      { name: "Pending", value: 19 },
+      { name: "Failed", value: 4 },
+      { name: "Manual", value: 6 },
+    ],
+    activity: baseActivity.concat(baseActivity.map((item, index) => ({ ...item, id: `${item.id}-copy-${index}`, time: `10:${25 + index}` }))),
+    rankings: [
+      { name: "VNPay", value: "98.1%", change: "+0.5%" },
+      { name: "Balance", value: "99.2%", change: "+0.2%" },
+      { name: "Cash", value: "100%", change: "stable" },
+    ],
+    insights: [
+      { id: "real-1", title: "Payment saga ổn định", body: "Tỷ lệ success cao, lỗi tập trung ở callback retry thấp.", severity: "success" },
+      { id: "real-2", title: "Queue bill tăng nhẹ", body: "Nên ưu tiên các bill có amount lớn hơn 1 triệu.", severity: "warning" },
+    ],
+  },
+  {
+    id: "merchant",
+    label: "Merchant",
+    description: "Hiệu quả cửa hàng, tồn kho, campaign và top sản phẩm.",
+    kpis: [
+      { id: "active-merchants", label: "Merchant active", value: 128, formatter: "number", change: "+12", sentiment: "positive" },
+      { id: "merchant-revenue", label: "Merchant GMV", value: 486000000, formatter: "currency", change: "+16.3%", sentiment: "positive" },
+      { id: "stockout", label: "Sắp hết hàng", value: 9, formatter: "number", change: "cần bổ sung", sentiment: "warning" },
+      { id: "merchant-ctr", label: "Campaign CTR", value: 7.4, formatter: "percent", change: "+1.1%", sentiment: "positive" },
+    ],
+    trends: baseTrends.map((point) => ({ ...point, revenue: point.revenue * 0.72, orders: Math.round(point.orders * 0.66) })),
+    channels: [
+      { name: "Store", value: 44 },
+      { name: "Affiliate", value: 22 },
+      { name: "Voucher", value: 20 },
+      { name: "Organic", value: 14 },
+    ],
+    activity: baseActivity,
+    rankings: [
+      { name: "Fabu Shop Hanoi", value: "92M", change: "+22%" },
+      { name: "Merchant 247", value: "73M", change: "+18%" },
+      { name: "District 1 Store", value: "66M", change: "+15%" },
+    ],
+    insights: [
+      { id: "mer-1", title: "Merchant cần campaign theo tồn kho", body: "Sản phẩm tồn cao nên đẩy vào sidebar/cross-sell thay vì banner chính.", severity: "info" },
+      { id: "mer-2", title: "9 SKU sắp hết hàng", body: "Router 5G Pro ở 3 cửa hàng cần bổ sung trong ngày.", severity: "warning" },
+    ],
+  },
+  {
+    id: "rider",
+    label: "Rider",
+    description: "Theo dõi giao thiết bị, SLA, trạng thái rider và issue theo tuyến.",
+    kpis: [
+      { id: "deliveries", label: "Giao hôm nay", value: 312, formatter: "number", change: "+7.8%", sentiment: "positive" },
+      { id: "sla", label: "SLA đúng hẹn", value: 94.6, formatter: "percent", change: "+2.1%", sentiment: "positive" },
+      { id: "avg-time", label: "Thời gian TB", value: 28, formatter: "duration", change: "-4 phút", sentiment: "positive" },
+      { id: "exceptions", label: "Issue mở", value: 11, formatter: "number", change: "theo dõi", sentiment: "warning" },
+    ],
+    trends: baseTrends.map((point) => ({ ...point, revenue: point.revenue * 0.38, orders: Math.round(point.orders * 0.42), conversion: point.conversion - 0.8 })),
+    channels: [
+      { name: "Delivered", value: 76 },
+      { name: "In transit", value: 16 },
+      { name: "Retry", value: 5 },
+      { name: "Issue", value: 3 },
+    ],
+    activity: baseActivity,
+    rankings: [
+      { name: "North route", value: "98.2% SLA", change: "+1.4%" },
+      { name: "West route", value: "94.6% SLA", change: "+2.8%" },
+      { name: "Central route", value: "91.9% SLA", change: "-0.3%" },
+    ],
+    insights: [
+      { id: "rid-1", title: "SLA cải thiện", body: "Route West giảm thời gian trung bình nhờ gom đơn theo khu vực.", severity: "success" },
+      { id: "rid-2", title: "Issue cần xử lý", body: "11 đơn cần liên hệ khách trước khi chuyển trạng thái retry.", severity: "warning" },
+    ],
+  },
+];
