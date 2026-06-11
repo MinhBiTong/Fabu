@@ -78,29 +78,36 @@ namespace Application.Services
             return ApiResponse<bool>.Success(true, "Service deleted successfully.");
         }
 
-        public Task<ApiResponse<List<ServiceResponse>>> GetActiveServicesByCategoryAsync(string category)
+        public async Task<ApiResponse<List<ServiceResponse>>> GetActiveServicesByCategoryAsync(string category)
         {
-            throw new NotImplementedException();
+            var services = await _unitOfWork.Services.GetActiveServicesByCategoryAsync(category);
+            return ApiResponse<List<ServiceResponse>>.Success(_mapper.Map<List<ServiceResponse>>(services));
         }
 
-        public Task<ApiResponse<List<ServiceResponse>>> GetPopularServicesAsync(int top)
+        public async Task<ApiResponse<List<ServiceResponse>>> GetPopularServicesAsync(int top)
         {
-            throw new NotImplementedException();
+            var services = await _unitOfWork.Services.GetPopularServicesAsync(top);
+            return ApiResponse<List<ServiceResponse>>.Success(_mapper.Map<List<ServiceResponse>>(services));
         }
 
-        public Task<ApiResponse<ServiceResponse>> GetByCodeAsync(string code)
+        public async Task<ApiResponse<ServiceResponse>> GetByCodeAsync(string code)
         {
-            throw new NotImplementedException();
+            var service = await _unitOfWork.Services.GetByCodeAsync(code);
+            if (service == null)
+                return ApiResponse<ServiceResponse>.Fail(404, "Service not found.");
+
+            return ApiResponse<ServiceResponse>.Success(_mapper.Map<ServiceResponse>(service));
         }
 
-        public Task<ApiResponse<bool>> IsServiceActiveAsync(long serviceId)
+        public async Task<ApiResponse<bool>> IsServiceActiveAsync(long serviceId)
         {
-            throw new NotImplementedException();
+            return ApiResponse<bool>.Success(await _unitOfWork.Services.IsServiceActiveAsync(serviceId));
         }
 
-        public Task<ApiResponse<List<ServiceResponse>>> SearchServicesAsync(string keyword)
+        public async Task<ApiResponse<List<ServiceResponse>>> SearchServicesAsync(string keyword)
         {
-            throw new NotImplementedException();
+            var services = await _unitOfWork.Services.SearchServicesAsync(keyword);
+            return ApiResponse<List<ServiceResponse>>.Success(_mapper.Map<List<ServiceResponse>>(services));
         }
     }
 }

@@ -16,6 +16,12 @@ namespace Persistence.Data.Contexts
             _userContext = userContext;
         }
 
+        public DbSet<TelecomProduct> TelecomProducts => Set<TelecomProduct>();
+        public DbSet<ShoppingCart> ShoppingCarts => Set<ShoppingCart>();
+        public DbSet<ShoppingCartItem> ShoppingCartItems => Set<ShoppingCartItem>();
+        public DbSet<Order> Orders => Set<Order>();
+        public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);            

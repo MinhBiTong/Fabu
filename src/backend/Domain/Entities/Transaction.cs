@@ -16,6 +16,11 @@ namespace Domain.Entities
         public virtual Customer? Customer { get; set; }
         public long? PaymentId { get; set; }
         public virtual Payment? Payment { get; set; }
+        public Guid? OrderId { get; set; }
+        public virtual Order? Order { get; set; }
+        public long? ServiceId { get; set; }
+        public virtual Service? Service { get; set; }
+        public int? SubscriptionMonths { get; set; }
         public string TransactionType { get; set; } // Recharge, BillPayment...
 
         public decimal Amount { get; set; }

@@ -17,10 +17,13 @@ namespace Api.Controllers
     {
         private readonly IPaymentService _paymentService;
         private readonly IMediator _mediator;
-        public PaymentController(IPaymentService paymentService, IMediator mediator)
+        private readonly string _frontendBaseUrl;
+
+        public PaymentController(IPaymentService paymentService, IMediator mediator, IConfiguration configuration)
         {
             _paymentService = paymentService;
             _mediator = mediator;
+            _frontendBaseUrl = configuration["Frontend:BaseUrl"]?.TrimEnd('/') ?? "http://localhost:3000";
         }
 
         /// <summary>
@@ -30,7 +33,7 @@ namespace Api.Controllers
         [Authorize]   // Hoặc [AllowAnonymous] nếu cho phép guest thanh toán
         public async Task<ActionResult<ApiResponse<PaymentResponse>>> CreatePayment([FromBody] PaymentCreateRequest request)
         {
-            if (request == null || request.Amount <= 0)
+            if (request == null || (request.Amount <= 0 && !request.OrderId.HasValue && !request.ServiceId.HasValue))
                 return BadRequest(ApiResponse<PaymentResponse>.Fail(400, "Invalid payment data"));
 
             try
@@ -59,6 +62,37 @@ namespace Api.Controllers
             return BuildGatewayRedirect(result);
         }
 
+        [HttpPost("package")]
+        [Authorize]
+        public async Task<ActionResult<ApiResponse<PaymentResponse>>> PayPackage([FromBody] PackagePaymentRequest request)
+        {
+            try
+            {
+                var result = await _paymentService.CreatePaymentAsync(new PaymentCreateRequest
+                {
+                    CustomerId = request.CustomerId,
+                    ServiceId = request.ServiceId,
+                    SubscriptionMonths = request.SubscriptionMonths,
+                    Amount = 0,
+                    PaymentMethod = request.PaymentMethod,
+                    UseAccountBalance = request.UseAccountBalance,
+                    CouponCode = request.CouponCode,
+                    TransactionType = request.PayMonthly
+                        ? Domain.ValueObjects.TransactionType.MonthlyPackagePayment
+                        : Domain.ValueObjects.TransactionType.PackageSubscription,
+                    OrderInfo = request.PayMonthly
+                        ? $"Fabu monthly package service {request.ServiceId}"
+                        : $"Fabu package service {request.ServiceId} x {request.SubscriptionMonths} months"
+                });
+
+                return Ok(ApiResponse<PaymentResponse>.Success(result, "Package payment created successfully."));
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(ApiResponse<PaymentResponse>.Fail((int)ex.GetErrorCode(), ex.Message));
+            }
+        }
+
         [HttpGet("paypal-callback")]
         [AllowAnonymous]
         public async Task<IActionResult> PayPalCallback([FromQuery] Dictionary<string, string> callbackData)
@@ -78,12 +112,12 @@ namespace Api.Controllers
         [HttpGet("paypal-cancel")]
         [AllowAnonymous]
         public IActionResult PayPalCancel([FromQuery] string? paymentRef)
-            => Redirect($"https://your-frontend.com/payment-failed?ref={Uri.EscapeDataString(paymentRef ?? string.Empty)}&message=PayPal+payment+cancelled");
+            => Redirect($"{_frontendBaseUrl}/payment-failed?ref={Uri.EscapeDataString(paymentRef ?? string.Empty)}&message=PayPal+payment+cancelled");
 
         [HttpGet("stripe-cancel")]
         [AllowAnonymous]
         public IActionResult StripeCancel([FromQuery] string? paymentRef)
-            => Redirect($"https://your-frontend.com/payment-failed?ref={Uri.EscapeDataString(paymentRef ?? string.Empty)}&message=Stripe+payment+cancelled");
+            => Redirect($"{_frontendBaseUrl}/payment-failed?ref={Uri.EscapeDataString(paymentRef ?? string.Empty)}&message=Stripe+payment+cancelled");
 
         /// <summary>
         /// Lấy thông tin một giao dịch thanh toán theo PaymentRef
@@ -100,10 +134,10 @@ namespace Api.Controllers
         {
             if (result.IsSuccess)
             {
-                return Redirect($"https://your-frontend.com/payment-success?ref={Uri.EscapeDataString(result.PaymentRef)}");
+                return Redirect($"{_frontendBaseUrl}/payment-success?ref={Uri.EscapeDataString(result.PaymentRef)}");
             }
 
-            return Redirect($"https://your-frontend.com/payment-failed?message={Uri.EscapeDataString(result.Message)}");
+            return Redirect($"{_frontendBaseUrl}/payment-failed?message={Uri.EscapeDataString(result.Message)}");
         }
     }
 }

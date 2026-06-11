@@ -44,19 +44,33 @@ namespace Application.Services
             return await _paymentTransactionSaga.StartAsync(request);
         }
 
-        public Task<ApiResponse<bool>> DeleteAsync(int id)
+        public async Task<ApiResponse<bool>> DeleteAsync(int id)
         {
-            throw new NotImplementedException();
+            var payment = await _unitOfWork.Payments.GetByIdAsync(id);
+            if (payment is null)
+                return ApiResponse<bool>.Fail(404, "Payment not found.");
+
+            _unitOfWork.Payments.Delete(payment);
+            await _unitOfWork.SaveChangesAsync();
+            return ApiResponse<bool>.Success(true, "Payment deleted successfully.");
         }
 
-        public Task<ApiResponse<List<PaymentResponse>>> GetAllAsync()
+        public async Task<ApiResponse<List<PaymentResponse>>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            var payments = await _unitOfWork.Payments.GetAllAsync();
+            return ApiResponse<List<PaymentResponse>>.Success(
+                payments.OrderByDescending(payment => payment.PaymentDate)
+                    .Select(payment => PaymentResponse.FromEntity(payment))
+                    .ToList());
         }
 
-        public Task<ApiResponse<PaymentResponse>> GetByIdAsync(int id)
+        public async Task<ApiResponse<PaymentResponse>> GetByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            var payment = await _unitOfWork.Payments.GetByIdAsync(id);
+            if (payment is null)
+                return ApiResponse<PaymentResponse>.Fail(404, "Payment not found.");
+
+            return ApiResponse<PaymentResponse>.Success(PaymentResponse.FromEntity(payment));
         }
 
         public async Task<PaymentResponse> GetPaymentByRefAsync(string paymentRef)
@@ -87,9 +101,28 @@ namespace Application.Services
             return await _unitOfWork.Payments.GetTotalPaidAmountAsync(customerId);
         }
 
-        public Task<ApiResponse<bool>> UpdateAsync(int id, PaymentUpdateRequest request)
+        public async Task<ApiResponse<bool>> UpdateAsync(int id, PaymentUpdateRequest request)
         {
-            throw new NotImplementedException();
+            var payment = await _unitOfWork.Payments.GetByIdAsync(id);
+            if (payment is null)
+                return ApiResponse<bool>.Fail(404, "Payment not found.");
+
+            if (!string.IsNullOrWhiteSpace(request.PaymentRef)
+                && !string.Equals(payment.PaymentRef, request.PaymentRef, StringComparison.OrdinalIgnoreCase))
+            {
+                return ApiResponse<bool>.Fail(400, "PaymentRef does not match.");
+            }
+
+            payment.Status = request.Status?.Trim().ToLowerInvariant() switch
+            {
+                "success" or "completed" => StatusPayment.Completed,
+                "failed" or "cancelled" => StatusPayment.Failed,
+                "refunded" => StatusPayment.Refunded,
+                _ => payment.Status
+            };
+
+            await _unitOfWork.SaveChangesAsync();
+            return ApiResponse<bool>.Success(true, "Payment updated successfully.");
         }
 
         public async Task<PaymentResponse> CreatePaymentAsync(PaymentCreateRequest request)

@@ -41,6 +41,9 @@ namespace Infrastructure.Extensions
             services.AddScoped<IRechargePlanRecommendationService, RechargePlanRecommendationService>();
             services.AddSingleton<IRechargePlanRecommendationEngine, RuleBasedRechargePlanRecommendationEngine>();
             services.AddScoped<IServiceService, ServiceService>();
+            services.AddScoped<ITelecomProductService, TelecomProductService>();
+            services.AddScoped<IShoppingCartService, ShoppingCartService>();
+            services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IGlobalSearchService, GlobalSearchService>();
             services.AddSingleton<ISearchDocumentMapper, SearchDocumentMapper>();
             services.AddHttpClient<ElasticsearchSearchIndexService>();

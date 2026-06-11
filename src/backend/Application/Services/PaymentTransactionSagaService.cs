@@ -35,7 +35,7 @@ namespace Application.Services
 
         public async Task<PaymentResponse> StartAsync(PaymentCreateRequest request, CancellationToken cancellationToken = default)
         {
-            if (request.Amount <= 0)
+            if (request.Amount <= 0 && !request.OrderId.HasValue && !request.ServiceId.HasValue)
                 throw new AppException(ErrorCode.INVALID_AMOUNT, "The amount is not valid.");
 
             await using var transaction = await _unitOfWork.BeginTransactionAsync();
@@ -52,11 +52,16 @@ namespace Application.Services
                 EnsureActiveAccount(account);
 
                 var bill = await ResolveBillAsync(request, customer);
-                var transactionType = NormalizeTransactionType(request.TransactionType, customer, bill);
+                var order = await ResolveOrderAsync(request, customer);
+                var service = await ResolveServiceAsync(request);
+                var subscriptionMonths = Math.Clamp(request.SubscriptionMonths, 1, 36);
+                var transactionType = NormalizeTransactionType(request.TransactionType, customer, bill, order, service);
                 var customerType = ResolveCustomerType(customer, bill);
                 var isPostpaid = IsPostpaid(customerType);
 
-                var originalAmount = request.Amount;
+                var originalAmount = ResolveOriginalAmount(request, order, service, subscriptionMonths);
+                if (originalAmount <= 0)
+                    throw new AppException(ErrorCode.INVALID_AMOUNT, "The amount is not valid.");
                 var payableAmount = originalAmount;
                 var discountApplied = 0m;
                 CouponUsage? couponUsage = null;
@@ -85,6 +90,7 @@ namespace Application.Services
                     }
                 }
 
+                ApplyOrderDiscount(order, originalAmount, payableAmount, discountApplied);
                 ValidateBillAmount(bill, payableAmount);
                 var balanceBefore = account.Balance;
                 var completesImmediately = request.UseAccountBalance || request.PaymentMethod == PaymentMethod.Cash;
@@ -97,8 +103,18 @@ namespace Application.Services
 
                 if (completesImmediately)
                 {
-                    EnsureEnoughBalance(account, payableAmount, isPostpaid, transactionType);
-                    ApplyAccountAndBillSettlement(account, bill, transactionType, payableAmount, now, debitAccount: ShouldDebitAccount(transactionType));
+                    if (request.UseAccountBalance)
+                    {
+                        EnsureEnoughBalance(account, payableAmount, isPostpaid, transactionType);
+                    }
+
+                    ApplyAccountAndBillSettlement(
+                        account,
+                        bill,
+                        transactionType,
+                        payableAmount,
+                        now,
+                        debitAccount: request.UseAccountBalance && ShouldDebitAccount(transactionType));
                 }
 
                 var payment = new Payment
@@ -112,10 +128,18 @@ namespace Application.Services
                     Transactions = new List<Transaction>()
                 };
 
+                if (order is not null)
+                {
+                    order.Payment = payment;
+                }
+
                 var transactionEntity = new Transaction
                 {
                     CustomerId = customer.Id,
                     Payment = payment,
+                    OrderId = order?.Id,
+                    ServiceId = service?.Id,
+                    SubscriptionMonths = service is null ? null : subscriptionMonths,
                     Amount = payableAmount,
                     TransactionRef = transactionRef,
                     TransactionType = transactionType,
@@ -124,6 +148,11 @@ namespace Application.Services
                     CompletedAt = completesImmediately ? now : null,
                     CouponUsages = new List<CouponUsage>()
                 };
+
+                if (completesImmediately)
+                {
+                    await ApplyOrderAndServiceFulfillmentAsync(order, service, customer, subscriptionMonths, now);
+                }
 
                 payment.Transactions.Add(transactionEntity);
                 await _unitOfWork.Payments.AddAsync(payment);
@@ -230,6 +259,21 @@ namespace Application.Services
                         now,
                         debitAccount: false);
 
+                    var order = transactionEntity.OrderId.HasValue
+                        ? await _unitOfWork.Orders.GetOrderWithItemsAsync(transactionEntity.OrderId.Value)
+                        : payment.Orders.FirstOrDefault();
+
+                    var service = transactionEntity.ServiceId.HasValue
+                        ? transactionEntity.Service ?? await _unitOfWork.Services.GetByIdAsync(transactionEntity.ServiceId.Value)
+                        : null;
+
+                    await ApplyOrderAndServiceFulfillmentAsync(
+                        order,
+                        service,
+                        customer,
+                        transactionEntity.SubscriptionMonths ?? 1,
+                        now);
+
                     transactionEntity.Status = StatusTransaction.Success;
                     transactionEntity.CompletedAt = now;
 
@@ -275,6 +319,12 @@ namespace Application.Services
                 customerId = bill?.CustomerId;
             }
 
+            if (!customerId.HasValue && request.OrderId.HasValue)
+            {
+                var order = await _unitOfWork.Orders.GetByIdAsync(request.OrderId.Value);
+                customerId = order?.CustomerId;
+            }
+
             if (!customerId.HasValue && !string.IsNullOrWhiteSpace(request.MobileNumber))
             {
                 var customerByMobile = await _unitOfWork.Customers.GetByMobileNumberAsync(request.MobileNumber);
@@ -302,6 +352,45 @@ namespace Application.Services
             return bill;
         }
 
+        private async Task<Order?> ResolveOrderAsync(PaymentCreateRequest request, Customer customer)
+        {
+            if (!request.OrderId.HasValue) return null;
+
+            var order = await _unitOfWork.Orders.GetOrderWithItemsAsync(request.OrderId.Value);
+            if (order is null)
+                throw new InvalidOperationException("Order not found.");
+
+            if (order.CustomerId != customer.Id)
+                throw new InvalidOperationException("Order does not belong to this customer.");
+
+            if (order.Status is OrderStatus.Paid or OrderStatus.Processing or OrderStatus.Completed)
+                throw new InvalidOperationException("Order has already been paid.");
+
+            if (order.Items.Count == 0)
+                throw new InvalidOperationException("Order does not have any item.");
+
+            foreach (var item in order.Items)
+            {
+                if (item.Product is null)
+                    throw new InvalidOperationException("Order product not found.");
+
+                EnsureProductCanBeFulfilled(item.Product, item.Quantity);
+            }
+
+            return order;
+        }
+
+        private async Task<Service?> ResolveServiceAsync(PaymentCreateRequest request)
+        {
+            if (!request.ServiceId.HasValue) return null;
+
+            var service = await _unitOfWork.Services.GetByIdAsync(request.ServiceId.Value);
+            if (service is null || !service.IsActive)
+                throw new AppException(ErrorCode.SERVICE_NOT_FOUND);
+
+            return service;
+        }
+
         private IPaymentGateway ResolveGateway(PaymentMethod paymentMethod)
             => ResolveGateway(paymentMethod.ToString());
 
@@ -313,15 +402,54 @@ namespace Application.Services
             return gateway ?? throw new AppException(ErrorCode.PAYMENT_PROVIDER_NOT_SUPPORTED);
         }
 
-        private static string NormalizeTransactionType(string? transactionType, Customer customer, PostpaidBill? bill)
+        private static string NormalizeTransactionType(
+            string? transactionType,
+            Customer customer,
+            PostpaidBill? bill,
+            Order? order,
+            Service? service)
         {
             if (bill is not null)
-                return "BillPayment";
+                return TransactionType.BillPayment;
+
+            if (order is not null)
+                return TransactionType.ProductPurchase;
+
+            if (service is not null)
+            {
+                return string.Equals(transactionType, TransactionType.MonthlyPackagePayment, StringComparison.OrdinalIgnoreCase)
+                    ? TransactionType.MonthlyPackagePayment
+                    : TransactionType.PackageSubscription;
+            }
 
             if (!string.IsNullOrWhiteSpace(transactionType))
                 return transactionType.Trim();
 
-            return IsPostpaid(customer.CustomerType) ? "BillPayment" : "Recharge";
+            return IsPostpaid(customer.CustomerType) ? TransactionType.BillPayment : TransactionType.Recharge;
+        }
+
+        private static decimal ResolveOriginalAmount(
+            PaymentCreateRequest request,
+            Order? order,
+            Service? service,
+            int subscriptionMonths)
+        {
+            if (order is not null)
+                return order.SubTotal;
+
+            if (service is not null)
+                return service.Price * subscriptionMonths;
+
+            return request.Amount;
+        }
+
+        private static void ApplyOrderDiscount(Order? order, decimal originalAmount, decimal payableAmount, decimal discountApplied)
+        {
+            if (order is null) return;
+
+            order.SubTotal = originalAmount;
+            order.DiscountAmount = discountApplied;
+            order.TotalAmount = payableAmount;
         }
 
         private static string ResolveCustomerType(Customer customer, PostpaidBill? bill)
@@ -334,9 +462,12 @@ namespace Application.Services
         {
             var prefix = transactionType switch
             {
-                "BillPayment" => "BILL",
-                "ServiceActivation" => "SVC",
-                "Recharge" => "RECH",
+                TransactionType.BillPayment => "BILL",
+                TransactionType.ServiceActivation => "SVC",
+                TransactionType.PackageSubscription => "PKG",
+                TransactionType.MonthlyPackagePayment => "MON",
+                TransactionType.ProductPurchase => "ORD",
+                TransactionType.Recharge => "RECH",
                 _ => "TRX"
             };
 
@@ -400,7 +531,7 @@ namespace Application.Services
             DateTime now,
             bool debitAccount)
         {
-            if (string.Equals(transactionType, "Recharge", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(transactionType, TransactionType.Recharge, StringComparison.OrdinalIgnoreCase))
             {
                 account.Balance += amount;
                 account.LastRechargeDate = now;
@@ -417,6 +548,71 @@ namespace Application.Services
                     ? StatusPostpaid.Paid
                     : StatusPostpaid.Partial;
             }
+        }
+
+        private async Task ApplyOrderAndServiceFulfillmentAsync(
+            Order? order,
+            Service? service,
+            Customer customer,
+            int subscriptionMonths,
+            DateTime now)
+        {
+            if (order is not null)
+            {
+                CompleteOrder(order, now);
+            }
+
+            if (service is not null)
+            {
+                await ActivateCustomerServiceAsync(customer, service, subscriptionMonths, now);
+            }
+        }
+
+        private static void CompleteOrder(Order order, DateTime now)
+        {
+            if (order.Status is OrderStatus.Paid or OrderStatus.Processing or OrderStatus.Completed)
+                return;
+
+            foreach (var item in order.Items)
+            {
+                if (item.Product is null)
+                    throw new InvalidOperationException("Order product not found.");
+
+                EnsureProductCanBeFulfilled(item.Product, item.Quantity);
+                item.Product.StockQuantity -= item.Quantity;
+            }
+
+            order.Status = OrderStatus.Paid;
+            order.PaidAt = new DateTimeOffset(now, TimeSpan.Zero);
+        }
+
+        private async Task ActivateCustomerServiceAsync(Customer customer, Service service, int subscriptionMonths, DateTime now)
+        {
+            subscriptionMonths = Math.Clamp(subscriptionMonths, 1, 36);
+            var validityDays = service.ValidityDays.HasValue && service.ValidityDays.Value > 0
+                ? service.ValidityDays.Value * subscriptionMonths
+                : 30 * subscriptionMonths;
+
+            await _unitOfWork.CustomerServices.AddAsync(new Domain.Entities.CustomerService
+            {
+                CustomerId = customer.Id,
+                ServiceId = service.Id,
+                ActivatedAt = now,
+                ExpiresAt = now.AddDays(validityDays),
+                IsAutoRenewed = service.IsAutoRenew
+            });
+        }
+
+        private static void EnsureProductCanBeFulfilled(TelecomProduct product, int quantity)
+        {
+            if (!product.IsActive || !product.IsPublished || product.IsDeleted)
+                throw new InvalidOperationException("Product is not available for fulfillment.");
+
+            if (quantity <= 0)
+                throw new InvalidOperationException("Order item quantity is invalid.");
+
+            if (product.StockQuantity < quantity)
+                throw new InvalidOperationException("Product stock is not enough.");
         }
 
         private async Task AddAuditLogAsync(
@@ -452,6 +648,15 @@ namespace Application.Services
                 foreach (var transactionEntity in payment.Transactions)
                 {
                     transactionEntity.Status = StatusTransaction.Failed;
+                    var order = transactionEntity.OrderId.HasValue
+                        ? await _unitOfWork.Orders.GetOrderWithItemsAsync(transactionEntity.OrderId.Value)
+                        : null;
+
+                    if (order is not null && order.Status == OrderStatus.PendingPayment)
+                    {
+                        order.Status = OrderStatus.Failed;
+                        order.CancelledAt = DateTimeOffset.UtcNow;
+                    }
                 }
 
                 await AddAuditLogAsync(

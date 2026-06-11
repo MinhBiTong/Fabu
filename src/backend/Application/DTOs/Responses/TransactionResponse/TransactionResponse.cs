@@ -6,6 +6,9 @@ namespace Application.DTOs.Responses.TransactionResponse
     {
         public long? CustomerId { get; set; }
         public long? PaymentId { get; set; }
+        public Guid? OrderId { get; set; }
+        public long? ServiceId { get; set; }
+        public int? SubscriptionMonths { get; set; }
         public string TransactionType { get; set; } = string.Empty;
         public decimal Amount { get; set; }
         public string Status { get; set; } = string.Empty;
@@ -22,6 +25,9 @@ namespace Application.DTOs.Responses.TransactionResponse
             {
                 CustomerId = entity.CustomerId,
                 PaymentId = entity.PaymentId,
+                OrderId = entity.OrderId,
+                ServiceId = entity.ServiceId,
+                SubscriptionMonths = entity.SubscriptionMonths,
                 TransactionRef = entity.TransactionRef,
                 Amount = entity.Amount,
                 TransactionType = entity.TransactionType,

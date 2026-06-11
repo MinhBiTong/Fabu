@@ -25,5 +25,6 @@ namespace Domain.Entities
 
         public StatusPayment Status { get; set; } = StatusPayment.Pending;
         public virtual ICollection<Transaction> Transactions { get; set; }
+        public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
     }
 }

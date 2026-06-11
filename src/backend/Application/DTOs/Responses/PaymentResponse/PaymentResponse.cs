@@ -21,6 +21,8 @@ namespace Application.DTOs.Responses.PaymentResponse
         public string? PaymentUrl { get; set; }           // URL chuyển hướng đến gateway
         public string? Message { get; set; }
         public long? CustomerId { get; set; }
+        public Guid? OrderId { get; set; }
+        public long? ServiceId { get; set; }
         public string? TransactionRef { get; set; }
         public string? CustomerType { get; set; }
         public decimal? AccountBalanceBefore { get; set; }
@@ -40,6 +42,8 @@ namespace Application.DTOs.Responses.PaymentResponse
                 PaymentDate = payment.PaymentDate,
                 PaymentUrl = paymentUrl,
                 CustomerId = transaction?.CustomerId,
+                OrderId = transaction?.OrderId,
+                ServiceId = transaction?.ServiceId,
                 TransactionRef = transaction?.TransactionRef,
                 Message = payment.Status == StatusPayment.Completed ? "Payment Successfully" : "The payment is pending"
             };

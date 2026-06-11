@@ -40,6 +40,9 @@ namespace Persistence.Repositories
         private IFeedbackRepository? _feedbacks;
         private IRechargePlanRepository? _rechargePlans;
         private ITransactionRepository? _transactions;
+        private ITelecomProductRepository? _telecomProducts;
+        private IShoppingCartRepository? _shoppingCarts;
+        private IOrderRepository? _orders;
 
 
 
@@ -59,6 +62,9 @@ namespace Persistence.Repositories
         public IRechargePlanRepository RechargePlans => _rechargePlans ??= new RechargePlanRepository(_context);
         public ITransactionRepository Transactions => _transactions ??= new TransactionRepository(_context);
         public IPaymentRepository Payments => _payments ??= new PaymentRepository(_context);
+        public ITelecomProductRepository TelecomProducts => _telecomProducts ??= new TelecomProductRepository(_context);
+        public IShoppingCartRepository ShoppingCarts => _shoppingCarts ??= new ShoppingCartRepository(_context);
+        public IOrderRepository Orders => _orders ??= new OrderRepository(_context);
 
         public async Task<int> SaveChangesAsync()
         {

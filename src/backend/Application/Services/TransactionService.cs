@@ -63,22 +63,36 @@ namespace Application.Services
 
         public Task<TransactionResponse> CreateServiceActivationTransactionAsync(ServiceCreateRequest request)
         {
-            throw new NotImplementedException();
+            throw new AppException(
+                ErrorCode.INVALID_KEY,
+                "Use PaymentController /api/v{version}/Payment/package with CustomerId and ServiceId to activate a package transaction.");
         }
 
         public Task<TransactionResponse> CreateBillPaymentTransactionAsync(PostpaidCreateRequest request)
         {
-            throw new NotImplementedException();
+            throw new AppException(
+                ErrorCode.INVALID_KEY,
+                "Use PostpaidController /api/v{version}/Postpaid/bills/{billId}/pay to pay a postpaid bill.");
         }
 
-        public Task<ApiResponse<List<TransactionResponse>>> GetAllAsync()
+        public async Task<ApiResponse<List<TransactionResponse>>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            var transactions = await _unitOfWork.Transactions.GetAllAsync();
+            var response = transactions
+                .OrderByDescending(transaction => transaction.CreatedDate)
+                .Select(TransactionResponse.FromEntity)
+                .ToList();
+
+            return ApiResponse<List<TransactionResponse>>.Success(response);
         }
 
-        public Task<ApiResponse<TransactionResponse>> GetByIdAsync(int id)
+        public async Task<ApiResponse<TransactionResponse>> GetByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            var transaction = await _unitOfWork.Transactions.GetByIdAsync(id);
+            if (transaction is null)
+                return ApiResponse<TransactionResponse>.Fail(404, "Transaction not found.");
+
+            return ApiResponse<TransactionResponse>.Success(TransactionResponse.FromEntity(transaction));
         }
 
         public async Task<decimal> GetTotalSpentByCustomerAsync(long customerId)

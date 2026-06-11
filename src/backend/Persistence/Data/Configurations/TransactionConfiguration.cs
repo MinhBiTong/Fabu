@@ -49,6 +49,18 @@ namespace Persistence.Data.Configurations
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.NoAction); // Tránh vòng lặp Cascade xóa
 
+            builder.HasOne(x => x.Order)
+                .WithMany()
+                .HasForeignKey(x => x.OrderId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasOne(x => x.Service)
+                .WithMany()
+                .HasForeignKey(x => x.ServiceId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.NoAction);
+
             builder.HasIndex(t => new { t.CustomerId, t.CreatedDate})
                 .HasDatabaseName("IX_Transactions_CustomerId_CreatedDate")
                 .IsDescending(new[] { false, true }); // Sắp xếp theo CreatedDate giảm dần

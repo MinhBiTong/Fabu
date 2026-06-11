@@ -26,6 +26,14 @@ namespace Persistence.Repositories
         {
             return await _dbSet
             .Include(p => p.Transactions)
+                .ThenInclude(t => t.Service)
+            .Include(p => p.Transactions)
+                .ThenInclude(t => t.Order)
+                    .ThenInclude(o => o!.Items)
+                        .ThenInclude(i => i.Product)
+            .Include(p => p.Orders)
+                .ThenInclude(o => o.Items)
+                    .ThenInclude(i => i.Product)
             .Include(p => p.PostpaidBill)
             .FirstOrDefaultAsync(p => p.PaymentRef == paymentRef && !p.IsDeleted);
         }

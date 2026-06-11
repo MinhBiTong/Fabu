@@ -27,5 +27,7 @@ namespace Domain.Entities
         public virtual ICollection<Feedback> Feedbacks { get; set; }
         public virtual ICollection<CustomerService> CustomerServices { get; set; }
         public virtual ICollection<Transaction> Transactions { get; set; }
+        public virtual ICollection<ShoppingCart> ShoppingCarts { get; set; } = new List<ShoppingCart>();
+        public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
     }
 }

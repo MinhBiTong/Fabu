@@ -26,6 +26,9 @@ namespace Domain.Abstractions
         IPaymentRepository Payments { get; }
         ITransactionRepository Transactions { get; }
         IPostpaidBillRepository PostpaidBills { get; }
+        ITelecomProductRepository TelecomProducts { get; }
+        IShoppingCartRepository ShoppingCarts { get; }
+        IOrderRepository Orders { get; }
         Task<int> CommitAsync();
         Task RollbackAsync();
         Task<int> CommitAsync(int commitId);

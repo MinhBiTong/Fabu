@@ -11,6 +11,9 @@ namespace Domain.ValueObjects
         public const string Recharge = "Recharge";
         public const string BillPayment = "BillPayment";
         public const string ServiceActivation = "ServiceActivation";
+        public const string PackageSubscription = "PackageSubscription";
+        public const string MonthlyPackagePayment = "MonthlyPackagePayment";
+        public const string ProductPurchase = "ProductPurchase";
         public const string Refund = "Refund";
     }
 }
