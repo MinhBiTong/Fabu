@@ -71,6 +71,7 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
     });
+builder.Services.AddHealthChecks();
 var app = builder.Build();
 app.UseMiddleware<GlobalException>();
 
@@ -99,6 +100,7 @@ app.UseRateLimiter();
 app.UseAuthentication();
 app.UseMiddleware<TokenBlacklistMiddleware>();
 app.UseAuthorization();
+app.MapHealthChecks("/health");
 app.MapControllers();
 app.MapReverseProxy().RequireRateLimiting("GatewayPolicy");
 

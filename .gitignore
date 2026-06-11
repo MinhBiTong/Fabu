@@ -26,6 +26,15 @@ BundleArtifacts/
 appsettings.Development.json
 appsettings.Production.json
 
+# --- PRODUCTION RUNTIME DATA ---
+.env.production
+certbot/
+backup/*.dump
+backup/*.sql
+backup/*.sql.gz
+logs/
+*.env.local
+
 # --- OS / SYSTEM ---
 .DS_Store
 Thumbs.db

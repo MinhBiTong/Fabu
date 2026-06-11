@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: Fabu
+    orgId: 1
+    folder: Fabu
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards

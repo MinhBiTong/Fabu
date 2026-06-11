@@ -1,0 +1,155 @@
+name: FABU Production Deploy
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  validate:
+    name: Restore, build, lint, test
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore backend
+        run: dotnet restore src/backend/Api/fabu.sln
+
+      - name: Build backend
+        run: dotnet build src/backend/Api/fabu.sln --configuration Release --no-restore
+
+      - name: Test backend if test projects exist
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t tests < <(find src/backend -name '*Tests.csproj' -o -name '*.Tests.csproj')
+          if [ "${#tests[@]}" -eq 0 ]; then
+            echo "No backend test project found; skipping dotnet test."
+            exit 0
+          fi
+          for project in "${tests[@]}"; do
+            dotnet test "$project" --configuration Release --no-build
+          done
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: src/frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: src/frontend
+        run: npm ci
+
+      - name: Lint frontend
+        working-directory: src/frontend
+        run: npm run lint
+
+      - name: Build frontend
+        working-directory: src/frontend
+        env:
+          NEXT_PUBLIC_API_URL: https://api.fabu.company.com
+        run: npm run build
+
+  docker:
+    name: Build and push Docker images
+    runs-on: ubuntu-24.04
+    needs: validate
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve lowercase registry
+        shell: bash
+        run: |
+          echo "REGISTRY=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_ENV"
+          echo "IMAGE_TAG=${GITHUB_SHA}" >> "$GITHUB_ENV"
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push backend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./src/backend
+          file: ./src/backend/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/fabu-backend:${{ env.IMAGE_TAG }}
+            ${{ env.REGISTRY }}/fabu-backend:latest
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./src/frontend
+          file: ./src/frontend/Dockerfile
+          push: true
+          build-args: |
+            NEXT_PUBLIC_API_URL=https://api.fabu.company.com
+          tags: |
+            ${{ env.REGISTRY }}/fabu-frontend:${{ env.IMAGE_TAG }}
+            ${{ env.REGISTRY }}/fabu-frontend:latest
+
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-24.04
+    needs: docker
+    environment: production
+    steps:
+      - name: Resolve lowercase registry
+        shell: bash
+        run: |
+          echo "REGISTRY=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_ENV"
+          echo "IMAGE_TAG=${GITHUB_SHA}" >> "$GITHUB_ENV"
+
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_SSH_PORT || 22 }}
+          script_stop: true
+          envs: REGISTRY,IMAGE_TAG
+          script: |
+            set -Eeuo pipefail
+            cd /opt/fabu
+
+            PREVIOUS_TAG="$(grep '^IMAGE_TAG=' .env.production | cut -d= -f2- || true)"
+
+            git fetch --all --prune
+            git reset --hard "${IMAGE_TAG}"
+
+            sed -i "s|^REGISTRY=.*|REGISTRY=${REGISTRY}|" .env.production
+            sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=${IMAGE_TAG}|" .env.production
+
+            docker compose --env-file .env.production pull backend frontend || true
+            docker compose --env-file .env.production up -d --remove-orphans
+
+            if ! ./scripts/healthcheck.sh; then
+              echo "Healthcheck failed. Rolling back to ${PREVIOUS_TAG}..."
+              if [ -n "${PREVIOUS_TAG}" ]; then
+                IMAGE_TAG_PREVIOUS="${PREVIOUS_TAG}" ./scripts/rollback.sh
+              fi
+              exit 1
+            fi
+
+            docker image prune -f
